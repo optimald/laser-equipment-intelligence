@@ -422,7 +422,62 @@ score_overall = score_margin + score_urgency + score_condition + score_reputatio
 
 ---
 
-## 9) Technology Stack & Implementation
+## 9) Project Organization & Implementation
+
+### Tight Project Structure
+
+```
+laser-equipment-intelligence/
+├── docs/                           # Documentation
+│   ├── SPEC.md                     # This technical specification
+│   ├── CHECKLIST.md                # Implementation tracking
+│   ├── API.md                      # API documentation
+│   ├── DEPLOYMENT.md               # Deployment guide
+│   └── TROUBLESHOOTING.md          # Common issues & solutions
+├── src/                            # Source code
+│   ├── spiders/                    # Scrapy spiders
+│   │   ├── auction_spiders/        # Auction platform scrapers
+│   │   ├── dealer_spiders/         # Dealer network scrapers
+│   │   └── marketplace_spiders/    # Marketplace scrapers
+│   ├── middleware/                 # Custom middleware
+│   │   ├── evasion.py             # Anti-detection middleware
+│   │   ├── proxy.py               # Proxy rotation
+│   │   └── captcha.py             # CAPTCHA solving
+│   ├── pipelines/                 # Data processing pipelines
+│   │   ├── normalization.py       # Data normalization
+│   │   ├── scoring.py             # Opportunity scoring
+│   │   └── alerts.py              # Alert generation
+│   ├── utils/                     # Utility modules
+│   │   ├── brand_mapping.py       # Brand normalization
+│   │   ├── price_analysis.py      # Price comparison
+│   │   └── evasion_scoring.py     # Evasion effectiveness
+│   └── config/                    # Configuration
+│       ├── settings.py            # Scrapy settings
+│       ├── evasion_config.yaml    # Evasion parameters
+│       └── sources_config.yaml    # Source configurations
+├── tests/                         # Test suite
+│   ├── unit/                      # Unit tests
+│   ├── integration/               # Integration tests
+│   └── evasion/                   # Evasion effectiveness tests
+├── scripts/                       # Utility scripts
+│   ├── deploy.sh                  # Deployment script
+│   ├── monitor.py                 # Health monitoring
+│   └── data_export.py             # Data export utilities
+├── docker/                        # Docker configuration
+│   ├── Dockerfile                 # Main application
+│   ├── docker-compose.yml         # Multi-service setup
+│   └── nginx.conf                 # Reverse proxy config
+├── monitoring/                    # Monitoring & alerting
+│   ├── prometheus/                # Prometheus configs
+│   ├── grafana/                   # Dashboard configs
+│   └── alerts/                    # Alert rules
+├── requirements.txt               # Python dependencies
+├── scrapy.cfg                     # Scrapy configuration
+├── .env.example                   # Environment variables template
+└── README.md                      # Project overview
+```
+
+### Technology Stack & Implementation
 
 **Python-Centric Architecture for 2025**
 
