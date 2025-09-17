@@ -1,0 +1,97 @@
+{
+  "search_term": "Agnes RF Microneedling System",
+  "search_timestamp": "2025-09-16T20:42:03.181266",
+  "total_listings": 2,
+  "qualification_summary": {
+    "HOT": 2,
+    "REVIEW": 0,
+    "ARCHIVE": 0
+  },
+  "equipment_specifications": {
+    "rf_frequency": "1 MHz",
+    "power_range": "2W - 46W",
+    "time_settings": "50 msec - 2,000 msec",
+    "display": "10.1-inch LCD touch screen",
+    "handpieces": [
+      "Monopolar",
+      "RF Skin Booster"
+    ],
+    "weight": "~12 lbs",
+    "fda_status": "FDA-cleared",
+    "applications": "Dermatological & general surgical procedures"
+  },
+  "treatment_applications": [
+    "Under-eye bags reduction",
+    "Facial contouring (jawline, neck)",
+    "Acne and acne scar treatment",
+    "Fine lines and wrinkles",
+    "Skin tightening and firming",
+    "Enlarged pores treatment",
+    "Safe for all skin types"
+  ],
+  "listings": [
+    {
+      "title_raw": "Agnes RF Microneedling System - Complete Package",
+      "description_raw": "Advanced radiofrequency microneedling device with 1 MHz frequency, adjustable power 2W-46W, 10.1\" LCD touch screen, monopolar handpiece, RF skin booster, 9 types of micro-insulated needles, system cart, 2-year warranty",
+      "brand": "Agnes",
+      "model": "RF Microneedling System",
+      "asking_price": 0.0,
+      "condition": "new",
+      "year": 2024,
+      "location_city": "Unknown",
+      "location_state": "Unknown",
+      "location_country": "USA",
+      "seller_name": "Agnes Medical (Official)",
+      "source_url": "https://agnesmedical.zohocommerce.com/agnes-rf-device",
+      "source_type": "manufacturer",
+      "accessories": [
+        "monopolar handpiece",
+        "RF skin booster",
+        "9 types micro-insulated needles",
+        "system cart",
+        "2-year warranty",
+        "in-service training"
+      ],
+      "normalized_brand": "Agnes",
+      "normalized_model": "Rf_microneedling_System",
+      "brand_score": 80.0,
+      "price_score": 60.0,
+      "condition_score": 100.0,
+      "technology_score": 85.0,
+      "overall_score": 81.75,
+      "qualification_level": "HOT",
+      "processed_timestamp": "2025-09-16T20:42:03.181083"
+    },
+    {
+      "title_raw": "Agnes RF Microneedling System - Professional Grade",
+      "description_raw": "FDA-cleared radiofrequency microneedling device for dermatological procedures. Treats under-eye bags, sagging jowls, fine lines, wrinkles, acne scars. Complete system with all accessories.",
+      "brand": "Agnes",
+      "model": "RF Microneedling System",
+      "asking_price": 0.0,
+      "condition": "new",
+      "year": 2024,
+      "location_city": "Unknown",
+      "location_state": "Unknown",
+      "location_country": "USA",
+      "seller_name": "iAgnes Medical",
+      "source_url": "https://iagnes.com/product/agnes-rf-microneedling-system/",
+      "source_type": "distributor",
+      "accessories": [
+        "monopolar handpiece",
+        "RF skin booster",
+        "micro-insulated needles",
+        "system cart",
+        "warranty"
+      ],
+      "normalized_brand": "Agnes",
+      "normalized_model": "Rf_microneedling_System",
+      "brand_score": 80.0,
+      "price_score": 60.0,
+      "condition_score": 100.0,
+      "technology_score": 85.0,
+      "overall_score": 81.75,
+      "qualification_level": "HOT",
+      "processed_timestamp": "2025-09-16T20:42:03.181120"
+    }
+  ]
+}

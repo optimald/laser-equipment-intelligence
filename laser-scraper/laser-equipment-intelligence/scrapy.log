@@ -1,0 +1,537 @@
+2025-09-16 14:26:02 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 14:26:02 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 14:26:04 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 14:26:04 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 14:29:29 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 14:29:29 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 14:32:09 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 14:32:09 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 14:37:28 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 14:37:28 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 15:00:35 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 15:00:35 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 15:00:39 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 15:00:39 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 15:00:42 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 15:00:42 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 15:00:42 [scrapy.addons] INFO: Enabled addons:
+[]
+2025-09-16 15:00:42 [scrapy.middleware] INFO: Enabled extensions:
+['scrapy.extensions.corestats.CoreStats',
+ 'scrapy.extensions.memusage.MemoryUsage',
+ 'scrapy.extensions.closespider.CloseSpider',
+ 'scrapy.extensions.logstats.LogStats',
+ 'scrapy.extensions.throttle.AutoThrottle']
+2025-09-16 15:00:42 [scrapy.crawler] INFO: Overridden settings:
+{'AUTOTHROTTLE_ENABLED': True,
+ 'AUTOTHROTTLE_START_DELAY': 1,
+ 'BOT_NAME': 'laser_intelligence',
+ 'CLOSESPIDER_PAGECOUNT': '1',
+ 'CONCURRENT_REQUESTS': 4,
+ 'CONCURRENT_REQUESTS_PER_DOMAIN': 2,
+ 'COOKIES_ENABLED': False,
+ 'DOWNLOAD_DELAY': (3, 8),
+ 'HTTPCACHE_ENABLED': True,
+ 'HTTPCACHE_EXPIRATION_SECS': 3600,
+ 'HTTPCACHE_IGNORE_HTTP_CODES': [503, 504, 505, 500, 403, 404, 408, 429],
+ 'LOG_FILE': 'scrapy.log',
+ 'LOG_LEVEL': 'INFO',
+ 'NEWSPIDER_MODULE': 'laser_intelligence.spiders',
+ 'RETRY_TIMES': 3,
+ 'SPIDER_MODULES': ['laser_intelligence.spiders'],
+ 'TELNETCONSOLE_ENABLED': False}
+2025-09-16 15:00:42 [scrapy.middleware] INFO: Enabled downloader middlewares:
+['scrapy.downloadermiddlewares.offsite.OffsiteMiddleware',
+ 'scrapy.downloadermiddlewares.retry.RetryMiddleware',
+ 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware',
+ 'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware',
+ 'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware',
+ 'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware',
+ 'laser_intelligence.middleware.evasion.EvasionMiddleware',
+ 'laser_intelligence.middleware.proxy.ProxyMiddleware',
+ 'laser_intelligence.middleware.captcha.CaptchaMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware',
+ 'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.RedirectMiddleware',
+ 'scrapy.downloadermiddlewares.stats.DownloaderStats',
+ 'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware']
+2025-09-16 15:00:42 [scrapy.middleware] INFO: Enabled spider middlewares:
+['scrapy.spidermiddlewares.start.StartSpiderMiddleware',
+ 'scrapy.spidermiddlewares.httperror.HttpErrorMiddleware',
+ 'laser_intelligence.middleware.evasion.EvasionMiddleware',
+ 'laser_intelligence.middleware.proxy.ProxyMiddleware',
+ 'laser_intelligence.middleware.captcha.CaptchaMiddleware',
+ 'scrapy.spidermiddlewares.referer.RefererMiddleware',
+ 'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware',
+ 'scrapy.spidermiddlewares.depth.DepthMiddleware']
+2025-09-16 15:00:42 [scrapy.middleware] INFO: Enabled item pipelines:
+['laser_intelligence.pipelines.normalization.NormalizationPipeline',
+ 'laser_intelligence.pipelines.scoring.ScoringPipeline',
+ 'laser_intelligence.pipelines.alerts.AlertsPipeline']
+2025-09-16 15:00:42 [scrapy.core.engine] INFO: Spider opened
+2025-09-16 15:00:42 [py.warnings] WARNING: /Users/flux/Library/Mobile Documents/com~apple~CloudDocs/Documents/laser-scraper/laser-equipment-intelligence/venv/lib/python3.13/site-packages/scrapy/core/spidermw.py:433: ScrapyDeprecationWarning: laser_intelligence.spiders.dotmed_spider.DotmedSpider defines the deprecated start_requests() method. start_requests() has been deprecated in favor of a new method, start(), to support asynchronous code execution. start_requests() will stop being called in a future version of Scrapy. If you use Scrapy 2.13 or higher only, replace start_requests() with start(); note that start() is a coroutine (async def). If you need to maintain compatibility with lower Scrapy versions, when overriding start_requests() in a spider class, override start() as well; you can use super() to reuse the inherited start() implementation without copy-pasting. See the release notes of Scrapy 2.13 for details: https://docs.scrapy.org/en/2.13/news.html
+  warn(
+
+2025-09-16 15:00:42 [scrapy.extensions.logstats] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
+2025-09-16 15:00:42 [scrapy.utils.signal] ERROR: Error caught on signal handler: <bound method AutoThrottle._spider_opened of <scrapy.extensions.throttle.AutoThrottle object at 0x105b7b770>>
+Traceback (most recent call last):
+  File "/Users/flux/Library/Mobile Documents/com~apple~CloudDocs/Documents/laser-scraper/laser-equipment-intelligence/venv/lib/python3.13/site-packages/scrapy/utils/defer.py", line 417, in maybeDeferred_coro
+    result = f(*args, **kw)
+  File "/Users/flux/Library/Mobile Documents/com~apple~CloudDocs/Documents/laser-scraper/laser-equipment-intelligence/venv/lib/python3.13/site-packages/pydispatch/robustapply.py", line 55, in robustApply
+    return receiver(*arguments, **named)
+  File "/Users/flux/Library/Mobile Documents/com~apple~CloudDocs/Documents/laser-scraper/laser-equipment-intelligence/venv/lib/python3.13/site-packages/scrapy/extensions/throttle.py", line 46, in _spider_opened
+    self.mindelay = self._min_delay(spider)
+                    ~~~~~~~~~~~~~~~^^^^^^^^
+  File "/Users/flux/Library/Mobile Documents/com~apple~CloudDocs/Documents/laser-scraper/laser-equipment-intelligence/venv/lib/python3.13/site-packages/scrapy/extensions/throttle.py", line 52, in _min_delay
+    return getattr(spider, "download_delay", s.getfloat("DOWNLOAD_DELAY"))
+                                             ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/flux/Library/Mobile Documents/com~apple~CloudDocs/Documents/laser-scraper/laser-equipment-intelligence/venv/lib/python3.13/site-packages/scrapy/settings/__init__.py", line 204, in getfloat
+    return float(self.get(name, default))
+TypeError: float() argument must be a string or a real number, not 'tuple'
+2025-09-16 15:00:42 [dotmed_auctions] INFO: EvasionMiddleware opened
+2025-09-16 15:00:42 [dotmed_auctions] INFO: ProxyMiddleware opened
+2025-09-16 15:00:42 [dotmed_auctions] INFO: CaptchaMiddleware opened
+2025-09-16 15:00:42 [dotmed_auctions] INFO: EvasionMiddleware opened
+2025-09-16 15:00:42 [dotmed_auctions] INFO: ProxyMiddleware opened
+2025-09-16 15:00:42 [dotmed_auctions] INFO: CaptchaMiddleware opened
+2025-09-16 15:08:24 [scrapy.crawler] INFO: Received SIGINT, shutting down gracefully. Send again to force 
+2025-09-16 15:33:19 [scrapy.crawler] INFO: Received SIGINT twice, forcing unclean shutdown
+2025-09-16 17:33:34 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:33:34 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:35:18 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:35:18 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:35:24 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:35:24 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:36:56 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:36:56 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:37:48 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:37:48 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:39:32 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:39:32 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:39:32 [urllib3.connectionpool] DEBUG: Starting new HTTPS connection (1): example.com:443
+2025-09-16 17:39:33 [urllib3.connectionpool] DEBUG: https://example.com:443 "GET /nonexistent.pdf HTTP/1.1" 404 1256
+2025-09-16 17:39:33 [urllib3.connectionpool] DEBUG: Starting new HTTPS connection (1): example.com:443
+2025-09-16 17:39:34 [urllib3.connectionpool] DEBUG: https://example.com:443 "GET /test1.pdf HTTP/1.1" 404 1256
+2025-09-16 17:39:36 [urllib3.connectionpool] DEBUG: Starting new HTTPS connection (1): example.com:443
+2025-09-16 17:39:36 [urllib3.connectionpool] DEBUG: https://example.com:443 "GET /test2.pdf HTTP/1.1" 404 1256
+2025-09-16 17:40:26 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:40:26 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:42:51 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:42:51 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:46:39 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:46:39 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:47:00 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:47:00 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:48:39 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:48:39 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:51:35 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:51:35 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 17:53:14 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 17:53:14 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 18:04:37 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 18:04:37 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 18:09:53 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 18:09:53 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 18:11:10 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 18:11:10 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 18:14:08 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 18:14:08 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 18:22:16 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 18:22:16 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 18:41:40 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 18:41:40 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 19:27:46 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 19:27:46 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 19:27:50 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 19:27:50 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 19:27:53 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 19:27:53 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 19:27:56 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 19:27:56 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 20:11:22 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 20:11:22 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 20:18:43 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 20:18:43 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 20:20:53 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: laser_intelligence)
+2025-09-16 20:20:53 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.0.1',
+ 'libxml2': '2.14.5',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.3 (main, Apr  8 2025, 13:54:08) [Clang 17.0.0 '
+           '(clang-1700.0.13.3)]',
+ 'pyOpenSSL': '25.2.0 (OpenSSL 3.5.2 5 Aug 2025)',
+ 'cryptography': '45.0.7',
+ 'Platform': 'macOS-15.6.1-arm64-arm-64bit-Mach-O'}
+2025-09-16 20:20:53 [dotmed_auctions] INFO: Parsing category: https://www.dotmed.com/auctions/
+2025-09-16 20:20:53 [bidspotter] INFO: Parsing catalog list: https://www.bidspotter.com/en-us/auction-catalogues
+2025-09-16 20:20:53 [ebay_laser] INFO: Parsing eBay search results for: None
+2025-09-16 20:20:53 [govdeals] INFO: Parsing GovDeals category: https://www.govdeals.com/index.cfm?fa=Main.AdvSearchResultsNew
+2025-09-16 20:20:53 [facebook_marketplace] INFO: Parsing search results: https://www.facebook.com/marketplace/search/?query=laser%20equipment
+2025-09-16 20:20:53 [craigslist] INFO: Parsing search results for unknown: unknown
+2025-09-16 20:20:53 [labx] INFO: Parsing search results: https://www.labx.com/search/laser+equipment

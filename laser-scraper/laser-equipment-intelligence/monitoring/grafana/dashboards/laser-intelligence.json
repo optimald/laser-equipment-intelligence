@@ -1,0 +1,217 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Laser Equipment Intelligence Platform",
+    "tags": ["laser", "scraping", "intelligence"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"scrapyd\"}",
+            "legendFormat": "Scrapyd Status"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": 0
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Listings Discovered",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(listings_discovered_total[5m])",
+            "legendFormat": "Listings/min"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "HOT Items (Score >= 70)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "hot_listings_total",
+            "legendFormat": "HOT Items"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 5
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Evasion Scores",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "avg(evasion_score)",
+            "legendFormat": "Avg Evasion Score"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Source Performance",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "source_success_rate",
+            "legendFormat": "{{source}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 8
+        }
+      },
+      {
+        "id": 6,
+        "title": "Block Warnings",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "block_warnings_total",
+            "legendFormat": "Block Warnings"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "yellow",
+                  "value": 5
+                },
+                {
+                  "color": "red",
+                  "value": 10
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 7,
+        "title": "CAPTCHA Solves",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "captcha_solves_total",
+            "legendFormat": "CAPTCHA Solves"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 16
+        }
+      },
+      {
+        "id": 8,
+        "title": "Database Connections",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends",
+            "legendFormat": "Active Connections"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 16
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

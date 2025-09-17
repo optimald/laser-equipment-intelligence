@@ -1,0 +1,315 @@
+# Data sources configuration for laser equipment intelligence platform
+
+# Source definitions
+sources:
+  # Auction & Liquidation Platforms
+  dotmed:
+    name: "DOTmed Auctions"
+    type: "auction"
+    base_url: "https://www.dotmed.com/auction"
+    crawl_method: "html"
+    evasion_level: "high"
+    priority: 1
+    crawl_frequency: 3600  # 1 hour
+    success_rate_target: 0.95
+    rate_limit: 100  # requests per hour
+    robots_policy: "disallow"
+    tos_notes: "High-value source, requires stealth"
+    categories:
+      - "medical-equipment"
+      - "laser-equipment"
+      - "aesthetic-equipment"
+    
+  bidspotter:
+    name: "BidSpotter"
+    type: "auction"
+    base_url: "https://www.bidspotter.com"
+    crawl_method: "html"
+    evasion_level: "medium"
+    priority: 2
+    crawl_frequency: 7200  # 2 hours
+    success_rate_target: 0.90
+    rate_limit: 200
+    robots_policy: "disallow"
+    tos_notes: "Infinite scroll, JS-heavy"
+    categories:
+      - "medical"
+      - "healthcare"
+      - "laser"
+    
+  proxibid:
+    name: "Proxibid"
+    type: "auction"
+    base_url: "https://www.proxibid.com"
+    crawl_method: "html"
+    evasion_level: "medium"
+    priority: 3
+    crawl_frequency: 7200
+    success_rate_target: 0.90
+    rate_limit: 150
+    robots_policy: "disallow"
+    tos_notes: "Complex auction platform"
+    categories:
+      - "medical-equipment"
+      - "healthcare"
+    
+  govdeals:
+    name: "GovDeals"
+    type: "auction"
+    base_url: "https://www.govdeals.com"
+    crawl_method: "html"
+    evasion_level: "low"
+    priority: 4
+    crawl_frequency: 14400  # 4 hours
+    success_rate_target: 0.95
+    rate_limit: 500
+    robots_policy: "allow"
+    tos_notes: "Government data, low risk"
+    categories:
+      - "medical-equipment"
+      - "healthcare-equipment"
+    
+  gsaauctions:
+    name: "GSA Auctions"
+    type: "auction"
+    base_url: "https://gsaauctions.gov"
+    crawl_method: "html"
+    evasion_level: "low"
+    priority: 5
+    crawl_frequency: 14400
+    success_rate_target: 0.95
+    rate_limit: 500
+    robots_policy: "allow"
+    tos_notes: "Government data, low risk"
+    categories:
+      - "medical-equipment"
+    
+  # Marketplaces
+  ebay:
+    name: "eBay"
+    type: "marketplace"
+    base_url: "https://www.ebay.com"
+    crawl_method: "html"
+    evasion_level: "high"
+    priority: 6
+    crawl_frequency: 1800  # 30 minutes
+    success_rate_target: 0.85
+    rate_limit: 100
+    robots_policy: "disallow"
+    tos_notes: "High volume, CAPTCHA risk"
+    categories:
+      - "medical-equipment"
+      - "laser-equipment"
+      - "aesthetic-equipment"
+    
+  facebook_marketplace:
+    name: "Facebook Marketplace"
+    type: "marketplace"
+    base_url: "https://www.facebook.com/marketplace"
+    crawl_method: "html"
+    evasion_level: "high"
+    priority: 7
+    crawl_frequency: 3600
+    success_rate_target: 0.80
+    rate_limit: 60  # 1 request per minute
+    robots_policy: "disallow"
+    tos_notes: "Stealth browsers only, heavy throttling"
+    categories:
+      - "medical-equipment"
+      - "laser-equipment"
+    
+  craigslist:
+    name: "Craigslist"
+    type: "marketplace"
+    base_url: "https://craigslist.org"
+    crawl_method: "html"
+    evasion_level: "medium"
+    priority: 8
+    crawl_frequency: 7200
+    success_rate_target: 0.85
+    rate_limit: 200
+    robots_policy: "disallow"
+    tos_notes: "Heavy throttling, RSS available"
+    categories:
+      - "medical-equipment"
+      - "laser-equipment"
+    
+  # Specialized Laser Dealers
+  thelaseragent:
+    name: "The Laser Agent"
+    type: "dealer"
+    base_url: "https://www.thelaseragent.com"
+    crawl_method: "html"
+    evasion_level: "medium"
+    priority: 9
+    crawl_frequency: 14400
+    success_rate_target: 0.90
+    rate_limit: 300
+    robots_policy: "disallow"
+    tos_notes: "Specialized laser dealer"
+    categories:
+      - "laser-equipment"
+      - "aesthetic-equipment"
+    
+  laserservicesolutions:
+    name: "Laser Service Solutions"
+    type: "dealer"
+    base_url: "https://www.laserservicesolutions.com"
+    crawl_method: "html"
+    evasion_level: "medium"
+    priority: 10
+    crawl_frequency: 14400
+    success_rate_target: 0.90
+    rate_limit: 300
+    robots_policy: "disallow"
+    tos_notes: "Laser service provider"
+    categories:
+      - "laser-equipment"
+      - "laser-parts"
+    
+  thelaserwarehouse:
+    name: "The Laser Warehouse"
+    type: "dealer"
+    base_url: "https://www.thelaserwarehouse.com"
+    crawl_method: "html"
+    evasion_level: "medium"
+    priority: 11
+    crawl_frequency: 14400
+    success_rate_target: 0.90
+    rate_limit: 300
+    robots_policy: "disallow"
+    tos_notes: "Used laser equipment dealer"
+    categories:
+      - "laser-equipment"
+      - "used-equipment"
+    
+  # International Sources
+  hilditchgroup:
+    name: "Hilditch Group"
+    type: "auction"
+    base_url: "https://www.hilditchgroup.com"
+    crawl_method: "html"
+    evasion_level: "medium"
+    priority: 12
+    crawl_frequency: 14400
+    success_rate_target: 0.90
+    rate_limit: 200
+    robots_policy: "disallow"
+    tos_notes: "EU/UK liquidations"
+    categories:
+      - "medical-equipment"
+      - "laser-equipment"
+    proxy_tier: "residential_eu"
+    
+  britishmedicalauctions:
+    name: "British Medical Auctions"
+    type: "auction"
+    base_url: "https://www.britishmedicalauctions.co.uk"
+    crawl_method: "html"
+    evasion_level: "medium"
+    priority: 13
+    crawl_frequency: 14400
+    success_rate_target: 0.90
+    rate_limit: 200
+    robots_policy: "disallow"
+    tos_notes: "UK medical equipment auctions"
+    categories:
+      - "medical-equipment"
+      - "laser-equipment"
+    proxy_tier: "residential_eu"
+
+# Source performance tracking
+performance:
+  # Success rate thresholds
+  thresholds:
+    excellent: 0.95
+    good: 0.90
+    fair: 0.80
+    poor: 0.70
+  
+  # Auto-adjustment rules
+  auto_adjustment:
+    enabled: true
+    
+    # Increase crawl frequency for high-performing sources
+    frequency_boost:
+      threshold: 0.95
+      multiplier: 1.5
+    
+    # Decrease crawl frequency for low-performing sources
+    frequency_reduction:
+      threshold: 0.70
+      multiplier: 0.5
+    
+    # Pause sources with very low success rates
+    auto_pause:
+      threshold: 0.50
+      duration: 3600  # 1 hour
+
+# Source discovery
+discovery:
+  enabled: true
+  
+  # Auto-discovery from social media
+  social_media:
+    twitter:
+      enabled: true
+      keywords: ["laser equipment", "medical auction", "clinic closing"]
+      rate_limit: 100  # requests per hour
+    
+    linkedin:
+      enabled: true
+      keywords: ["asset recovery", "liquidation", "clinic closing"]
+      rate_limit: 50  # requests per hour
+    
+    reddit:
+      enabled: true
+      subreddits: ["medicaldevices", "UsedGear", "Flipping", "laser", "aesthetic", "dermatology", "cosmeticsurgery", "medicalequipment", "usedmedical", "equipmentforsale"]
+      rate_limit: 200  # requests per hour
+    
+    facebook_groups_api:
+      enabled: true
+      groups: ["MedicalEquipmentForSale", "UsedMedicalEquipment", "AestheticEquipment", "LaserEquipmentSales", "MedicalDeviceTrading", "CosmeticEquipment", "DermatologyEquipment", "MedicalAuction", "EquipmentLiquidation", "MedicalSurplus"]
+      rate_limit: 200  # requests per hour
+      requires_auth: true
+      auth_method: "api_token"
+    
+    facebook_groups_session:
+      enabled: false  # Disabled by default, requires user credentials
+      groups: ["MedicalEquipmentForSale", "UsedMedicalEquipment", "AestheticEquipment", "LaserEquipmentSales", "MedicalDeviceTrading", "CosmeticEquipment", "DermatologyEquipment", "MedicalAuction", "EquipmentLiquidation", "MedicalSurplus"]
+      rate_limit: 10  # requests per hour (very limited)
+      requires_auth: true
+      auth_method: "user_session"
+  
+  # Manual source submission
+  manual_submission:
+    enabled: true
+    webform_url: "/submit-source"
+    email_forwarding: "sources@company.com"
+
+# Data quality requirements
+quality:
+  # Minimum data completeness
+  completeness:
+    required_fields: ["brand", "model", "asking_price", "condition"]
+    optional_fields: ["serial_number", "year", "hours", "accessories"]
+  
+  # Data validation rules
+  validation:
+    price_range:
+      min: 100
+      max: 1000000
+    
+    year_range:
+      min: 1990
+      max: 2025
+    
+    hours_range:
+      min: 0
+      max: 50000
+  
+  # Deduplication rules
+  deduplication:
+    enabled: true
+    fuzzy_match_threshold: 0.85
+    time_window: 86400  # 24 hours

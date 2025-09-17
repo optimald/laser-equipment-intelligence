@@ -1,0 +1,25 @@
+{
+  "total_tests": 27,
+  "passed_tests": 27,
+  "failed_tests": 0,
+  "warning_tests": 0,
+  "critical_failures": 0,
+  "performance_metrics": {
+    "brand_mapping": 518135.145151328,
+    "price_analysis": 133661.695347355
+  },
+  "spider_status": {
+    "DOTmed": "PASS",
+    "BidSpotter": "PASS",
+    "eBay": "PASS",
+    "GovDeals": "PASS",
+    "Facebook Marketplace": "PASS",
+    "Craigslist": "PASS",
+    "LabX": "PASS"
+  },
+  "module_status": {
+    "brand_mapping": "PASS",
+    "price_analysis": "PASS",
+    "evasion_scoring": "PASS"
+  }
+}
