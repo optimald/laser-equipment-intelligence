@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowPathIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon, MagnifyingGlassIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 interface LaserMatchItem {
   id: string
@@ -12,7 +12,6 @@ interface LaserMatchItem {
   price?: number
   location?: string
   description?: string
-  images?: string[]
   url: string
   sources?: {
     source: string
@@ -21,12 +20,29 @@ interface LaserMatchItem {
     found: boolean
   }[]
   searchStatus?: 'idle' | 'searching' | 'completed' | 'error'
+  // Procurement fields
+  assignedRep?: string
+  targetPrice?: number
+  sourcingStatus: 'not_started' | 'in_progress' | 'quoted' | 'negotiating' | 'purchased' | 'declined'
+  notes?: string
 }
+
+const SOURCING_STATUS_OPTIONS = [
+  { value: 'not_started', label: 'Not Started', color: 'bg-gray-100 text-gray-800' },
+  { value: 'in_progress', label: 'In Progress', color: 'bg-blue-100 text-blue-800' },
+  { value: 'quoted', label: 'Quoted', color: 'bg-yellow-100 text-yellow-800' },
+  { value: 'negotiating', label: 'Negotiating', color: 'bg-orange-100 text-orange-800' },
+  { value: 'purchased', label: 'Purchased', color: 'bg-green-100 text-green-800' },
+  { value: 'declined', label: 'Declined', color: 'bg-red-100 text-red-800' }
+]
+
+const REPS = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Chen', 'Tom Wilson']
 
 export default function LaserMatchTab() {
   const [items, setItems] = useState<LaserMatchItem[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [editingItem, setEditingItem] = useState<string | null>(null)
 
   // Fetch LaserMatch items on component mount
   useEffect(() => {
@@ -48,9 +64,12 @@ export default function LaserMatchTab() {
         price: item.price,
         location: item.location,
         description: item.description,
-        images: item.images,
         url: item.url || '',
-        sources: []
+        sources: [],
+        sourcingStatus: 'not_started' as const,
+        assignedRep: undefined,
+        targetPrice: undefined,
+        notes: ''
       }))
       setItems(convertedResults)
     } catch (error) {
@@ -67,7 +86,11 @@ export default function LaserMatchTab() {
           location: 'California, USA',
           description: 'Complete Sciton Joule laser system with multiple handpieces',
           url: 'https://lasermatch.io/item/1',
-          sources: []
+          sources: [],
+          sourcingStatus: 'in_progress',
+          assignedRep: 'John Smith',
+          targetPrice: 75000,
+          notes: 'Need to verify warranty status'
         },
         {
           id: '2',
@@ -79,7 +102,11 @@ export default function LaserMatchTab() {
           location: 'Texas, USA',
           description: 'Cynosure PicoSure Pro tattoo removal laser',
           url: 'https://lasermatch.io/item/2',
-          sources: []
+          sources: [],
+          sourcingStatus: 'quoted',
+          assignedRep: 'Sarah Johnson',
+          targetPrice: 100000,
+          notes: 'Waiting for service records'
         },
         {
           id: '3',
@@ -91,7 +118,11 @@ export default function LaserMatchTab() {
           location: 'Florida, USA',
           description: 'Cutera Excel V laser system for aesthetic treatments',
           url: 'https://lasermatch.io/item/3',
-          sources: []
+          sources: [],
+          sourcingStatus: 'not_started',
+          assignedRep: undefined,
+          targetPrice: undefined,
+          notes: ''
         }
       ]
       setItems(mockItems)
@@ -166,14 +197,25 @@ export default function LaserMatchTab() {
     }
   }
 
+  const updateItem = (itemId: string, updates: Partial<LaserMatchItem>) => {
+    setItems(prev => prev.map(item => 
+      item.id === itemId ? { ...item, ...updates } : item
+    ))
+  }
+
   const formatPrice = (price?: number) => {
-    if (!price) return 'Price not available'
+    if (!price) return 'N/A'
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(price)
+  }
+
+  const getStatusColor = (status: string) => {
+    const statusOption = SOURCING_STATUS_OPTIONS.find(opt => opt.value === status)
+    return statusOption?.color || 'bg-gray-100 text-gray-800'
   }
 
   if (isLoading) {
@@ -190,8 +232,8 @@ export default function LaserMatchTab() {
       {/* Header with Refresh Button */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">LaserMatch Items</h2>
-          <p className="text-gray-600">Found {items.length} items from LaserMatch.io</p>
+          <h2 className="text-2xl font-bold text-gray-900">LaserMatch Procurement</h2>
+          <p className="text-gray-600">Managing {items.length} items from LaserMatch.io</p>
         </div>
         <button
           onClick={refreshLaserMatchItems}
@@ -203,120 +245,201 @@ export default function LaserMatchTab() {
         </button>
       </div>
 
-      {/* Items Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
-          <div key={item.id} className="card">
-            {/* Item Image */}
-            <div className="aspect-w-16 aspect-h-9 mb-4">
-              <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                {item.images && item.images.length > 0 ? (
-                  <img 
-                    src={item.images[0]} 
-                    alt={item.title}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                ) : (
-                  <div className="text-gray-400 text-center">
-                    <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="mt-2 text-sm">No image available</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Item Details */}
-            <div className="space-y-3">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-                  {item.title}
-                </h3>
-                {(item.brand || item.model) && (
-                  <p className="text-sm text-gray-600">
-                    {item.brand} {item.model}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-bold text-primary-600">
-                  {formatPrice(item.price)}
-                </span>
-                {item.condition && (
-                  <span className="badge badge-success">
-                    {item.condition}
-                  </span>
-                )}
-              </div>
-
-              {item.location && (
-                <p className="text-sm text-gray-500">
-                  📍 {item.location}
-                </p>
-              )}
-
-              {item.description && (
-                <p className="text-sm text-gray-600 line-clamp-3">
-                  {item.description}
-                </p>
-              )}
-
-              {/* Find Sources Button */}
-              <button
-                onClick={() => findSources(item)}
-                disabled={item.searchStatus === 'searching'}
-                className="w-full btn-secondary flex items-center justify-center"
-              >
-                <MagnifyingGlassIcon className="h-4 w-4 mr-2" />
-                {item.searchStatus === 'searching' ? 'Searching...' : 'Find Sources'}
-              </button>
-
-              {/* Search Status */}
-              {item.searchStatus === 'searching' && (
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600 mx-auto"></div>
-                  <p className="text-sm text-gray-500 mt-2">Searching sources...</p>
-                </div>
-              )}
-
-              {/* Found Sources */}
-              {item.sources && item.sources.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-gray-900">
-                    Found {item.sources.length} sources:
-                  </h4>
-                  {item.sources.map((source, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{source.source}</p>
-                        {source.price && (
-                          <p className="text-sm text-gray-600">{formatPrice(source.price)}</p>
-                        )}
+      {/* Items Table */}
+      <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Equipment
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Assigned Rep
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Target Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Sources
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Notes
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {items.map((item) => (
+                <tr key={item.id} className="hover:bg-gray-50">
+                  {/* Equipment Info */}
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className="text-sm font-medium text-gray-900 line-clamp-2">
+                        {item.title}
                       </div>
-                      <a
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-600 hover:text-primary-700 text-sm"
-                      >
-                        View →
-                      </a>
+                      <div className="text-sm text-gray-500">
+                        {item.brand} {item.model}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {item.condition} • {item.location}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </td>
 
-              {/* Error Status */}
-              {item.searchStatus === 'error' && (
-                <div className="text-center text-red-600 text-sm">
-                  ❌ Failed to find sources
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+                  {/* Current Price */}
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-gray-900">
+                      {formatPrice(item.price)}
+                    </div>
+                  </td>
+
+                  {/* Assigned Rep */}
+                  <td className="px-6 py-4">
+                    {editingItem === item.id ? (
+                      <select
+                        value={item.assignedRep || ''}
+                        onChange={(e) => updateItem(item.id, { assignedRep: e.target.value || undefined })}
+                        className="text-sm border border-gray-300 rounded px-2 py-1"
+                      >
+                        <option value="">Select Rep</option>
+                        {REPS.map(rep => (
+                          <option key={rep} value={rep}>{rep}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="text-sm text-gray-900">
+                        {item.assignedRep || 'Unassigned'}
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Target Price */}
+                  <td className="px-6 py-4">
+                    {editingItem === item.id ? (
+                      <input
+                        type="number"
+                        value={item.targetPrice || ''}
+                        onChange={(e) => updateItem(item.id, { targetPrice: e.target.value ? Number(e.target.value) : undefined })}
+                        placeholder="Target price"
+                        className="text-sm border border-gray-300 rounded px-2 py-1 w-24"
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-900">
+                        {formatPrice(item.targetPrice)}
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Sourcing Status */}
+                  <td className="px-6 py-4">
+                    {editingItem === item.id ? (
+                      <select
+                        value={item.sourcingStatus}
+                        onChange={(e) => updateItem(item.id, { sourcingStatus: e.target.value as any })}
+                        className="text-sm border border-gray-300 rounded px-2 py-1"
+                      >
+                        {SOURCING_STATUS_OPTIONS.map(status => (
+                          <option key={status.value} value={status.value}>
+                            {status.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.sourcingStatus)}`}>
+                        {SOURCING_STATUS_OPTIONS.find(s => s.value === item.sourcingStatus)?.label}
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Sources */}
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      {item.searchStatus === 'searching' && (
+                        <div className="flex items-center text-xs text-blue-600">
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-1"></div>
+                          Searching...
+                        </div>
+                      )}
+                      {item.sources && item.sources.length > 0 && (
+                        <div className="text-xs text-gray-600">
+                          {item.sources.length} sources found
+                        </div>
+                      )}
+                      {item.searchStatus === 'error' && (
+                        <div className="text-xs text-red-600">Search failed</div>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Notes */}
+                  <td className="px-6 py-4">
+                    {editingItem === item.id ? (
+                      <textarea
+                        value={item.notes || ''}
+                        onChange={(e) => updateItem(item.id, { notes: e.target.value })}
+                        placeholder="Add notes..."
+                        className="text-sm border border-gray-300 rounded px-2 py-1 w-32 h-16 resize-none"
+                      />
+                    ) : (
+                      <div className="text-sm text-gray-600 max-w-32 truncate">
+                        {item.notes || 'No notes'}
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Actions */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center space-x-2">
+                      {editingItem === item.id ? (
+                        <>
+                          <button
+                            onClick={() => setEditingItem(null)}
+                            className="text-green-600 hover:text-green-700"
+                          >
+                            <CheckIcon className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => setEditingItem(null)}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => findSources(item)}
+                            disabled={item.searchStatus === 'searching'}
+                            className="text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                            title="Find Sources"
+                          >
+                            <MagnifyingGlassIcon className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => setEditingItem(item.id)}
+                            className="text-gray-600 hover:text-gray-700"
+                            title="Edit"
+                          >
+                            <PencilIcon className="h-4 w-4" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {items.length === 0 && (
