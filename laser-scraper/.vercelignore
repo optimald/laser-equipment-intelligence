@@ -1,7 +1,13 @@
-# Ignore everything except the web directory and root package files
-*
-!web/
-!web/**
-!package.json
-!package-lock.json
-!vercel.json
+# Ignore everything except the web directory
+api/
+backend/
+docs/
+laser-equipment-intelligence/
+laser-scraper-landing/
+node_modules/
+nixpacks.toml
+Procfile
+railway.json
+README.md
+requirements.txt
+test_api.py
