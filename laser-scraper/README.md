@@ -1,91 +1,163 @@
-# Laser Equipment Intelligence Platform
+# Laser Equipment Procurement Intelligence Frontend
 
-Automated discovery and procurement intelligence for aesthetic/medical laser equipment through advanced web scraping and AI-powered market analysis.
+A Next.js frontend application for the Laser Equipment Procurement Intelligence platform, providing procurement teams with a comprehensive interface to search, configure, and monitor laser equipment sourcing across multiple data sources.
 
-## 🎯 Project Overview
+## Features
 
-This platform continuously monitors 50+ auction platforms, dealer networks, and marketplaces to identify high-value laser equipment opportunities before competitors, providing actionable, margin-qualified leads to procurement teams.
+- **Equipment Search**: Advanced search interface with filters for brand, model, condition, price, and location
+- **Source Configuration**: Manage and configure multiple data sources (LaserMatch.io, DOTmed, BidSpotter, etc.)
+- **Dashboard**: Real-time monitoring of listings, margins, and system performance
+- **Responsive Design**: Mobile-friendly interface built with Tailwind CSS
 
-## 📊 Key Metrics
+## Tech Stack
 
-- **$2M+** Annual Equipment Value Identified
-- **50+** Data Sources Monitored
-- **24/7** Continuous Operation
-- **<5min** Alert Response Time
-- **99.9%** System Uptime
-- **90%** Accuracy Rate
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: Heroicons
+- **Forms**: React Hook Form
+- **State Management**: React Query (for API calls)
 
-## 🏗️ Project Structure
+## Getting Started
 
-```
-laser-equipment-intelligence/
-├── docs/                           # Documentation
-│   ├── SPEC.md                     # Technical specification
-│   ├── CHECKLIST.md                # Implementation tracking
-│   ├── API.md                      # API documentation
-│   ├── DEPLOYMENT.md               # Deployment guide
-│   └── TROUBLESHOOTING.md          # Common issues & solutions
-├── src/                            # Source code
-│   ├── spiders/                    # Scrapy spiders
-│   ├── middleware/                 # Custom middleware
-│   ├── pipelines/                  # Data processing pipelines
-│   ├── utils/                      # Utility modules
-│   └── config/                     # Configuration
-├── tests/                          # Test suite
-├── scripts/                        # Utility scripts
-├── docker/                         # Docker configuration
-├── monitoring/                     # Monitoring & alerting
-└── laser-scraper-landing/          # Executive presentation
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd laser-procurement-frontend
 ```
 
-## 🚀 Quick Start
+2. Install dependencies:
+```bash
+npm install
+```
 
-1. **Review Documentation**: Start with [SPEC.md](docs/SPEC.md) for technical details
-2. **Track Progress**: Use [CHECKLIST.md](docs/CHECKLIST.md) for implementation status
-3. **View Presentation**: Access the [executive presentation](laser-scraper-landing/) for stakeholders
+3. Copy environment variables:
+```bash
+cp .env.example .env.local
+```
 
-## 🎯 Target Equipment
+4. Update environment variables in `.env.local`:
+```env
+API_BASE_URL=http://localhost:8000
+```
 
-### Core Brands
-- **Sciton**: Joule, BBL, M22 systems
-- **Cynosure**: PicoSure, PicoWay, GentleMax Pro
-- **Cutera**: Excel V, Xeo, Secret RF
-- **Lumenis**: Elite+, Ultraformer
-- **Alma**: OPUS, Harmony XL
+5. Start the development server:
+```bash
+npm run dev
+```
 
-### Equipment Types
-- **Platform Systems**: Complete laser towers with handpieces
-- **Handpieces**: Large/Small applicators, dual wavelength
-- **Accessories**: Tips, filters, carts, chillers
-- **Consumables**: Treatment guides, calibration tools
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 🔧 Technology Stack
+## Project Structure
 
-- **Core**: Python, Scrapy, Playwright
-- **Evasion**: Proxy rotation, CAPTCHA solving, fingerprint spoofing
-- **Infrastructure**: PostgreSQL, Redis, AWS EC2
-- **Monitoring**: Prometheus, Grafana, Slack alerts
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx         # Root layout
+│   ├── page.tsx           # Home page
+│   └── globals.css        # Global styles
+├── components/            # React components
+│   ├── EquipmentSearch.tsx    # Search interface
+│   ├── SearchResults.tsx      # Results display
+│   ├── SourceConfiguration.tsx # Source management
+│   └── Dashboard.tsx          # Analytics dashboard
+└── types/                 # TypeScript type definitions
+```
 
-## 📈 Implementation Timeline
+## Components
 
-- **Week 1**: Evasion core and anti-bot wrapper
-- **Week 2**: Site-specific parsers for 10+ sources
-- **Week 3**: Distributed Scrapyd cluster setup
-- **Week 4**: End-to-end integration and testing
+### EquipmentSearch
+Advanced search interface allowing users to:
+- Search by equipment name, brand, or model
+- Filter by condition, price range, and location
+- Select specific data sources
+- Configure advanced search parameters
 
-## 🔒 Legal & Compliance
+### SearchResults
+Displays search results with:
+- Grid and list view modes
+- Sorting options (relevance, price, score, date)
+- Detailed equipment information
+- Favorites and sharing functionality
 
-- **Public Data Only**: Scrapes only publicly accessible listings
-- **No PII Collection**: Strips personal information
-- **Fair Use Defense**: Market intelligence for business purposes
-- **FDA Compliance**: Monitors device recall lists
+### SourceConfiguration
+Manages data source settings:
+- Enable/disable sources
+- Configure crawl frequency and delays
+- Monitor source performance
+- View source logs and status
 
-## 📞 Contact
+### Dashboard
+Provides analytics and monitoring:
+- Key performance metrics
+- Source performance breakdown
+- Price trend analysis
+- Recent activity feed
 
-For questions about implementation or technical details, refer to the comprehensive documentation in the `docs/` folder.
+## API Integration
 
----
+The frontend integrates with the Laser Equipment Intelligence backend API:
 
-**Status**: Active Development  
-**Timeline**: 1-week implementation  
-**Confidentiality**: Internal Use Only
+```typescript
+// Example API calls
+const searchEquipment = async (params: SearchParams) => {
+  const response = await fetch(`${API_BASE_URL}/api/search`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params)
+  })
+  return response.json()
+}
+```
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard:
+   - `API_BASE_URL`: Your backend API URL
+3. Deploy automatically on push to main branch
+
+### Manual Deployment
+
+```bash
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `API_BASE_URL` | Backend API base URL | Yes |
+| `NEXT_PUBLIC_GA_ID` | Google Analytics ID | No |
+| `NEXT_PUBLIC_SENTRY_DSN` | Sentry DSN for error tracking | No |
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Commit changes: `git commit -am 'Add new feature'`
+4. Push to branch: `git push origin feature/new-feature`
+5. Submit a pull request
+
+## License
+
+This project is proprietary software. All rights reserved.
+
+## Support
+
+For support and questions:
+- Email: support@company.com
+- Documentation: [Backend API Docs](../laser-equipment-intelligence/docs/)
