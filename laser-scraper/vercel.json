@@ -6,3 +6,4 @@
   "framework": "nextjs"
 }
 // Test after clearing root directory
+// CRITICAL FIX: Removed conflicting .vercel directory
