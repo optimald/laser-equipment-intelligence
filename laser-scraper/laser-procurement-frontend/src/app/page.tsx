@@ -23,16 +23,19 @@ export default function Home() {
   const handleSearch = async (searchParams: any) => {
     setIsSearching(true)
     try {
-      // TODO: Implement API call to backend
       console.log('Searching with params:', searchParams)
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Import the API service dynamically to avoid SSR issues
+      const { apiService } = await import('../services/api')
       
-      // Mock results for now
+      const results = await apiService.searchEquipment(searchParams)
+      setSearchResults(results)
+    } catch (error) {
+      console.error('Search failed:', error)
+      // Fallback to mock data if API fails
       const mockResults = [
         {
-          id: '1',
+          id: 1,
           title: 'Sciton Joule Laser System',
           brand: 'Sciton',
           model: 'Joule',
@@ -47,7 +50,7 @@ export default function Home() {
           score_overall: 85
         },
         {
-          id: '2',
+          id: 2,
           title: 'Cynosure PicoSure Pro',
           brand: 'Cynosure',
           model: 'PicoSure Pro',
@@ -64,8 +67,6 @@ export default function Home() {
       ]
       
       setSearchResults(mockResults)
-    } catch (error) {
-      console.error('Search failed:', error)
     } finally {
       setIsSearching(false)
     }

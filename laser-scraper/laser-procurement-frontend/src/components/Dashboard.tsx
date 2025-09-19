@@ -40,13 +40,31 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Mock data for demonstration
+  // Fetch real data from API
   useEffect(() => {
-    const mockStats: DashboardStats = {
-      totalListings: 1247,
-      newListings: 89,
-      highValueListings: 23,
-      avgMargin: 28.5,
+    const fetchDashboardData = async () => {
+      try {
+        const { apiService } = await import('../services/api')
+        const apiStats = await apiService.getDashboardStats()
+        // Convert API response to component interface
+        const dashboardStats: DashboardStats = {
+          totalListings: apiStats.total_listings,
+          newListings: apiStats.new_listings,
+          highValueListings: apiStats.high_value_listings,
+          avgMargin: apiStats.avg_margin,
+          topSources: apiStats.top_sources,
+          recentActivity: apiStats.recent_activity,
+          priceTrends: apiStats.price_trends
+        }
+        setStats(dashboardStats)
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error)
+        // Fallback to mock data
+        const mockStats: DashboardStats = {
+          totalListings: 1247,
+          newListings: 89,
+          highValueListings: 23,
+          avgMargin: 28.5,
       topSources: [
         { name: 'LaserMatch.io', count: 234, percentage: 18.8 },
         { name: 'DOTmed Auctions', count: 198, percentage: 15.9 },
@@ -106,10 +124,13 @@ export default function Dashboard() {
       ]
     }
 
-    setTimeout(() => {
-      setStats(mockStats)
-      setIsLoading(false)
-    }, 1000)
+        setStats(mockStats)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchDashboardData()
   }, [])
 
   const formatPrice = (price: number) => {

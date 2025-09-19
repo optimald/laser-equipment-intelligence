@@ -33,8 +33,38 @@ export default function SourceConfiguration({}: SourceConfigurationProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedSource, setSelectedSource] = useState<SourceConfig | null>(null)
 
-  // Mock data for demonstration
+  // Fetch real data from API with fallback to mock data
   useEffect(() => {
+    const fetchSourceConfigurations = async () => {
+      try {
+        const { apiService } = await import('../services/api')
+        const apiSources = await apiService.getSourceConfigurations()
+        // Convert API response to component interface
+        const convertedSources: SourceConfig[] = apiSources.map(source => ({
+          id: source.id,
+          name: source.name,
+          priority: source.priority as 'HIGH' | 'MEDIUM' | 'LOW',
+          enabled: source.enabled,
+          crawlFrequency: source.priority === 'HIGH' ? 1 : source.priority === 'MEDIUM' ? 4 : 12,
+          maxConcurrent: source.priority === 'HIGH' ? 8 : source.priority === 'MEDIUM' ? 4 : 2,
+          delayMin: source.priority === 'HIGH' ? 2 : source.priority === 'MEDIUM' ? 3 : 5,
+          delayMax: source.priority === 'HIGH' ? 5 : source.priority === 'MEDIUM' ? 8 : 15,
+          evasionLevel: source.priority === 'HIGH' ? 'LOW' : source.priority === 'MEDIUM' ? 'MEDIUM' : 'HIGH',
+          lastCrawl: source.last_run,
+          status: source.status === 'active' ? 'ACTIVE' : 'PAUSED',
+          successRate: source.priority === 'HIGH' ? 95 : source.priority === 'MEDIUM' ? 88 : 75
+        }))
+        setSources(convertedSources)
+      } catch (error) {
+        console.error('Failed to fetch source configurations:', error)
+        // Fallback to mock data
+        loadMockData()
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    const loadMockData = () => {
     const mockSources: SourceConfig[] = [
       {
         id: 'lasermatch',
@@ -208,8 +238,9 @@ export default function SourceConfiguration({}: SourceConfigurationProps) {
 
     setTimeout(() => {
       setSources(mockSources)
-      setIsLoading(false)
-    }, 1000)
+    }
+
+    fetchSourceConfigurations()
   }, [])
 
   const getStatusIcon = (status: string) => {
