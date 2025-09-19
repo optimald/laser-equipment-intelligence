@@ -2,10 +2,16 @@
   "name": "laser-equipment-intelligence-monorepo",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "laser-procurement-frontend"
+  ],
   "scripts": {
     "dev": "cd laser-procurement-frontend && npm run dev",
     "build": "cd laser-procurement-frontend && npm run build",
     "start": "cd laser-procurement-frontend && npm run start",
     "lint": "cd laser-procurement-frontend && npm run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
   }
 }
