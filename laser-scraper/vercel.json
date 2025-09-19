@@ -5,3 +5,4 @@
   "installCommand": "cd web && npm ci",
   "framework": "nextjs"
 }
+// Test after clearing root directory
