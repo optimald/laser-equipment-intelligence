@@ -1,8 +1,9 @@
 {
   "version": 2,
-  "buildCommand": "cd laser-procurement-frontend && npm install && npm run build",
-  "outputDirectory": "laser-procurement-frontend/.next",
-  "installCommand": "cd laser-procurement-frontend && npm install",
-  "framework": "nextjs",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./laser-procurement-frontend"
+  "builds": [
+    {
+      "src": "laser-procurement-frontend/package.json",
+      "use": "@vercel/next"
+    }
+  ]
 }
