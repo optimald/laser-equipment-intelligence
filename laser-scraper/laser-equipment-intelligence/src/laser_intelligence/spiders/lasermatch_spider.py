@@ -1,5 +1,6 @@
 """
-Asset Recovery Services spider for liquidation opportunities and medical equipment recovery
+LaserMatch.io spider for medical laser equipment inventory management system
+Extracts all listed items from lasermatch.io for procurement intelligence
 """
 
 import scrapy
@@ -12,21 +13,21 @@ from scrapy_playwright.page import PageMethod
 from laser_intelligence.pipelines.normalization import LaserListingItem
 
 
-class AssetRecoveryServicesSpider(scrapy.Spider):
-    name = 'asset_recovery_services'
-    allowed_domains = ['assetrecoveryservices.com']
+class LaserMatchSpider(scrapy.Spider):
+    name = 'lasermatch'
+    allowed_domains = ['lasermatch.io']
     
-    # Asset recovery and liquidation opportunities
+    # LaserMatch.io main pages and categories
     start_urls = [
-        'https://www.assetrecoveryservices.com/inventory',
-        'https://www.assetrecoveryservices.com/inventory?category=medical-equipment',
-        'https://www.assetrecoveryservices.com/inventory?category=healthcare-equipment',
-        'https://www.assetrecoveryservices.com/inventory?category=laboratory-equipment',
-        'https://www.assetrecoveryservices.com/inventory?category=dental-equipment',
-        'https://www.assetrecoveryservices.com/inventory?category=aesthetic-equipment',
-        'https://www.assetrecoveryservices.com/liquidations',
-        'https://www.assetrecoveryservices.com/auctions',
-        'https://www.assetrecoveryservices.com/repossessions'
+        'https://lasermatch.io/',
+        'https://lasermatch.io/inventory',
+        'https://lasermatch.io/listings',
+        'https://lasermatch.io/equipment',
+        'https://lasermatch.io/medical-equipment',
+        'https://lasermatch.io/laser-equipment',
+        'https://lasermatch.io/aesthetic-equipment',
+        'https://lasermatch.io/dental-equipment',
+        'https://lasermatch.io/laboratory-equipment'
     ]
     
     custom_settings = {
@@ -41,10 +42,10 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
                 '--disable-dev-shm-usage'
             ]
         },
-        'DOWNLOAD_DELAY': (2, 6),  # Moderate delays
+        'DOWNLOAD_DELAY': (2, 5),  # Moderate delays for inventory site
         'RANDOMIZE_DOWNLOAD_DELAY': True,
-        'CONCURRENT_REQUESTS': 10,
-        'CONCURRENT_REQUESTS_PER_DOMAIN': 3,
+        'CONCURRENT_REQUESTS': 12,
+        'CONCURRENT_REQUESTS_PER_DOMAIN': 4,
         'DOWNLOADER_MIDDLEWARES': {
             'laser_intelligence.middleware.evasion.EvasionMiddleware': 543,
             'laser_intelligence.middleware.proxy.ProxyMiddleware': 544,
@@ -61,9 +62,9 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.processed_urls = set()
-        self.processed_liquidations = set()
+        self.processed_items = set()
         
-        # Laser equipment keywords for Asset Recovery Services
+        # Laser equipment keywords for LaserMatch.io
         self.laser_keywords = [
             'laser', 'ipl', 'rf', 'hifu', 'cryolipolysis',
             'sciton', 'cynosure', 'cutera', 'candela', 'lumenis',
@@ -78,18 +79,22 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
             'nd:yag laser', 'erbium laser', 'ipl device', 'rf device',
             'laser hair removal', 'laser tattoo removal', 'laser skin resurfacing',
             'coolsculpting', 'venus legacy', 'ultraformer', 'ulthera',
-            'laser equipment', 'laser system', 'laser machine', 'laser device'
+            'laser equipment', 'laser system', 'laser machine', 'laser device',
+            'aerolase', 'lightpod', 'agnes', 'rf device',
+            'medical equipment', 'healthcare equipment', 'dental equipment',
+            'aesthetic equipment', 'beauty equipment', 'spa equipment',
+            'clinic equipment', 'practice equipment', 'surgery equipment'
         ]
     
     def start_requests(self):
-        """Generate initial requests for asset recovery listings"""
+        """Generate initial requests for LaserMatch.io listings"""
         for url in self.start_urls:
             yield scrapy.Request(
                 url,
                 meta={
                     'playwright': True,
                     'playwright_page_methods': [
-                        PageMethod('wait_for_selector', '.inventory-list, .asset-list, .equipment-list, .liquidation-list', timeout=30000),
+                        PageMethod('wait_for_selector', '.inventory-list, .equipment-list, .listing-grid, .item-grid, .product-grid', timeout=30000),
                         PageMethod('wait_for_timeout', 3000),
                         PageMethod('evaluate', 'window.scrollTo(0, document.body.scrollHeight)'),
                         PageMethod('wait_for_timeout', 2000),
@@ -101,44 +106,51 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
             )
     
     def parse_inventory_list(self, response):
-        """Parse inventory list page for asset recovery items"""
+        """Parse inventory list page for equipment items"""
         self.logger.info(f'Parsing inventory list: {response.url}')
         
-        # Extract asset links - try multiple selectors
-        asset_links = []
+        # Extract item links - try multiple selectors for LaserMatch.io
+        item_links = []
         
-        # Common asset link patterns for Asset Recovery Services
+        # Common item link patterns for LaserMatch.io
         selectors = [
-            'a[href*="inventory"]::attr(href)',
-            'a[href*="asset"]::attr(href)',
-            'a[href*="equipment"]::attr(href)',
-            'a[href*="liquidation"]::attr(href)',
             'a[href*="item"]::attr(href)',
+            'a[href*="equipment"]::attr(href)',
+            'a[href*="listing"]::attr(href)',
+            'a[href*="product"]::attr(href)',
+            'a[href*="inventory"]::attr(href)',
             '.inventory-item a::attr(href)',
-            '.asset-item a::attr(href)',
             '.equipment-item a::attr(href)',
-            '.liquidation-item a::attr(href)',
+            '.listing-item a::attr(href)',
+            '.product-item a::attr(href)',
+            '.item-card a::attr(href)',
+            '.equipment-card a::attr(href)',
+            '.listing-card a::attr(href)',
+            '.product-card a::attr(href)',
             '.inventory-link::attr(href)',
-            '.asset-link::attr(href)',
             '.equipment-link::attr(href)',
+            '.listing-link::attr(href)',
+            '.product-link::attr(href)',
             'h3 a::attr(href)',
             'h2 a::attr(href)',
             '.item-title a::attr(href)',
-            '.asset-title a::attr(href)'
+            '.equipment-title a::attr(href)',
+            '.listing-title a::attr(href)',
+            '.product-title a::attr(href)'
         ]
         
         for selector in selectors:
             links = response.css(selector).getall()
-            asset_links.extend(links)
+            item_links.extend(links)
         
         # Remove duplicates and filter valid URLs
-        asset_links = list(set([link for link in asset_links if link and ('inventory' in link.lower() or 'asset' in link.lower() or 'equipment' in link.lower() or 'item' in link.lower())]))
+        item_links = list(set([link for link in item_links if link and ('item' in link.lower() or 'equipment' in link.lower() or 'listing' in link.lower() or 'product' in link.lower() or 'inventory' in link.lower())]))
         
-        self.logger.info(f'Found {len(asset_links)} asset links')
+        self.logger.info(f'Found {len(item_links)} item links')
         
-        for link in asset_links:
-            if link not in self.processed_liquidations:
-                self.processed_liquidations.add(link)
+        for link in item_links:
+            if link not in self.processed_items:
+                self.processed_items.add(link)
                 full_url = response.urljoin(link)
                 
                 yield scrapy.Request(
@@ -146,24 +158,27 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
                     meta={
                         'playwright': True,
                         'playwright_page_methods': [
-                            PageMethod('wait_for_selector', '.asset-details, .equipment-details, .inventory-details, .item-details', timeout=30000),
+                            PageMethod('wait_for_selector', '.item-details, .equipment-details, .listing-details, .product-details', timeout=30000),
                             PageMethod('wait_for_timeout', 2000),
                         ],
                     },
                     headers=self.get_random_headers(),
-                    callback=self.parse_asset_detail,
+                    callback=self.parse_item_detail,
                     dont_filter=True,
                 )
         
+        # Also try to extract items directly from the list page
+        self.extract_items_from_list_page(response)
+        
         # Follow pagination
-        next_page = response.css('.pagination .next::attr(href), .pager .next::attr(href), a[rel="next"]::attr(href), .page-next::attr(href)').get()
+        next_page = response.css('.pagination .next::attr(href), .pager .next::attr(href), a[rel="next"]::attr(href), .page-next::attr(href), .load-more::attr(href)').get()
         if next_page:
             yield scrapy.Request(
                 response.urljoin(next_page),
                 meta={
                     'playwright': True,
                     'playwright_page_methods': [
-                        PageMethod('wait_for_selector', '.inventory-list, .asset-list, .equipment-list, .liquidation-list', timeout=30000),
+                        PageMethod('wait_for_selector', '.inventory-list, .equipment-list, .listing-grid, .item-grid, .product-grid', timeout=30000),
                         PageMethod('wait_for_timeout', 3000),
                     ],
                 },
@@ -172,52 +187,142 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
                 dont_filter=True,
             )
     
-    def parse_asset_detail(self, response):
-        """Parse individual asset detail page"""
-        self.logger.info(f'Parsing asset detail: {response.url}')
+    def extract_items_from_list_page(self, response):
+        """Extract items directly from list page without following links"""
+        self.logger.info(f'Extracting items from list page: {response.url}')
+        
+        # Try multiple selectors for item containers
+        item_selectors = [
+            '.inventory-item',
+            '.equipment-item',
+            '.listing-item',
+            '.product-item',
+            '.item-card',
+            '.equipment-card',
+            '.listing-card',
+            '.product-card',
+            '.item',
+            '.equipment',
+            '.listing',
+            '.product',
+            'tr[class*="item"]',
+            'tr[class*="equipment"]',
+            'tr[class*="listing"]',
+            'div[class*="item"]',
+            'div[class*="equipment"]',
+            'div[class*="listing"]'
+        ]
+        
+        items = []
+        for selector in item_selectors:
+            items.extend(response.css(selector))
+        
+        self.logger.info(f'Found {len(items)} items on list page')
+        
+        for item_element in items:
+            try:
+                item = self.extract_item_data_from_element(item_element, response)
+                if item and self.is_laser_equipment(item):
+                    yield item
+            except Exception as e:
+                self.logger.error(f'Error extracting item data from element: {e}')
+    
+    def parse_item_detail(self, response):
+        """Parse individual item detail page"""
+        self.logger.info(f'Parsing item detail: {response.url}')
         
         try:
-            item = self.extract_asset_data(response)
+            item = self.extract_item_data_from_detail_page(response)
             if item and self.is_laser_equipment(item):
                 yield item
         except Exception as e:
-            self.logger.error(f'Error extracting asset data: {e}')
+            self.logger.error(f'Error extracting item data from detail page: {e}')
     
-    def extract_asset_data(self, response):
-        """Extract data from asset detail page"""
+    def extract_item_data_from_element(self, item_element, response):
+        """Extract data from item element on list page"""
         try:
-            # Extract title and description
-            title = response.css('h1::text, .asset-title::text, .equipment-title::text, .item-title::text').get()
-            description = response.css('.asset-description::text, .equipment-description::text, .item-description::text, .description::text').getall()
+            # Extract basic information
+            title = item_element.css('.item-title::text, .equipment-title::text, .listing-title::text, .product-title::text, h3::text, h4::text').get()
+            description = item_element.css('.item-description::text, .equipment-description::text, .listing-description::text, .product-description::text, .description::text').getall()
             description_text = ' '.join(description).strip()
             
-            # Extract asset ID
-            asset_id = response.css('.asset-id::text, .inventory-number::text, .equipment-id::text').get()
+            # Extract item ID
+            item_id = item_element.css('.item-id::text, .equipment-id::text, .listing-id::text, .product-id::text').get()
+            
+            # Extract pricing
+            price = item_element.css('.price::text, .cost::text, .value::text, .asking-price::text').get()
+            
+            # Extract condition
+            condition = item_element.css('.condition::text, .item-condition::text, .equipment-condition::text').get()
+            
+            # Extract manufacturer/brand
+            brand = item_element.css('.brand::text, .manufacturer::text, .make::text').get()
+            model = item_element.css('.model::text, .model-number::text').get()
+            
+            # Extract location
+            location = item_element.css('.location::text, .warehouse::text, .facility::text').get()
+            
+            # Extract images
+            images = item_element.css('img::attr(src)').getall()
+            
+            # Extract availability status
+            availability = item_element.css('.availability::text, .status::text, .inventory-status::text').get()
+            
+            # Create item
+            item = LaserListingItem()
+            item['source_url'] = response.url
+            item['source_listing_id'] = item_id
+            item['title_raw'] = title
+            item['description_raw'] = description_text
+            item['asking_price'] = self.parse_price(price)
+            item['condition'] = self.normalize_condition(condition)
+            item['images'] = [response.urljoin(img) for img in images]
+            item['location_city'] = location
+            item['brand'] = brand
+            item['model'] = model
+            item['availability'] = availability
+            item['discovered_at'] = time.time()
+            item['source_name'] = 'LaserMatch.io'
+            item['evasion_score'] = 100  # Placeholder, calculated in middleware
+            item['scraped_legally'] = True
+            
+            return item
+            
+        except Exception as e:
+            self.logger.error(f'Error extracting item data from element: {e}')
+            return None
+    
+    def extract_item_data_from_detail_page(self, response):
+        """Extract data from item detail page"""
+        try:
+            # Extract title and description
+            title = response.css('h1::text, .item-title::text, .equipment-title::text, .listing-title::text, .product-title::text').get()
+            description = response.css('.item-description::text, .equipment-description::text, .listing-description::text, .product-description::text, .description::text').getall()
+            description_text = ' '.join(description).strip()
+            
+            # Extract item ID
+            item_id = response.css('.item-id::text, .equipment-id::text, .listing-id::text, .product-id::text').get()
             
             # Extract pricing
             asking_price = response.css('.asking-price::text, .price::text, .cost::text, .value::text').get()
-            estimated_value = response.css('.estimated-value::text, .appraisal::text, .market-value::text').get()
+            market_value = response.css('.market-value::text, .estimated-value::text, .appraisal::text').get()
             
             # Extract condition
-            condition = response.css('.condition::text, .asset-condition::text, .equipment-condition::text').get()
+            condition = response.css('.condition::text, .item-condition::text, .equipment-condition::text').get()
             
             # Extract specifications
-            specs = response.css('.specifications::text, .asset-specifications::text, .equipment-specifications::text, .details::text').getall()
+            specs = response.css('.specifications::text, .item-specifications::text, .equipment-specifications::text, .details::text').getall()
             specs_text = ' '.join(specs).strip()
             
             # Extract images
-            images = response.css('.asset-images img::attr(src), .equipment-images img::attr(src), .gallery img::attr(src)').getall()
+            images = response.css('.item-images img::attr(src), .equipment-images img::attr(src), .gallery img::attr(src)').getall()
             
             # Extract location information
             location = response.css('.location::text, .warehouse::text, .facility::text, .storage::text').get()
-            pickup_location = response.css('.pickup-location::text, .pickup::text').get()
             
             # Extract seller/consignor information
             consignor = response.css('.consignor::text, .seller::text, .owner::text, .client::text').get()
-            
-            # Extract asset recovery details
-            recovery_type = response.css('.recovery-type::text, .liquidation-type::text, .asset-type::text').get()
-            recovery_reason = response.css('.recovery-reason::text, .liquidation-reason::text, .reason::text').get()
+            contact = response.css('.contact::text, .contact-info::text, .sales-contact::text').get()
             
             # Extract additional details
             brand = response.css('.brand::text, .manufacturer::text, .make::text').get()
@@ -225,43 +330,40 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
             serial = response.css('.serial::text, .serial-number::text, .serial-no::text').get()
             year = response.css('.year::text, .manufacture-year::text, .model-year::text').get()
             
-            # Extract contact information
-            contact = response.css('.contact::text, .contact-info::text, .sales-contact::text').get()
-            phone = response.css('.phone::text, .telephone::text, .contact-phone::text').get()
-            email = response.css('.email::text, .contact-email::text').get()
-            
             # Extract availability
             availability = response.css('.availability::text, .status::text, .inventory-status::text').get()
+            
+            # Extract category
+            category = response.css('.category::text, .equipment-category::text, .type::text').get()
             
             # Create item
             item = LaserListingItem()
             item['source_url'] = response.url
-            item['source_listing_id'] = asset_id
+            item['source_listing_id'] = item_id
             item['title_raw'] = title
             item['description_raw'] = f"{description_text} {specs_text}".strip()
             item['asking_price'] = self.parse_price(asking_price)
-            item['est_wholesale'] = self.parse_price(estimated_value)
+            item['est_wholesale'] = self.parse_price(market_value)
             item['condition'] = self.normalize_condition(condition)
             item['images'] = [response.urljoin(img) for img in images]
-            item['location_city'] = location or pickup_location
             item['seller_name'] = consignor
+            item['location_city'] = location
             item['brand'] = brand
             item['model'] = model
             item['serial_number'] = serial
             item['year'] = self.parse_year(year)
-            item['seller_contact'] = contact or phone or email
-            item['recovery_type'] = recovery_type
-            item['recovery_reason'] = recovery_reason
+            item['seller_contact'] = contact
             item['availability'] = availability
+            item['category'] = category
             item['discovered_at'] = time.time()
-            item['source_name'] = 'Asset Recovery Services'
+            item['source_name'] = 'LaserMatch.io'
             item['evasion_score'] = 100  # Placeholder, calculated in middleware
             item['scraped_legally'] = True
             
             return item
             
         except Exception as e:
-            self.logger.error(f'Error extracting asset data: {e}')
+            self.logger.error(f'Error extracting item data from detail page: {e}')
             return None
     
     def parse_price(self, price_text):
@@ -311,9 +413,8 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
             'working': 'good',
             'non-working': 'poor',
             'unknown': 'unknown',
-            'repossessed': 'used',
-            'liquidation': 'used',
-            'surplus': 'used'
+            'available': 'good',
+            'unavailable': 'unknown'
         }
         
         return condition_mapping.get(condition_text.lower(), 'unknown')
@@ -349,6 +450,6 @@ class AssetRecoveryServicesSpider(scrapy.Spider):
     
     def closed(self, reason):
         """Called when spider closes"""
-        self.logger.info(f'Asset Recovery Services spider closed: {reason}')
+        self.logger.info(f'LaserMatch.io spider closed: {reason}')
         self.logger.info(f'Processed {len(self.processed_urls)} unique URLs')
-        self.logger.info(f'Processed {len(self.processed_liquidations)} unique liquidations')
+        self.logger.info(f'Processed {len(self.processed_items)} unique items')

@@ -145,7 +145,17 @@ Cutera,Excel V,used,low,1,60000,inventory@company.com,backup system needed
 * Reddit: r/medicaldevices, r/UsedGear, r/Flipping (keyword matches)
 * Twitter/X: keyword alerts via public API endpoints
 
-### F) Partner / Manual Feeds (Legacy Support)
+### F) LLM-Driven Source Discovery (Clay.com-Style)
+
+* **Intelligent Source Discovery**: AI automatically discovers new auction sites, marketplaces, and dealers
+* **Adaptive Extraction**: Universal extraction from any website without pre-built scrapers
+* **Multi-Provider LLM Support**: Groq (primary), OpenAI, Anthropic, Cohere, Together AI
+* **Task-Specific Optimization**: Different LLMs for discovery, extraction, and analysis
+* **Self-Improving System**: Learns from successful extractions to improve future performance
+* **Geographic Targeting**: AI-powered discovery across multiple regions and countries
+* **Source Validation**: Automatic testing and validation of discovered sources
+
+### G) Partner / Manual Feeds (Legacy Support)
 
 * Intake webform for liquidators to submit lots (uploads + CSV)
 * Shared inbox ingestion (forwarded deal emails → parse into pipeline)
@@ -290,13 +300,16 @@ evasion: {
 
 ## 5) Extraction & Normalization
 
-### Parsing (Scrapy + Playwright Framework)
+### Parsing (Scrapy + Playwright + LLM Framework)
 
 * **HTML Extraction**: Site-specific Scrapy spiders with CSS/XPath selectors, fallback to BeautifulSoup/Parsel for noisy pages
 * **JavaScript Rendering**: Playwright integration for dynamic content (BidSpotter infinite scroll, DOTmed AJAX)
 * **Pagination Handling**: Automated page traversal with random delays and scroll simulation
 * **PDF Processing**: OCR via Tesseract for auction catalogs; regex brand/model extraction; ML confidence scoring
-* **Error Recovery**: Auto-fallback to LLM-based extraction (Grok API) when HTML structure changes
+* **LLM-Driven Extraction**: Clay.com-style adaptive extraction from any website without pre-built scrapers
+* **Multi-Provider LLM Support**: Groq (primary), OpenAI, Anthropic, Cohere, Together AI with automatic fallback
+* **Intelligent Source Discovery**: AI automatically discovers new sources and validates them
+* **Error Recovery**: Auto-fallback to LLM-based extraction when HTML structure changes
 * **Concurrent Processing**: Scrapy Twisted reactor for 100+ parallel requests per source
 
 ### Normalization
@@ -486,11 +499,20 @@ laser-equipment-intelligence/
 * **Playwright**: JavaScript rendering and stealth browser automation
 * **BeautifulSoup/Parsel**: HTML parsing and extraction
 * **undetected-playwright**: Advanced fingerprint evasion
+* **LLM Hunting System**: Clay.com-style intelligent source discovery and adaptive extraction
+* **Multi-Provider LLM Support**: Groq, OpenAI, Anthropic, Cohere, Together AI integration
 
 ### Evasion & Proxy Services
 * **Bright Data/Oxylabs**: Residential proxy rotation ($200-500/month)
 * **2Captcha**: CAPTCHA solving service ($50-100/month)
 * **ZenRows/ScrapingBee**: Managed scraping APIs (pay-per-request)
+
+### LLM Services & AI Integration
+* **Groq**: Primary LLM provider (Llama-3.1-70b) - fastest and most cost-effective
+* **OpenAI**: High-accuracy extraction (GPT-4o-mini) - best for structured data
+* **Anthropic**: Complex analysis (Claude-3-haiku) - superior reasoning capabilities
+* **Cohere**: Alternative provider (Command-r-plus) - additional option
+* **Together AI**: Cost-effective alternative (Llama-3.1-70b) - budget-friendly option
 
 ### Infrastructure & Storage
 * **PostgreSQL**: Primary database with optimized indexing
@@ -511,11 +533,14 @@ laser-equipment-intelligence/
 | **Week 2: Full Scrapers** | Site-specific parsers | 10+ sources live; evasion logging. | 1 week |
 | **Week 3: Scale & Monitor** | Distributed setup | Scrapyd cluster; block alerts via Slack. Tune for <1% failure. | 1 week |
 | **Week 4: Integrate & Test** | End-to-end | 100-sample run; legal audit. | 1 week |
-| **Ongoing** | Optimize | Weekly ToS scans; ML for parser auto-updates. | Continuous |
+| **Week 5: LLM Integration** | AI hunting system | Multi-provider LLM setup, source discovery, adaptive extraction. | 1 week |
+| **Week 6: LLM Optimization** | Performance tuning | Task-specific provider selection, fallback systems, cost optimization. | 1 week |
+| **Ongoing** | Optimize | Weekly ToS scans; ML for parser auto-updates; LLM performance monitoring. | Continuous |
 
 **Budget Requirements:**
 * Development: $10-15k (v1 implementation)
 * Monthly Operations: $1k (proxies, services, infrastructure)
+* LLM Services: $200-500/month (Groq primary, OpenAI/Anthropic fallback)
 * Legal Consultation: $5k (one-time compliance audit)
 
 ---
@@ -667,6 +692,72 @@ class EvasionMiddleware:
 ```
 
 This implementation provides a solid foundation for the full-scraping laser equipment intelligence system with built-in evasion capabilities and compliance tracking.
+
+### LLM Hunting System Architecture
+
+```python
+# Clay.com-Style LLM Hunting System
+from laser_intelligence.ai.hunting_orchestrator import HuntingOrchestrator
+from laser_intelligence.ai.llm_providers import get_llm_config, LLMProvider
+
+class LLMEnhancedLaserScraper(scrapy.Spider):
+    def __init__(self):
+        super().__init__()
+        # Multi-provider LLM setup
+        self.hunting_orchestrator = HuntingOrchestrator()
+        self.llm_config = get_llm_config(task_type='source_discovery')
+        
+    def start_requests(self):
+        """AI-driven source discovery and extraction"""
+        # Discover new sources using LLM
+        discovery_session = self.hunting_orchestrator.hunt_laser_equipment(
+            strategy='comprehensive',
+            search_terms=['sciton', 'cynosure', 'cutera', 'laser equipment'],
+            geographic_scope=['United States', 'Canada'],
+            max_sources=50,
+            min_confidence=0.7
+        )
+        
+        # Extract from discovered sources
+        for source in discovery_session.discovered_sources:
+            yield scrapy.Request(
+                source.url,
+                meta={
+                    'playwright': True,
+                    'llm_extraction': True,
+                    'source_type': source.source_type,
+                    'confidence': source.confidence
+                },
+                callback=self.llm_parse,
+                dont_filter=True
+            )
+    
+    def llm_parse(self, response):
+        """LLM-powered adaptive extraction"""
+        from laser_intelligence.ai.adaptive_extractor import AdaptiveExtractor
+        
+        extractor = AdaptiveExtractor(provider='openai')  # High accuracy
+        result = extractor.extract_from_url(response.url)
+        
+        if result.success:
+            for listing in result.extracted_listings:
+                yield listing
+        else:
+            # Fallback to traditional parsing
+            yield from self.traditional_parse(response)
+```
+
+### Multi-Provider LLM Configuration
+
+```python
+# Provider selection based on task type
+discovery_config = get_llm_config(task_type='source_discovery')  # → Groq (fastest)
+extraction_config = get_llm_config(task_type='data_extraction')  # → OpenAI (most accurate)
+analysis_config = get_llm_config(task_type='content_analysis')   # → Anthropic (best reasoning)
+
+# Automatic fallback system
+orchestrator = HuntingOrchestrator()  # Uses Groq → OpenAI → Anthropic fallback
+```
 
 ---
 
