@@ -122,10 +122,11 @@ export default function LaserMatchTab() {
       console.error('Failed to refresh LaserMatch items:', error)
       
       // Show user-friendly error message
-      if (error.message.includes('404') || error.message.includes('Not Found')) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
         alert('⚠️ LaserMatch scraper endpoint not available. The backend API may need to be updated with the latest LaserMatch endpoints.')
       } else {
-        alert(`❌ Failed to refresh items: ${error.message}`)
+        alert(`❌ Failed to refresh items: ${errorMessage}`)
       }
     } finally {
       setIsRefreshing(false)
