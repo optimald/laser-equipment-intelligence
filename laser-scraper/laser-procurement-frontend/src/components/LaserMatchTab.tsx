@@ -54,6 +54,13 @@ export default function LaserMatchTab() {
     try {
       const { apiService } = await import('../services/api')
       const results = await apiService.searchEquipment({ sources: ['LaserMatch.io'] })
+      
+      if (!results || results.length === 0) {
+        console.log('No LaserMatch items found in database. Run the spider first.')
+        setItems([])
+        return
+      }
+      
       // Convert API results to component interface
       const convertedResults: LaserMatchItem[] = results.map(item => ({
         id: item.id.toString(),
@@ -74,58 +81,7 @@ export default function LaserMatchTab() {
       setItems(convertedResults)
     } catch (error) {
       console.error('Failed to fetch LaserMatch items:', error)
-      // Fallback to mock data
-      const mockItems: LaserMatchItem[] = [
-        {
-          id: '1',
-          title: 'Sciton Joule Laser System',
-          brand: 'Sciton',
-          model: 'Joule',
-          condition: 'excellent',
-          price: 85000,
-          location: 'California, USA',
-          description: 'Complete Sciton Joule laser system with multiple handpieces',
-          url: 'https://lasermatch.io/item/1',
-          sources: [],
-          sourcingStatus: 'in_progress',
-          assignedRep: 'John Smith',
-          targetPrice: 75000,
-          notes: 'Need to verify warranty status'
-        },
-        {
-          id: '2',
-          title: 'Cynosure PicoSure Pro',
-          brand: 'Cynosure',
-          model: 'PicoSure Pro',
-          condition: 'good',
-          price: 120000,
-          location: 'Texas, USA',
-          description: 'Cynosure PicoSure Pro tattoo removal laser',
-          url: 'https://lasermatch.io/item/2',
-          sources: [],
-          sourcingStatus: 'quoted',
-          assignedRep: 'Sarah Johnson',
-          targetPrice: 100000,
-          notes: 'Waiting for service records'
-        },
-        {
-          id: '3',
-          title: 'Cutera Excel V System',
-          brand: 'Cutera',
-          model: 'Excel V',
-          condition: 'excellent',
-          price: 95000,
-          location: 'Florida, USA',
-          description: 'Cutera Excel V laser system for aesthetic treatments',
-          url: 'https://lasermatch.io/item/3',
-          sources: [],
-          sourcingStatus: 'not_started',
-          assignedRep: undefined,
-          targetPrice: undefined,
-          notes: ''
-        }
-      ]
-      setItems(mockItems)
+      setItems([])
     } finally {
       setIsLoading(false)
     }
