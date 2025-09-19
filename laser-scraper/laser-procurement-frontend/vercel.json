@@ -1,6 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "cd laser-procurement-frontend && npm run build",
-  "outputDirectory": "laser-procurement-frontend/.next",
-  "installCommand": "cd laser-procurement-frontend && npm install"
-}
