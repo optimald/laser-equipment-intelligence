@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import {
   ChartBarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   EyeIcon,
   CurrencyDollarIcon,
   ClockIcon,
@@ -159,7 +159,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-2 flex items-center text-sm text-green-600">
-            <TrendingUpIcon className="h-4 w-4 mr-1" />
+            <ArrowTrendingUpIcon className="h-4 w-4 mr-1" />
             <span>+{stats.newListings} new today</span>
           </div>
         </div>
@@ -191,7 +191,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-2 flex items-center text-sm text-green-600">
-            <TrendingUpIcon className="h-4 w-4 mr-1" />
+            <ArrowTrendingUpIcon className="h-4 w-4 mr-1" />
             <span>+2.3% vs last week</span>
           </div>
         </div>
@@ -269,9 +269,9 @@ export default function Dashboard() {
                         priceChange > 0 ? 'text-green-600' : 'text-red-600'
                       }`}>
                         {priceChange > 0 ? (
-                          <TrendingUpIcon className="h-3 w-3 mr-1" />
+                          <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
                         ) : (
-                          <TrendingDownIcon className="h-3 w-3 mr-1" />
+                          <ArrowTrendingDownIcon className="h-3 w-3 mr-1" />
                         )}
                         {Math.abs(priceChange / 1000).toFixed(1)}k
                       </span>

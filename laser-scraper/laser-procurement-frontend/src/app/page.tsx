@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { SearchIcon, CogIcon, ChartBarIcon, BoltIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, CogIcon, ChartBarIcon, BoltIcon } from '@heroicons/react/24/outline'
 import EquipmentSearch from '@/components/EquipmentSearch'
 import SourceConfiguration from '@/components/SourceConfiguration'
 import SearchResults from '@/components/SearchResults'
@@ -15,7 +15,7 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false)
 
   const tabs = [
-    { id: 'search', name: 'Equipment Search', icon: SearchIcon },
+    { id: 'search', name: 'Equipment Search', icon: MagnifyingGlassIcon },
     { id: 'configuration', name: 'Source Configuration', icon: CogIcon },
     { id: 'dashboard', name: 'Dashboard', icon: ChartBarIcon },
   ]
