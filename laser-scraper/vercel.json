@@ -1,9 +1,7 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "laser-procurement-frontend/package.json",
-      "use": "@vercel/next"
-    }
-  ]
+  "buildCommand": "cd laser-procurement-frontend && npm ci && npm run build",
+  "outputDirectory": "laser-procurement-frontend/.next",
+  "installCommand": "cd laser-procurement-frontend && npm ci",
+  "framework": "nextjs"
 }
