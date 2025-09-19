@@ -40,30 +40,6 @@ export interface SourceConfiguration {
   status: string;
 }
 
-export interface DashboardStats {
-  total_listings: number;
-  new_listings: number;
-  high_value_listings: number;
-  avg_margin: number;
-  top_sources: Array<{
-    name: string;
-    count: number;
-    percentage: number;
-  }>;
-  recent_activity: Array<{
-    id: string;
-    action: string;
-    item: string;
-    timestamp: string;
-    source: string;
-  }>;
-  price_trends: Array<{
-    date: string;
-    avg_price: number;
-    count: number;
-  }>;
-}
-
 class ApiService {
   private baseUrl: string;
 
@@ -123,24 +99,6 @@ class ApiService {
     source_stats: Array<{ source: string; count: number }>;
   }> {
     return this.request('/api/v1/search/stats');
-  }
-
-  // Dashboard API methods
-  async getDashboardStats(): Promise<DashboardStats> {
-    return this.request<DashboardStats>('/api/v1/dashboard/stats');
-  }
-
-  async getRecentActivity(limit: number = 20): Promise<{
-    activity: Array<{
-      type: string;
-      action: string;
-      item: string;
-      source: string;
-      timestamp: string;
-      metadata?: any;
-    }>;
-  }> {
-    return this.request(`/api/v1/dashboard/activity?limit=${limit}`);
   }
 
   // Configuration API methods
