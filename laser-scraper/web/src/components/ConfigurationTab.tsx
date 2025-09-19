@@ -67,11 +67,11 @@ export default function ConfigurationTab() {
       setValue('refreshInterval', searchConfig.refreshInterval)
     } catch (error) {
       console.error('Failed to load configuration:', error)
-      // Fallback to mock data
+      // Fallback to mock data - these are the actual scrape targets
       const mockSources: SourceConfig[] = [
-        { id: 'dotmed_auctions', name: 'DOTmed Auctions', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
-        { id: 'ebay_laser', name: 'eBay', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'ebay_laser', name: 'eBay', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
         { id: 'bidspotter', name: 'BidSpotter', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
+        { id: 'dotmed_auctions', name: 'DOTmed Auctions', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
         { id: 'govdeals', name: 'GovDeals', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
         { id: 'iron_horse_auction', name: 'Iron Horse Auction', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
         { id: 'kurtz_auction', name: 'Kurtz Auction', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
@@ -211,7 +211,7 @@ export default function ConfigurationTab() {
                 className="input-field"
               />
               <p className="text-sm text-gray-500 mt-1">
-                How often to automatically refresh LaserMatch items
+                How often to automatically refresh equipment items
               </p>
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function ConfigurationTab() {
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
             <label className="ml-2 block text-sm text-gray-700">
-              Enable auto-refresh of LaserMatch items
+              Enable auto-refresh of equipment items
             </label>
           </div>
 
@@ -270,11 +270,16 @@ export default function ConfigurationTab() {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={async () => {
-                    const { apiService } = await import('../services/api')
-                    apiService.runSpider(source.id)
+                    try {
+                      const { apiService } = await import('../services/api')
+                      await apiService.runSpider(source.id)
+                      console.log(`Spider started for ${source.name}`)
+                    } catch (error) {
+                      console.error(`Failed to run spider for ${source.name}:`, error)
+                    }
                   }}
                   disabled={!source.enabled}
-                  className="btn-secondary text-sm"
+                  className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Run Spider
                 </button>
