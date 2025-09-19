@@ -1,23 +1,13 @@
 {
-  "name": "laser-scraper-monorepo",
+  "name": "laser-equipment-intelligence-monorepo",
   "version": "1.0.0",
-  "description": "Laser Equipment Intelligence Platform - Monorepo",
   "private": true,
   "workspaces": [
-    "laser-equipment-intelligence",
-    "laser-procurement-frontend",
-    "laser-scraper-landing"
+    "laser-procurement-frontend"
   ],
   "scripts": {
-    "dev:frontend": "cd laser-procurement-frontend && npm run dev",
-    "dev:landing": "cd laser-scraper-landing && npm run dev",
-    "build:frontend": "cd laser-procurement-frontend && npm run build",
-    "build:landing": "cd laser-scraper-landing && npm run build",
-    "install:all": "npm install && cd laser-procurement-frontend && npm install && cd ../laser-scraper-landing && npm install",
-    "deploy:frontend": "cd laser-procurement-frontend && vercel --prod",
-    "deploy:landing": "cd laser-scraper-landing && vercel --prod"
-  },
-  "devDependencies": {
-    "vercel": "^32.0.0"
+    "build": "cd laser-procurement-frontend && npm run build",
+    "dev": "cd laser-procurement-frontend && npm run dev",
+    "start": "cd laser-procurement-frontend && npm run start"
   }
 }
