@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "laser-procurement-frontend/package.json",
+      "use": "@vercel/next",
+      "config": {
+        "distDir": "laser-procurement-frontend/.next"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/laser-procurement-frontend/$1"
+    }
+  ]
+}
