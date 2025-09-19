@@ -238,6 +238,7 @@ export default function SourceConfiguration({}: SourceConfigurationProps) {
 
     setTimeout(() => {
       setSources(mockSources)
+    }, 1000)
     }
 
     fetchSourceConfigurations()
