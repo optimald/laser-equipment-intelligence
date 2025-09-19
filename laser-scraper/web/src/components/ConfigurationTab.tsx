@@ -269,47 +269,194 @@ export default function ConfigurationTab() {
           </button>
         </div>
 
-        <div className="space-y-4">
-          {sources.map((source) => (
-            <div key={source.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-              <div className="flex items-center space-x-4">
-                <input
-                  type="checkbox"
-                  checked={source.enabled}
-                  onChange={(e) => updateSource(source.id, e.target.checked)}
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                />
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">{source.name}</h4>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className={`badge ${getPriorityColor(source.priority)}`}>
-                      {source.priority}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {source.defaultSearchCount} items • {source.delay}s delay
-                    </span>
+        <div className="space-y-6">
+          {/* Auction & Liquidation Platforms */}
+          <div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-3">Auction & Liquidation Platforms</h4>
+            <div className="space-y-3">
+              {sources.filter(s => ['dotmed_auctions', 'centurion_service_group', 'bidspotter', 'proxibid', 'govdeals', 'gsa_auctions', 'govplanet', 'heritage_global_partners', 'iron_horse_auction', 'kurtz_auction'].includes(s.id)).map((source) => (
+                <div key={source.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={source.enabled}
+                      onChange={(e) => updateSource(source.id, e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                      <div className="flex items-center space-x-3 mt-1">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
+                          {source.priority}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {source.defaultSearchCount} items • {source.delay}s delay
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const { apiService } = await import('../services/api')
+                          await apiService.runSpider(source.id)
+                          console.log(`Spider started for ${source.name}`)
+                        } catch (error) {
+                          console.error(`Failed to run spider for ${source.name}:`, error)
+                        }
+                      }}
+                      disabled={!source.enabled}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Run Spider
+                    </button>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={async () => {
-                    try {
-                      const { apiService } = await import('../services/api')
-                      await apiService.runSpider(source.id)
-                      console.log(`Spider started for ${source.name}`)
-                    } catch (error) {
-                      console.error(`Failed to run spider for ${source.name}:`, error)
-                    }
-                  }}
-                  disabled={!source.enabled}
-                  className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Run Spider
-                </button>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          {/* Dealer / Liquidator / Repossession */}
+          <div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-3">Dealer / Liquidator / Repossession</h4>
+            <div className="space-y-3">
+              {sources.filter(s => ['asset_recovery_services', 'speedy_repo', 'resolvion', 'nassau_asset_management', 'capital_asset_recovery_group', 'accelerated_asset_recovery', 'med_asset_solutions', 'alliance_healthcare_services', 'southeast_medical_equipment'].includes(s.id)).map((source) => (
+                <div key={source.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={source.enabled}
+                      onChange={(e) => updateSource(source.id, e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                      <div className="flex items-center space-x-3 mt-1">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
+                          {source.priority}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {source.defaultSearchCount} items • {source.delay}s delay
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const { apiService } = await import('../services/api')
+                          await apiService.runSpider(source.id)
+                          console.log(`Spider started for ${source.name}`)
+                        } catch (error) {
+                          console.error(`Failed to run spider for ${source.name}:`, error)
+                        }
+                      }}
+                      disabled={!source.enabled}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Run Spider
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Marketplaces / Classifieds */}
+          <div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-3">Marketplaces / Classifieds</h4>
+            <div className="space-y-3">
+              {sources.filter(s => ['ebay_laser', 'facebook_marketplace', 'craigslist', 'labx', 'used_line'].includes(s.id)).map((source) => (
+                <div key={source.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={source.enabled}
+                      onChange={(e) => updateSource(source.id, e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                      <div className="flex items-center space-x-3 mt-1">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
+                          {source.priority}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {source.defaultSearchCount} items • {source.delay}s delay
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const { apiService } = await import('../services/api')
+                          await apiService.runSpider(source.id)
+                          console.log(`Spider started for ${source.name}`)
+                        } catch (error) {
+                          console.error(`Failed to run spider for ${source.name}:`, error)
+                        }
+                      }}
+                      disabled={!source.enabled}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Run Spider
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Notices / Financial Signals */}
+          <div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-3">Notices / Financial Signals</h4>
+            <div className="space-y-3">
+              {sources.filter(s => ['fdic_failed_bank_list', 'naam_member_lists', 'ner_device_theft'].includes(s.id)).map((source) => (
+                <div key={source.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <input
+                      type="checkbox"
+                      checked={source.enabled}
+                      onChange={(e) => updateSource(source.id, e.target.checked)}
+                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                      <div className="flex items-center space-x-3 mt-1">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
+                          {source.priority}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {source.defaultSearchCount} items • {source.delay}s delay
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={async () => {
+                        try {
+                          const { apiService } = await import('../services/api')
+                          await apiService.runSpider(source.id)
+                          console.log(`Spider started for ${source.name}`)
+                        } catch (error) {
+                          console.error(`Failed to run spider for ${source.name}:`, error)
+                        }
+                      }}
+                      disabled={!source.enabled}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Run Spider
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
