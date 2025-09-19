@@ -67,7 +67,7 @@ export default function ConfigurationTab() {
       setValue('refreshInterval', searchConfig.refreshInterval)
     } catch (error) {
       console.error('Failed to load configuration:', error)
-      // Fallback to mock data - these are the actual scrape targets
+      // Fallback to mock data - these are the actual scrape targets (NOT LaserMatch)
       const mockSources: SourceConfig[] = [
         { id: 'ebay_laser', name: 'eBay', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
         { id: 'bidspotter', name: 'BidSpotter', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
@@ -78,7 +78,9 @@ export default function ConfigurationTab() {
         { id: 'asset_recovery_services', name: 'Asset Recovery Services', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
         { id: 'hilditch_group', name: 'Hilditch Group', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
         { id: 'facebook_marketplace', name: 'Facebook Marketplace', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
-        { id: 'craigslist', name: 'Craigslist', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 }
+        { id: 'craigslist', name: 'Craigslist', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
+        { id: 'equipment_trader', name: 'Equipment Trader', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
+        { id: 'machinery_trader', name: 'Machinery Trader', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 }
       ]
       setSources(mockSources)
     } finally {
