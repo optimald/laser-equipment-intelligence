@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { SearchIcon, FilterIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline'
 
 interface SearchForm {
   query: string
@@ -74,7 +74,7 @@ export default function EquipmentSearch({ onSearch, isSearching }: EquipmentSear
               placeholder="Enter equipment name, model, or keywords..."
               className="input-field pl-10"
             />
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           </div>
         </div>
         
@@ -98,7 +98,7 @@ export default function EquipmentSearch({ onSearch, isSearching }: EquipmentSear
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="flex items-center text-sm text-primary-600 hover:text-primary-700"
         >
-          <FilterIcon className="h-4 w-4 mr-1" />
+          <FunnelIcon className="h-4 w-4 mr-1" />
           {showAdvanced ? 'Hide' : 'Show'} Advanced Filters
         </button>
         
