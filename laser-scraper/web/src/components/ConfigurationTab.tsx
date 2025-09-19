@@ -67,20 +67,42 @@ export default function ConfigurationTab() {
       setValue('refreshInterval', searchConfig.refreshInterval)
     } catch (error) {
       console.error('Failed to load configuration:', error)
-      // Fallback to mock data - these are the actual scrape targets (NOT LaserMatch)
+      // Fallback to mock data - ALL actual scrape targets from spec (NO LaserMatch)
       const mockSources: SourceConfig[] = [
-        { id: 'ebay_laser', name: 'eBay', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
-        { id: 'bidspotter', name: 'BidSpotter', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
+        // Auction & Liquidation Platforms (Primary Targets)
         { id: 'dotmed_auctions', name: 'DOTmed Auctions', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
+        { id: 'centurion_service_group', name: 'Centurion Service Group', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
+        { id: 'bidspotter', name: 'BidSpotter', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
+        { id: 'proxibid', name: 'Proxibid', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
         { id: 'govdeals', name: 'GovDeals', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'gsa_auctions', name: 'GSA Auctions', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'govplanet', name: 'GovPlanet', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'heritage_global_partners', name: 'Heritage Global Partners', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
         { id: 'iron_horse_auction', name: 'Iron Horse Auction', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
         { id: 'kurtz_auction', name: 'Kurtz Auction', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
+        
+        // Dealer / Liquidator / Repossession
         { id: 'asset_recovery_services', name: 'Asset Recovery Services', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'hilditch_group', name: 'Hilditch Group', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
+        { id: 'speedy_repo', name: 'Speedy Repo', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'resolvion', name: 'Resolvion', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'nassau_asset_management', name: 'Nassau Asset Management', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'capital_asset_recovery_group', name: 'Capital Asset Recovery Group', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'accelerated_asset_recovery', name: 'Accelerated Asset Recovery', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'med_asset_solutions', name: 'Med Asset Solutions', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'alliance_healthcare_services', name: 'Alliance HealthCare Services', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'southeast_medical_equipment', name: 'Southeast Medical Equipment Liquidators', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        
+        // Marketplaces / Classifieds (Stealth Required)
+        { id: 'ebay_laser', name: 'eBay', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
         { id: 'facebook_marketplace', name: 'Facebook Marketplace', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
         { id: 'craigslist', name: 'Craigslist', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
-        { id: 'equipment_trader', name: 'Equipment Trader', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
-        { id: 'machinery_trader', name: 'Machinery Trader', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 }
+        { id: 'labx', name: 'LabX', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        { id: 'used_line', name: 'Used-line', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
+        
+        // Notices / Financial Signals
+        { id: 'fdic_failed_bank_list', name: 'FDIC Failed Bank List', enabled: true, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
+        { id: 'naam_member_lists', name: 'NAAM Member Lists', enabled: true, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
+        { id: 'ner_device_theft', name: 'NER Device Theft/Recovery', enabled: true, priority: 'LOW', defaultSearchCount: 3, delay: 10 }
       ]
       setSources(mockSources)
     } finally {
