@@ -54,7 +54,11 @@ export default function Dashboard() {
           avgMargin: apiStats.avg_margin,
           topSources: apiStats.top_sources,
           recentActivity: apiStats.recent_activity,
-          priceTrends: apiStats.price_trends
+          priceTrends: apiStats.price_trends.map(trend => ({
+            date: trend.date,
+            avgPrice: trend.avg_price,
+            count: trend.count
+          }))
         }
         setStats(dashboardStats)
       } catch (error) {
