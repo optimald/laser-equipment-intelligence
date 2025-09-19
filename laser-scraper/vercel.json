@@ -5,14 +5,8 @@
       "src": "laser-procurement-frontend/package.json",
       "use": "@vercel/next",
       "config": {
-        "zeroConfig": true
+        "distDir": ".next"
       }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
     }
   ]
 }
