@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import os
 from contextlib import asynccontextmanager
 
-from api.routers import search, dashboard, configuration, spiders
+from api.routers import search, dashboard, configuration, spiders, lasermatch
 from api.models.database import init_db
 
 @asynccontextmanager
@@ -41,6 +41,7 @@ app.include_router(search.router, prefix="/api/v1/search", tags=["search"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(configuration.router, prefix="/api/v1/config", tags=["configuration"])
 app.include_router(spiders.router, prefix="/api/v1/spiders", tags=["spiders"])
+app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["lasermatch"])
 
 @app.get("/")
 async def root():

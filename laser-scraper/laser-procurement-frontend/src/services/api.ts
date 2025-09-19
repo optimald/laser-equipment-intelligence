@@ -153,6 +153,34 @@ class ApiService {
     return this.request('/api/v1/spiders/stats');
   }
 
+  // LaserMatch Endpoints
+  async scrapeLaserMatch(): Promise<{
+    message: string;
+    items_scraped: number;
+    items_added: number;
+    execution_time: number;
+  }> {
+    return this.request('/api/v1/lasermatch/scrape', {
+      method: 'POST',
+    });
+  }
+
+  async getLaserMatchItems(skip = 0, limit = 100): Promise<{
+    items: any[];
+    total: number;
+  }> {
+    return this.request(`/api/v1/lasermatch/items?skip=${skip}&limit=${limit}`);
+  }
+
+  async getLaserMatchStats(): Promise<{
+    total_items: number;
+    hot_list_items: number;
+    in_demand_items: number;
+    latest_update: string | null;
+  }> {
+    return this.request('/api/v1/lasermatch/stats');
+  }
+
   // Health check
   async healthCheck(): Promise<{ status: string; service: string }> {
     return this.request('/health');

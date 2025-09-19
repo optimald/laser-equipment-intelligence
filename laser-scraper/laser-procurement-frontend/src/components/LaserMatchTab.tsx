@@ -43,26 +43,43 @@ export default function LaserMatchTab() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [editingItem, setEditingItem] = useState<string | null>(null)
+  const [stats, setStats] = useState<{
+    total_items: number
+    hot_list_items: number
+    in_demand_items: number
+    latest_update: string | null
+  } | null>(null)
 
-  // Fetch LaserMatch items on component mount
+  // Fetch LaserMatch items and stats on component mount
   useEffect(() => {
     fetchLaserMatchItems()
+    fetchStats()
   }, [])
+
+  const fetchStats = async () => {
+    try {
+      const { apiService } = await import('../services/api')
+      const statsData = await apiService.getLaserMatchStats()
+      setStats(statsData)
+    } catch (error) {
+      console.error('Failed to fetch LaserMatch stats:', error)
+    }
+  }
 
   const fetchLaserMatchItems = async () => {
     setIsLoading(true)
     try {
       const { apiService } = await import('../services/api')
-      const results = await apiService.searchEquipment({ sources: ['LaserMatch.io'] })
+      const response = await apiService.getLaserMatchItems(0, 500) // Get up to 500 items
       
-      if (!results || results.length === 0) {
-        console.log('No LaserMatch items found in database. Run the spider first.')
+      if (!response.items || response.items.length === 0) {
+        console.log('No LaserMatch items found in database. Click "Refresh Items" to run the scraper.')
         setItems([])
         return
       }
       
       // Convert API results to component interface
-      const convertedResults: LaserMatchItem[] = results.map(item => ({
+      const convertedResults: LaserMatchItem[] = response.items.map(item => ({
         id: item.id.toString(),
         title: item.title,
         brand: item.brand,
@@ -90,14 +107,17 @@ export default function LaserMatchTab() {
   const refreshLaserMatchItems = async () => {
     setIsRefreshing(true)
     try {
-      // Run the lasermatch spider
+      // Run the LaserMatch scraper
       const { apiService } = await import('../services/api')
-      await apiService.runSpider('lasermatch')
+      const result = await apiService.scrapeLaserMatch()
       
-      // Wait a moment for the spider to complete, then refresh the items
+      console.log(`✅ Scraper completed: ${result.items_scraped} items scraped in ${result.execution_time.toFixed(2)}s`)
+      
+      // Wait a moment for database update, then refresh the items and stats
       setTimeout(() => {
         fetchLaserMatchItems()
-      }, 5000)
+        fetchStats()
+      }, 2000)
     } catch (error) {
       console.error('Failed to refresh LaserMatch items:', error)
     } finally {
@@ -189,7 +209,26 @@ export default function LaserMatchTab() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">LaserMatch Procurement</h2>
-          <p className="text-gray-600">Managing {items.length} items from LaserMatch.io</p>
+          <p className="text-gray-600">
+            {stats ? (
+              <>
+                Managing {stats.total_items} items from LaserMatch.io
+                {stats.latest_update && (
+                  <span className="text-sm text-gray-500 ml-2">
+                    • Last updated: {new Date(stats.latest_update).toLocaleString()}
+                  </span>
+                )}
+              </>
+            ) : (
+              `Managing ${items.length} items from LaserMatch.io`
+            )}
+          </p>
+          {stats && (
+            <div className="flex space-x-4 text-sm text-gray-500 mt-1">
+              <span>🔥 Hot List: {stats.hot_list_items} items</span>
+              <span>📈 In Demand: {stats.in_demand_items} items</span>
+            </div>
+          )}
         </div>
         <button
           onClick={refreshLaserMatchItems}
