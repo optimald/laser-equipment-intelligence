@@ -6,5 +6,11 @@
       "use": "@vercel/next"
     }
   ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/web/$1"
+    }
+  ],
   "ignoreCommand": "git diff --quiet HEAD^ HEAD ./web"
 }
