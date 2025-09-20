@@ -1,9 +1,8 @@
 [phases.setup]
-nixPkgs = ["python39", "python39Packages.pip", "glibcLocales"]
-env = { LANG = "en_US.UTF-8", LC_ALL = "en_US.UTF-8" }
+nixPkgs = ["python39", "python39Packages.pip"]
 
 [phases.install]
 cmds = ["pip install --break-system-packages -r requirements.txt"]
 
 [start]
-cmd = "python simple_api.py"
+cmd = "uvicorn api.main:app --host 0.0.0.0 --port $PORT"
