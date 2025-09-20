@@ -436,7 +436,7 @@ export default function LaserMatchTab() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <span className="ml-2 text-gray-600">Loading LaserMatch items...</span>
+        <span className="ml-2 text-gray-400">Loading LaserMatch items...</span>
       </div>
     )
   }
@@ -740,14 +740,19 @@ export default function LaserMatchTab() {
                           {item.spiderUrls.map((spiderUrl) => (
                             <tr key={spiderUrl.id} className="hover:bg-gray-700">
                               <td className="px-3 py-2 whitespace-nowrap">
-                                <a
-                                  href={spiderUrl.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm text-gray-300 hover:text-white truncate block max-w-xs"
-                                >
-                                  {spiderUrl.url}
-                                </a>
+                                <div className="flex items-center space-x-2">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-300">
+                                    Source {(item.spiderUrls?.indexOf(spiderUrl) ?? -1) + 1}
+                                  </span>
+                                  <a
+                                    href={spiderUrl.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-blue-400 hover:text-blue-300 underline truncate block max-w-xs"
+                                  >
+                                    {spiderUrl.url}
+                                  </a>
+                                </div>
                               </td>
                               <td className="px-3 py-2 whitespace-nowrap">
                                 <div>
@@ -815,19 +820,19 @@ export default function LaserMatchTab() {
                 
                 <div className="space-y-3">
                   {/* Notes Log - Always Visible */}
-                  <div className="border border-gray-200 rounded-lg bg-gray-50 max-h-32 overflow-y-auto">
+                  <div className="border border-gray-700 rounded-lg bg-gray-800 max-h-32 overflow-y-auto">
                     {(item.notesLog && item.notesLog.length > 0) || item.notes ? (
                       <div className="p-3 space-y-2">
                         {/* Show new structured notes in reverse order (newest last, so newest appears at bottom) */}
                         {item.notesLog?.slice().reverse().map((note) => (
-                          <div key={note.id} className="bg-white rounded border border-gray-100 p-2">
+                          <div key={note.id} className="bg-gray-700 rounded border border-gray-600 p-2">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium text-gray-700">{note.author}</span>
-                              <span className="text-xs text-gray-500">
+                              <span className="text-xs font-medium text-gray-300">{note.author}</span>
+                              <span className="text-xs text-gray-400">
                                 {new Date(note.timestamp).toLocaleString()}
                               </span>
                             </div>
-                            <div className="text-sm text-gray-800">
+                            <div className="text-sm text-gray-200">
                               {renderNoteWithSourceTags(note.content, item.spiderUrls)}
                             </div>
                           </div>
@@ -835,12 +840,12 @@ export default function LaserMatchTab() {
                         
                         {/* Show legacy note if it exists and no structured notes */}
                         {item.notes && (!item.notesLog || item.notesLog.length === 0) && (
-                          <div className="bg-white rounded border border-gray-100 p-2">
+                          <div className="bg-gray-700 rounded border border-gray-600 p-2">
                             <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-medium text-gray-700">Legacy Note</span>
-                              <span className="text-xs text-gray-500">Unknown date</span>
+                              <span className="text-xs font-medium text-gray-300">Legacy Note</span>
+                              <span className="text-xs text-gray-400">Unknown date</span>
                             </div>
-                            <div className="text-sm text-gray-800">
+                            <div className="text-sm text-gray-200">
                               {renderNoteWithSourceTags(item.notes, item.spiderUrls)}
                             </div>
                           </div>
@@ -907,9 +912,9 @@ export default function LaserMatchTab() {
 
             {/* Sources Section - Nested Rows */}
             {(item.sources && item.sources.length > 0) || item.searchStatus === 'searching' || item.searchStatus === 'error' || addingSource === item.id ? (
-              <div className="border-t border-gray-200 bg-gray-50 px-4 py-4">
+              <div className="border-t border-gray-700 bg-gray-800 px-4 py-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-700">Sources</h4>
+                  <h4 className="text-sm font-medium text-gray-300">Sources</h4>
                   <div className="flex items-center space-x-2">
                     {item.searchStatus === 'searching' && (
                       <div className="flex items-center text-sm text-blue-600">
@@ -933,7 +938,7 @@ export default function LaserMatchTab() {
                 
                 {/* Add Source Form */}
                 {addingSource === item.id && (
-                  <div className="mb-4 p-3 bg-white rounded border border-gray-200">
+                  <div className="mb-4 p-3 bg-gray-700 rounded border border-gray-600">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                       <input
                         type="text"
@@ -1010,14 +1015,14 @@ export default function LaserMatchTab() {
                 {item.sources && item.sources.length > 0 && (
                   <div className="space-y-2">
                     {item.sources.map((source, index) => (
-                      <div key={index} className="bg-white rounded border border-gray-200 p-3">
+                      <div key={index} className="bg-gray-700 rounded border border-gray-600 p-3">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center space-x-3">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-white">
                               {source.source}
                             </div>
                             {source.addedBy === 'manual' && (
-                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                              <span className="text-xs bg-green-700 text-green-200 px-2 py-1 rounded">
                                 Manual
                               </span>
                             )}
@@ -1032,22 +1037,22 @@ export default function LaserMatchTab() {
                               </a>
                             )}
                           </div>
-                          <div className="text-sm font-semibold text-gray-900">
+                          <div className="text-sm font-semibold text-white">
                             {formatPrice(source.price)}
                           </div>
                         </div>
                         
                         {/* Contact Information */}
                         {(source.contactName || source.contactEmail || source.contactPhone) && (
-                          <div className="text-xs text-gray-600 space-y-1">
+                          <div className="text-xs text-gray-400 space-y-1">
                             {source.contactName && (
                               <div>Contact: {source.contactName}</div>
                             )}
                             {source.contactEmail && (
-                              <div>Email: <a href={`mailto:${source.contactEmail}`} className="text-blue-600 hover:text-blue-700">{source.contactEmail}</a></div>
+                              <div>Email: <a href={`mailto:${source.contactEmail}`} className="text-blue-400 hover:text-blue-300">{source.contactEmail}</a></div>
                             )}
                             {source.contactPhone && (
-                              <div>Phone: <a href={`tel:${source.contactPhone}`} className="text-blue-600 hover:text-blue-700">{source.contactPhone}</a></div>
+                              <div>Phone: <a href={`tel:${source.contactPhone}`} className="text-blue-400 hover:text-blue-300">{source.contactPhone}</a></div>
                             )}
                           </div>
                         )}
@@ -1060,7 +1065,7 @@ export default function LaserMatchTab() {
         </div>
               ))}
             </div>
-          </div>
+        </div>
         ))}
       </div>
 
