@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowPathIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon, PencilIcon, CheckIcon, XMarkIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
 interface Note {
   id: string
@@ -86,6 +86,7 @@ export default function LaserMatchTab() {
   const [newNoteContent, setNewNoteContent] = useState('')
   const [currentUser] = useState('John Smith') // TODO: Get from auth context
   const [addingSpiderUrl, setAddingSpiderUrl] = useState<string | null>(null)
+  const [spiderSearching, setSpiderSearching] = useState<string | null>(null)
   const [newSpiderUrl, setNewSpiderUrl] = useState({
     url: '',
     contactId: '',
@@ -281,6 +282,63 @@ export default function LaserMatchTab() {
         }
         return item
       }))
+    }
+  }
+
+  const autoFindSources = async (item: LaserMatchItem) => {
+    setSpiderSearching(item.id)
+    
+    try {
+      // Simulate spider crawling with a delay
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Mock spider results - in real implementation, this would call your spider API
+      const mockSpiderResults = [
+        {
+          id: `spider_${Date.now()}_1`,
+          url: `https://example-laser-dealer.com/search?q=${encodeURIComponent(item.title)}`,
+          contactId: '1', // John Smith
+          contactName: 'John Smith',
+          contactCompany: 'MedTech Solutions',
+          price: Math.floor(Math.random() * 50000) + 10000,
+          followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'new' as const,
+          addedBy: 'spider' as const,
+          addedAt: new Date().toISOString(),
+          notes: `Auto-discovered via spider crawl for ${item.brand} ${item.model}`
+        },
+        {
+          id: `spider_${Date.now()}_2`,
+          url: `https://laser-marketplace.com/listings/${item.brand?.toLowerCase()}-${item.model?.toLowerCase()}`,
+          contactId: '2', // Sarah Johnson
+          contactName: 'Sarah Johnson',
+          contactCompany: 'Laser Dynamics Inc',
+          price: Math.floor(Math.random() * 40000) + 15000,
+          followUpDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          status: 'contacted' as const,
+          addedBy: 'spider' as const,
+          addedAt: new Date().toISOString(),
+          notes: `Found matching equipment listing`
+        }
+      ]
+
+      // Add the spider results to the item
+      setItems(prev => prev.map(i => {
+        if (i.id === item.id) {
+          const currentSpiderUrls = i.spiderUrls || []
+          return {
+            ...i,
+            spiderUrls: [...currentSpiderUrls, ...mockSpiderResults]
+          }
+        }
+        return i
+      }))
+
+    } catch (error) {
+      console.error('Spider search failed:', error)
+      // Could show an error toast here
+    } finally {
+      setSpiderSearching(null)
     }
   }
 
@@ -535,12 +593,23 @@ export default function LaserMatchTab() {
                     Spider Crawled URLs & Sources
                   </label>
                   {addingSpiderUrl !== item.id && (
-                    <button
-                      onClick={() => setAddingSpiderUrl(item.id)}
-                      className="text-xs text-gray-300 hover:text-white"
-                    >
-                      Add Source
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => autoFindSources(item)}
+                        disabled={spiderSearching === item.id}
+                        className="flex items-center text-xs text-purple-400 hover:text-purple-300 disabled:text-gray-600"
+                        title="Auto-discover sources using spiders"
+                      >
+                        <SparklesIcon className="h-4 w-4 mr-1" />
+                        {spiderSearching === item.id ? 'Searching...' : 'Magic Find'}
+                      </button>
+                      <button
+                        onClick={() => setAddingSpiderUrl(item.id)}
+                        className="text-xs text-gray-300 hover:text-white"
+                      >
+                        Add Source
+                      </button>
+                    </div>
                   )}
                 </div>
 
