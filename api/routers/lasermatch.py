@@ -48,8 +48,27 @@ def fetch_and_extract_lasermatch():
                 try:
                     cells = row.find_all('td')
                     if len(cells) >= 2:
-                        item_name = cells[0].get_text().strip()
+                        # Get the raw text from both cells
+                        item_name_raw = cells[0].get_text().strip()
                         description_raw = cells[1].get_text().strip()
+                        
+                        # Debug: log what we're getting
+                        logging.info(f"Raw item_name: '{item_name_raw[:100]}...'")
+                        logging.info(f"Raw description: '{description_raw[:100]}...'")
+                        
+                        # The item name should be just the first part before any long description
+                        # Split on common separators and take the first meaningful part
+                        if ' - ' in item_name_raw:
+                            item_name = item_name_raw.split(' - ')[0].strip()
+                        elif ' Looking for ' in item_name_raw:
+                            item_name = item_name_raw.split(' Looking for ')[0].strip()
+                        else:
+                            # If no clear separator, take first reasonable length (equipment names are usually short)
+                            words = item_name_raw.split()
+                            if len(words) > 6:  # If more than 6 words, it's probably including description
+                                item_name = ' '.join(words[:4])  # Take first 4 words as item name
+                            else:
+                                item_name = item_name_raw
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -117,8 +136,27 @@ def fetch_and_extract_lasermatch():
                 try:
                     cells = row.find_all('td')
                     if len(cells) >= 2:
-                        item_name = cells[0].get_text().strip()
+                        # Get the raw text from both cells
+                        item_name_raw = cells[0].get_text().strip()
                         description_raw = cells[1].get_text().strip()
+                        
+                        # Debug: log what we're getting
+                        logging.info(f"Raw item_name: '{item_name_raw[:100]}...'")
+                        logging.info(f"Raw description: '{description_raw[:100]}...'")
+                        
+                        # The item name should be just the first part before any long description
+                        # Split on common separators and take the first meaningful part
+                        if ' - ' in item_name_raw:
+                            item_name = item_name_raw.split(' - ')[0].strip()
+                        elif ' Looking for ' in item_name_raw:
+                            item_name = item_name_raw.split(' Looking for ')[0].strip()
+                        else:
+                            # If no clear separator, take first reasonable length (equipment names are usually short)
+                            words = item_name_raw.split()
+                            if len(words) > 6:  # If more than 6 words, it's probably including description
+                                item_name = ' '.join(words[:4])  # Take first 4 words as item name
+                            else:
+                                item_name = item_name_raw
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
