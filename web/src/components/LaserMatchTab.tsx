@@ -25,6 +25,11 @@ interface LaserMatchItem {
     url: string
     price?: number
     found: boolean
+    contactName?: string
+    contactEmail?: string
+    contactPhone?: string
+    addedBy?: 'spider' | 'manual'
+    addedAt?: string
   }[]
   searchStatus?: 'idle' | 'searching' | 'completed' | 'error'
   // Procurement fields
@@ -65,6 +70,15 @@ export default function LaserMatchTab() {
   const [isLoading, setIsLoading] = useState(true)
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [newNoteContent, setNewNoteContent] = useState('')
+  const [addingSource, setAddingSource] = useState<string | null>(null)
+  const [newSource, setNewSource] = useState({
+    source: '',
+    url: '',
+    price: '',
+    contactName: '',
+    contactEmail: '',
+    contactPhone: ''
+  })
   const [stats, setStats] = useState<{
     total_items: number
     hot_list_items: number
@@ -224,7 +238,7 @@ export default function LaserMatchTab() {
         const currentNotes = item.notesLog || []
         return {
           ...item,
-          notesLog: [newNote, ...currentNotes] // Add new note at the beginning (newest first)
+          notesLog: [...currentNotes, newNote] // Add new note at the end (newest last)
         }
       }
       return item
@@ -232,6 +246,44 @@ export default function LaserMatchTab() {
 
     setNewNoteContent('')
     setEditingItem(null)
+  }
+
+  const addSource = (itemId: string) => {
+    if (!newSource.source.trim() || !newSource.url.trim()) return
+
+    const sourceToAdd = {
+      source: newSource.source.trim(),
+      url: newSource.url.trim(),
+      price: newSource.price ? Number(newSource.price) : undefined,
+      found: true,
+      contactName: newSource.contactName.trim() || undefined,
+      contactEmail: newSource.contactEmail.trim() || undefined,
+      contactPhone: newSource.contactPhone.trim() || undefined,
+      addedBy: 'manual' as const,
+      addedAt: new Date().toISOString()
+    }
+
+    setItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        const currentSources = item.sources || []
+        return {
+          ...item,
+          sources: [...currentSources, sourceToAdd]
+        }
+      }
+      return item
+    }))
+
+    // Reset form
+    setNewSource({
+      source: '',
+      url: '',
+      price: '',
+      contactName: '',
+      contactEmail: '',
+      contactPhone: ''
+    })
+    setAddingSource(null)
   }
 
   const formatPrice = (price?: number) => {
@@ -359,9 +411,19 @@ export default function LaserMatchTab() {
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                     Current Price
                   </label>
-                  <div className="text-lg font-semibold text-gray-900">
-                    {formatPrice(item.price)}
-                  </div>
+                  {editingItem === item.id ? (
+                    <input
+                      type="number"
+                      value={item.price || ''}
+                      onChange={(e) => updateItem(item.id, { price: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="Enter current price"
+                      className="text-lg font-semibold border border-gray-300 rounded px-3 py-1 w-full"
+                    />
+                  ) : (
+                    <div className="text-lg font-semibold text-gray-900">
+                      {formatPrice(item.price)}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
@@ -449,39 +511,13 @@ export default function LaserMatchTab() {
                   )}
                 </div>
                 
-                {editingItem === item.id ? (
-                  <div className="space-y-2">
-                    <textarea
-                      value={newNoteContent}
-                      onChange={(e) => setNewNoteContent(e.target.value)}
-                      placeholder="Add a new note..."
-                      className="w-full text-sm border border-gray-300 rounded px-3 py-2 h-20 resize-none"
-                    />
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => {
-                          setEditingItem(null)
-                          setNewNoteContent('')
-                        }}
-                        className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => addNote(item.id, newNoteContent)}
-                        disabled={!newNoteContent.trim()}
-                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                      >
-                        Add Note
-                      </button>
-                    </div>
-                  </div>
-                ) : (
+                <div className="space-y-3">
+                  {/* Notes Log - Always Visible */}
                   <div className="border border-gray-200 rounded-lg bg-gray-50 max-h-32 overflow-y-auto">
                     {(item.notesLog && item.notesLog.length > 0) || item.notes ? (
                       <div className="p-3 space-y-2">
-                        {/* Show new structured notes first (newest first) */}
-                        {item.notesLog?.map((note) => (
+                        {/* Show new structured notes in reverse order (newest last, so newest appears at bottom) */}
+                        {item.notesLog?.slice().reverse().map((note) => (
                           <div key={note.id} className="bg-white rounded border border-gray-100 p-2">
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-xs font-medium text-gray-700">{note.author}</span>
@@ -510,48 +546,186 @@ export default function LaserMatchTab() {
                       </div>
                     )}
                   </div>
-                )}
+
+                  {/* Add Note Form - Show when editing */}
+                  {editingItem === item.id && (
+                    <div className="space-y-2">
+                      <textarea
+                        value={newNoteContent}
+                        onChange={(e) => setNewNoteContent(e.target.value)}
+                        placeholder="Add a new note..."
+                        className="w-full text-sm border border-gray-300 rounded px-3 py-2 h-20 resize-none"
+                      />
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => {
+                            setEditingItem(null)
+                            setNewNoteContent('')
+                          }}
+                          className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => addNote(item.id, newNoteContent)}
+                          disabled={!newNoteContent.trim()}
+                          className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        >
+                          Add Note
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Sources Section - Nested Rows */}
-            {(item.sources && item.sources.length > 0) || item.searchStatus === 'searching' || item.searchStatus === 'error' ? (
-              <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
+            {(item.sources && item.sources.length > 0) || item.searchStatus === 'searching' || item.searchStatus === 'error' || addingSource === item.id ? (
+              <div className="border-t border-gray-200 bg-gray-50 px-4 py-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-medium text-gray-700">Sources</h4>
-                  {item.searchStatus === 'searching' && (
-                    <div className="flex items-center text-sm text-blue-600">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                      Searching...
-                    </div>
-                  )}
-                  {item.searchStatus === 'error' && (
-                    <div className="text-sm text-red-600">Search failed</div>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    {item.searchStatus === 'searching' && (
+                      <div className="flex items-center text-sm text-blue-600">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                        Searching...
+                      </div>
+                    )}
+                    {item.searchStatus === 'error' && (
+                      <div className="text-sm text-red-600">Search failed</div>
+                    )}
+                    {addingSource !== item.id && (
+                      <button
+                        onClick={() => setAddingSource(item.id)}
+                        className="text-xs text-blue-600 hover:text-blue-700"
+                      >
+                        Add Source
+                      </button>
+                    )}
+                  </div>
                 </div>
                 
+                {/* Add Source Form */}
+                {addingSource === item.id && (
+                  <div className="mb-4 p-3 bg-white rounded border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                      <input
+                        type="text"
+                        placeholder="Source name *"
+                        value={newSource.source}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, source: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                      <input
+                        type="url"
+                        placeholder="Website URL *"
+                        value={newSource.url}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, url: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={newSource.price}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, price: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Contact name"
+                        value={newSource.contactName}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, contactName: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                      <input
+                        type="email"
+                        placeholder="Contact email"
+                        value={newSource.contactEmail}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, contactEmail: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Contact phone"
+                        value={newSource.contactPhone}
+                        onChange={(e) => setNewSource(prev => ({ ...prev, contactPhone: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => {
+                          setAddingSource(null)
+                          setNewSource({
+                            source: '',
+                            url: '',
+                            price: '',
+                            contactName: '',
+                            contactEmail: '',
+                            contactPhone: ''
+                          })
+                        }}
+                        className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => addSource(item.id)}
+                        disabled={!newSource.source.trim() || !newSource.url.trim()}
+                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        Add Source
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sources List */}
                 {item.sources && item.sources.length > 0 && (
                   <div className="space-y-2">
                     {item.sources.map((source, index) => (
-                      <div key={index} className="flex items-center justify-between py-2 px-3 bg-white rounded border border-gray-200">
-                        <div className="flex items-center space-x-3">
-                          <div className="text-sm font-medium text-gray-900">
-                            {source.source}
+                      <div key={index} className="bg-white rounded border border-gray-200 p-3">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center space-x-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {source.source}
+                            </div>
+                            {source.addedBy === 'manual' && (
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                                Manual
+                              </span>
+                            )}
+                            {source.url && (
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-600 hover:text-blue-700"
+                              >
+                                View →
+                              </a>
+                            )}
                           </div>
-                          {source.url && (
-                            <a
-                              href={source.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs text-blue-600 hover:text-blue-700"
-                            >
-                              View →
-                            </a>
-                          )}
+                          <div className="text-sm font-semibold text-gray-900">
+                            {formatPrice(source.price)}
+                          </div>
                         </div>
-                        <div className="text-sm font-semibold text-gray-900">
-                          {formatPrice(source.price)}
-                        </div>
+                        
+                        {/* Contact Information */}
+                        {(source.contactName || source.contactEmail || source.contactPhone) && (
+                          <div className="text-xs text-gray-600 space-y-1">
+                            {source.contactName && (
+                              <div>Contact: {source.contactName}</div>
+                            )}
+                            {source.contactEmail && (
+                              <div>Email: <a href={`mailto:${source.contactEmail}`} className="text-blue-600 hover:text-blue-700">{source.contactEmail}</a></div>
+                            )}
+                            {source.contactPhone && (
+                              <div>Phone: <a href={`tel:${source.contactPhone}`} className="text-blue-600 hover:text-blue-700">{source.contactPhone}</a></div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
