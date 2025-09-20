@@ -1,0 +1,100 @@
+{
+  "search_term": "Aerolase Lightpod Neo Elite",
+  "search_timestamp": "2025-09-16T20:35:49.343224",
+  "total_listings": 3,
+  "qualification_summary": {
+    "HOT": 0,
+    "REVIEW": 3,
+    "ARCHIVE": 0
+  },
+  "listings": [
+    {
+      "title_raw": "Genuine 2018 Aerolase LightPod Neo Elite",
+      "description_raw": "Comprehensive set of accessories and ongoing support for consumables and service through Aerolase",
+      "brand": "Aerolase",
+      "model": "LightPod Neo Elite",
+      "asking_price": 7800.0,
+      "condition": "used",
+      "year": 2018,
+      "location_city": "Unknown",
+      "location_state": "Unknown",
+      "location_country": "USA",
+      "seller_name": "Bintang Lasers",
+      "source_url": "https://www.bintanglasers.com/shop/genuine-2018-aerolase-lightpod-neo-elite-2/",
+      "source_type": "dealer",
+      "accessories": [
+        "comprehensive set of accessories",
+        "ongoing support",
+        "consumables",
+        "service through Aerolase"
+      ],
+      "normalized_brand": "Aerolase",
+      "normalized_model": "Lightpod_Neo_Elite",
+      "brand_score": 75.0,
+      "price_score": 90.0,
+      "condition_score": 60.0,
+      "overall_score": 69.5,
+      "qualification_level": "REVIEW",
+      "processed_timestamp": "2025-09-16T20:35:49.343065"
+    },
+    {
+      "title_raw": "Aerolase LightPod Neo Elite Micropulse 1064 XT 2018",
+      "description_raw": "Complete system with handpiece, external filters, various lenses, eyewear, and accessories",
+      "brand": "Aerolase",
+      "model": "LightPod Neo Elite",
+      "asking_price": 13725.0,
+      "condition": "used",
+      "year": 2018,
+      "location_city": "Unknown",
+      "location_state": "Unknown",
+      "location_country": "USA",
+      "seller_name": "LENCANA Medical Laser",
+      "source_url": "https://www.lencanamedicallaser.com/product/aerolase-lightpod-neo-elite-micropulse-1064-xt-2018/",
+      "source_type": "dealer",
+      "accessories": [
+        "handpiece",
+        "external filters",
+        "various lenses",
+        "eyewear",
+        "other accessories"
+      ],
+      "normalized_brand": "Aerolase",
+      "normalized_model": "Lightpod_Neo_Elite",
+      "brand_score": 75.0,
+      "price_score": 80.0,
+      "condition_score": 60.0,
+      "overall_score": 67.0,
+      "qualification_level": "REVIEW",
+      "processed_timestamp": "2025-09-16T20:35:49.343002"
+    },
+    {
+      "title_raw": "Aerolase LightPod Neo Elite - Like New 2020 Model",
+      "description_raw": "Perfect working order, includes all accessories, manuals, eyewear, and parts and labor warranty",
+      "brand": "Aerolase",
+      "model": "LightPod Neo Elite",
+      "asking_price": 0.0,
+      "condition": "like_new",
+      "year": 2020,
+      "location_city": "Unknown",
+      "location_state": "Unknown",
+      "location_country": "USA",
+      "seller_name": "MedPro Lasers",
+      "source_url": "https://www.medprolasers.com/inventory/aerolase-lightpod-neo-elite/",
+      "source_type": "dealer",
+      "accessories": [
+        "all accessories",
+        "manuals",
+        "eyewear",
+        "parts and labor warranty"
+      ],
+      "normalized_brand": "Aerolase",
+      "normalized_model": "Lightpod_Neo_Elite",
+      "brand_score": 75.0,
+      "price_score": 50.0,
+      "condition_score": 95.0,
+      "overall_score": 66.5,
+      "qualification_level": "REVIEW",
+      "processed_timestamp": "2025-09-16T20:35:49.343041"
+    }
+  ]
+}

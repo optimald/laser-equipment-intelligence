@@ -1,0 +1,139 @@
+# Laser Equipment Intelligence Platform Docker Compose
+
+version: '3.8'
+
+services:
+  # Scrapy Scrapyd daemon
+  scrapyd:
+    build: .
+    container_name: laser-scrapyd
+    ports:
+      - "6800:6800"
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./cache:/app/cache
+    environment:
+      - DATABASE_URL=postgresql://laser_user:laser_pass@postgres:5432/laser_intelligence
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=production
+      - DEBUG=false
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - laser-network
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: laser-postgres
+    environment:
+      - POSTGRES_DB=laser_intelligence
+      - POSTGRES_USER=laser_user
+      - POSTGRES_PASSWORD=laser_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - laser-network
+
+  # Redis cache and queue
+  redis:
+    image: redis:7-alpine
+    container_name: laser-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - laser-network
+
+  # Prometheus monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: laser-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - laser-network
+
+  # Grafana dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: laser-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    restart: unless-stopped
+    networks:
+      - laser-network
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: laser-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/ssl:/etc/nginx/ssl
+    depends_on:
+      - scrapyd
+      - grafana
+    restart: unless-stopped
+    networks:
+      - laser-network
+
+  # Scrapy scheduler (Airflow alternative)
+  scheduler:
+    build: .
+    container_name: laser-scheduler
+    command: ["python", "-m", "laser_intelligence.scheduler"]
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    environment:
+      - DATABASE_URL=postgresql://laser_user:laser_pass@postgres:5432/laser_intelligence
+      - REDIS_URL=redis://redis:6379/0
+      - ENVIRONMENT=production
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - laser-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  laser-network:
+    driver: bridge

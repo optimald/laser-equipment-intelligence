@@ -1,0 +1,11 @@
+api/
+backend/
+docs/
+laser-equipment-intelligence/
+laser-scraper-landing/
+nixpacks.toml
+Procfile
+railway.json
+README.md
+requirements.txt
+test_api.py
