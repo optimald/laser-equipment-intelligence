@@ -274,7 +274,7 @@ export default function LaserMatchTab() {
                     {cleanTitle(item.title)}
                   </h3>
                   <div className="text-sm text-gray-500 mb-1">
-                    {item.brand} {item.model}
+                    {cleanTitle(item.brand)}
                   </div>
                   <div className="text-xs text-gray-400 mb-3">
                     {item.condition} • {item.location}
