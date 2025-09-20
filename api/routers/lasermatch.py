@@ -57,22 +57,28 @@ def fetch_and_extract_lasermatch():
                         logging.info(f"Raw description: '{description_raw[:100]}...'")
                         
                         # The item name should be just the first part before any long description
-                        # First, split on newlines and take the first line (equipment name)
-                        if '\n' in item_name_raw:
-                            item_name = item_name_raw.split('\n')[0].strip()
-                        elif '\r' in item_name_raw:
-                            item_name = item_name_raw.split('\r')[0].strip()
-                        elif ' - ' in item_name_raw:
-                            item_name = item_name_raw.split(' - ')[0].strip()
-                        elif ' Looking for ' in item_name_raw:
-                            item_name = item_name_raw.split(' Looking for ')[0].strip()
-                        else:
-                            # If no clear separator, take first reasonable length (equipment names are usually short)
-                            words = item_name_raw.split()
-                            if len(words) > 6:  # If more than 6 words, it's probably including description
-                                item_name = ' '.join(words[:4])  # Take first 4 words as item name
+                        # First, split on newlines and take the first non-empty line (equipment name)
+                        lines = item_name_raw.replace('\r\n', '\n').replace('\r', '\n').split('\n')
+                        item_name = None
+                        for line in lines:
+                            line = line.strip()
+                            if line and not line.startswith('-') and not line.lower().startswith('looking for'):
+                                item_name = line
+                                break
+                        
+                        # If we didn't find a good line, fall back to other methods
+                        if not item_name:
+                            if ' - ' in item_name_raw:
+                                item_name = item_name_raw.split(' - ')[0].strip()
+                            elif ' Looking for ' in item_name_raw:
+                                item_name = item_name_raw.split(' Looking for ')[0].strip()
                             else:
-                                item_name = item_name_raw
+                                # If no clear separator, take first reasonable length (equipment names are usually short)
+                                words = item_name_raw.split()
+                                if len(words) > 6:  # If more than 6 words, it's probably including description
+                                    item_name = ' '.join(words[:4])  # Take first 4 words as item name
+                                else:
+                                    item_name = item_name_raw
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -149,22 +155,28 @@ def fetch_and_extract_lasermatch():
                         logging.info(f"Raw description: '{description_raw[:100]}...'")
                         
                         # The item name should be just the first part before any long description
-                        # First, split on newlines and take the first line (equipment name)
-                        if '\n' in item_name_raw:
-                            item_name = item_name_raw.split('\n')[0].strip()
-                        elif '\r' in item_name_raw:
-                            item_name = item_name_raw.split('\r')[0].strip()
-                        elif ' - ' in item_name_raw:
-                            item_name = item_name_raw.split(' - ')[0].strip()
-                        elif ' Looking for ' in item_name_raw:
-                            item_name = item_name_raw.split(' Looking for ')[0].strip()
-                        else:
-                            # If no clear separator, take first reasonable length (equipment names are usually short)
-                            words = item_name_raw.split()
-                            if len(words) > 6:  # If more than 6 words, it's probably including description
-                                item_name = ' '.join(words[:4])  # Take first 4 words as item name
+                        # First, split on newlines and take the first non-empty line (equipment name)
+                        lines = item_name_raw.replace('\r\n', '\n').replace('\r', '\n').split('\n')
+                        item_name = None
+                        for line in lines:
+                            line = line.strip()
+                            if line and not line.startswith('-') and not line.lower().startswith('looking for'):
+                                item_name = line
+                                break
+                        
+                        # If we didn't find a good line, fall back to other methods
+                        if not item_name:
+                            if ' - ' in item_name_raw:
+                                item_name = item_name_raw.split(' - ')[0].strip()
+                            elif ' Looking for ' in item_name_raw:
+                                item_name = item_name_raw.split(' Looking for ')[0].strip()
                             else:
-                                item_name = item_name_raw
+                                # If no clear separator, take first reasonable length (equipment names are usually short)
+                                words = item_name_raw.split()
+                                if len(words) > 6:  # If more than 6 words, it's probably including description
+                                    item_name = ' '.join(words[:4])  # Take first 4 words as item name
+                                else:
+                                    item_name = item_name_raw
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
