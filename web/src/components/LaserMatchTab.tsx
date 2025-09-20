@@ -40,14 +40,11 @@ const REPS = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Chen', 'Tom Wil
 
 // Helper function to extract brand and model from title
 const cleanTitle = (title: string): string => {
-  // If title contains a colon, take brand + model (everything up to the first newline or description)
+  // If title contains a colon, take brand and model (everything before newline)
   if (title.includes(':')) {
-    const parts = title.split('\n')
-    const firstLine = parts[0].trim()
-    // If the first line looks like "Brand: Model", return it
-    if (firstLine.includes(':')) {
-      return firstLine
-    }
+    const firstLine = title.split('\n')[0].trim()
+    // Return the brand: model part
+    return firstLine
   }
   // Otherwise, take the first word
   const words = title.split(' ')
@@ -265,20 +262,17 @@ export default function LaserMatchTab() {
       </div>
 
       {/* Items Cards */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {items.map((item) => (
           <div key={item.id} className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
             {/* Main Card Content */}
-            <div className="p-6">
+            <div className="p-4">
               <div className="flex justify-between items-start mb-4">
                 {/* Equipment Info */}
                 <div className="flex-1 min-w-0 mr-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-2 line-clamp-2">
+                  <h3 className="text-lg font-medium text-gray-900 mb-3 line-clamp-2">
                     {cleanTitle(item.title)}
                   </h3>
-                  <div className="text-xs text-gray-400 mb-3">
-                    {item.condition} • {item.location}
-                  </div>
                   <div className="text-sm text-gray-600">
                     {item.description}
                   </div>
@@ -326,7 +320,7 @@ export default function LaserMatchTab() {
               </div>
 
               {/* Price and Target Price Side by Side */}
-              <div className="grid grid-cols-2 gap-6 mb-4">
+              <div className="grid grid-cols-2 gap-4 mb-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                     Current Price
@@ -356,7 +350,7 @@ export default function LaserMatchTab() {
               </div>
 
               {/* Status, Rep, and Notes */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
                 {/* Status */}
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
