@@ -49,7 +49,8 @@ const SOURCING_STATUS_OPTIONS = [
   { value: 'declined', label: 'Declined', color: 'bg-red-100 text-red-800' }
 ]
 
-const REPS = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Chen', 'Tom Wilson']
+// Users will be loaded dynamically from configuration
+const DEFAULT_REPS = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Chen', 'Tom Wilson']
 
 // Helper function to extract brand and model from title
 const cleanTitle = (title: string): string => {
@@ -79,6 +80,7 @@ export default function LaserMatchTab() {
     contactEmail: '',
     contactPhone: ''
   })
+  const [currentUser] = useState('John Smith') // TODO: Get from auth context
   const [stats, setStats] = useState<{
     total_items: number
     hot_list_items: number
@@ -229,7 +231,7 @@ export default function LaserMatchTab() {
     const newNote: Note = {
       id: Date.now().toString(),
       content: content.trim(),
-      author: 'Current User', // In a real app, this would come from auth
+      author: currentUser,
       timestamp: new Date().toISOString()
     }
 
@@ -405,8 +407,8 @@ export default function LaserMatchTab() {
                 </div>
               </div>
 
-              {/* Price and Target Price Side by Side */}
-              <div className="grid grid-cols-2 gap-4 mb-3">
+              {/* All Key Fields in One Row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                     Current Price
@@ -417,10 +419,10 @@ export default function LaserMatchTab() {
                       value={item.price || ''}
                       onChange={(e) => updateItem(item.id, { price: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="Enter current price"
-                      className="text-lg font-semibold border border-gray-300 rounded px-3 py-1 w-full"
+                      className="text-sm font-semibold border border-gray-300 rounded px-2 py-1 w-full"
                     />
                   ) : (
-                    <div className="text-lg font-semibold text-gray-900">
+                    <div className="text-sm font-semibold text-gray-900">
                       {formatPrice(item.price)}
                     </div>
                   )}
@@ -435,28 +437,23 @@ export default function LaserMatchTab() {
                       value={item.targetPrice || ''}
                       onChange={(e) => updateItem(item.id, { targetPrice: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="Enter target price"
-                      className="text-lg font-semibold border border-gray-300 rounded px-3 py-1 w-full"
+                      className="text-sm font-semibold border border-gray-300 rounded px-2 py-1 w-full"
                     />
                   ) : (
-                    <div className="text-lg font-semibold text-gray-900">
+                    <div className="text-sm font-semibold text-gray-900">
                       {formatPrice(item.targetPrice)}
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Status and Rep */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                {/* Status */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                     Status
                   </label>
                   {editingItem === item.id ? (
                     <select
                       value={item.sourcingStatus}
                       onChange={(e) => updateItem(item.id, { sourcingStatus: e.target.value as any })}
-                      className="w-full text-sm border border-gray-300 rounded px-3 py-2"
+                      className="w-full text-xs border border-gray-300 rounded px-2 py-1"
                     >
                       {SOURCING_STATUS_OPTIONS.map(status => (
                         <option key={status.value} value={status.value}>
@@ -465,30 +462,28 @@ export default function LaserMatchTab() {
                       ))}
                     </select>
                   ) : (
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(item.sourcingStatus)}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.sourcingStatus)}`}>
                       {SOURCING_STATUS_OPTIONS.find(s => s.value === item.sourcingStatus)?.label}
                     </span>
                   )}
                 </div>
-
-                {/* Assigned Rep */}
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                     Assigned Rep
                   </label>
                   {editingItem === item.id ? (
                     <select
                       value={item.assignedRep || ''}
                       onChange={(e) => updateItem(item.id, { assignedRep: e.target.value || undefined })}
-                      className="w-full text-sm border border-gray-300 rounded px-3 py-2"
+                      className="w-full text-xs border border-gray-300 rounded px-2 py-1"
                     >
                       <option value="">Select Rep</option>
-                      {REPS.map(rep => (
+                      {DEFAULT_REPS.map(rep => (
                         <option key={rep} value={rep}>{rep}</option>
                       ))}
                     </select>
                   ) : (
-                    <div className="text-sm text-gray-900">
+                    <div className="text-xs text-gray-900">
                       {item.assignedRep || 'Unassigned'}
                     </div>
                   )}
