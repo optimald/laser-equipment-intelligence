@@ -379,7 +379,7 @@ export default function LaserMatchTab() {
     }
   }
 
-  const getStatusColor = (status: string) => {
+  const getSpiderUrlStatusColor = (status: string) => {
     switch (status) {
       case 'new': return 'bg-blue-100 text-blue-800'
       case 'contacted': return 'bg-yellow-100 text-yellow-800'
@@ -755,7 +755,7 @@ export default function LaserMatchTab() {
                                 <select
                                   value={spiderUrl.status}
                                   onChange={(e) => updateSpiderUrl(item.id, spiderUrl.id, { status: e.target.value })}
-                                  className={`text-xs px-2 py-1 rounded-full border-0 font-medium ${getStatusColor(spiderUrl.status)}`}
+                                  className={`text-xs px-2 py-1 rounded-full border-0 font-medium ${getSpiderUrlStatusColor(spiderUrl.status)}`}
                                 >
                                   <option value="new">New</option>
                                   <option value="contacted">Contacted</option>
