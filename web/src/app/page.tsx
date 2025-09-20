@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { MagnifyingGlassIcon, CogIcon, UserGroupIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, CogIcon, UserGroupIcon, UsersIcon } from '@heroicons/react/24/outline'
 import LaserMatchTab from '@/components/LaserMatchTab'
 import ConfigurationTab from '@/components/ConfigurationTab'
 import ContactManager from '@/components/ContactManager'
+import UsersTab from '@/components/UsersTab'
 
-type TabType = 'lasermatch' | 'contacts' | 'configuration'
+type TabType = 'lasermatch' | 'contacts' | 'users' | 'configuration'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('lasermatch')
@@ -14,6 +15,7 @@ export default function Home() {
   const tabs = [
     { id: 'lasermatch', name: 'LaserMatch', icon: MagnifyingGlassIcon },
     { id: 'contacts', name: 'Contacts', icon: UserGroupIcon },
+    { id: 'users', name: 'Users', icon: UsersIcon },
     { id: 'configuration', name: 'Configuration', icon: CogIcon },
   ]
 
@@ -64,6 +66,7 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'lasermatch' && <LaserMatchTab />}
         {activeTab === 'contacts' && <ContactManager />}
+        {activeTab === 'users' && <UsersTab />}
         {activeTab === 'configuration' && <ConfigurationTab />}
       </main>
     </div>
