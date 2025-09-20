@@ -38,13 +38,16 @@ const SOURCING_STATUS_OPTIONS = [
 
 const REPS = ['John Smith', 'Sarah Johnson', 'Mike Davis', 'Lisa Chen', 'Tom Wilson']
 
-// Helper function to extract clean brand name from title
+// Helper function to extract brand and model from title
 const cleanTitle = (title: string): string => {
-  // If title contains a colon, take everything before the first colon
+  // If title contains a colon, take brand + model (everything up to the first newline or description)
   if (title.includes(':')) {
-    const brandPart = title.split(':')[0].trim()
-    // Remove any newlines and take just the first line
-    return brandPart.split('\n')[0].trim()
+    const parts = title.split('\n')
+    const firstLine = parts[0].trim()
+    // If the first line looks like "Brand: Model", return it
+    if (firstLine.includes(':')) {
+      return firstLine
+    }
   }
   // Otherwise, take the first word
   const words = title.split(' ')
@@ -273,9 +276,6 @@ export default function LaserMatchTab() {
                   <h3 className="text-lg font-medium text-gray-900 mb-2 line-clamp-2">
                     {cleanTitle(item.title)}
                   </h3>
-                  <div className="text-sm text-gray-500 mb-1">
-                    {cleanTitle(item.brand || '')}
-                  </div>
                   <div className="text-xs text-gray-400 mb-3">
                     {item.condition} • {item.location}
                   </div>
