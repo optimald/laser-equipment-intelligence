@@ -1,5 +1,5 @@
 // API service for connecting to the Railway backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://postgres-production-6092.up.railway.app';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://laser-backend-production.up.railway.app';
 
 export interface SearchParams {
   query?: string;
