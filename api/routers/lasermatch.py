@@ -1,20 +1,34 @@
-"""
-LaserMatch.io specific API endpoints
-"""
-
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel
-from datetime import datetime
-import subprocess
-import os
-import sys
-import json
-import logging
 import requests
 from bs4 import BeautifulSoup
 import time
+import logging
+from datetime import datetime
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from typing import List, Dict, Any, Optional
+from pydantic import BaseModel
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 router = APIRouter()
+
+class LaserMatchItem(BaseModel):
+    id: str
+    title: str
+    brand: str
+    model: str
+    condition: str
+    price: Optional[float]
+    location: str
+    description: str
+    url: str
+    images: List[str]
+    discovered_at: str
+    last_updated: str
+    source: str
+    status: str
+    category: str
+    availability: str
 
 class LaserMatchScrapeResponse(BaseModel):
     message: str
@@ -23,158 +37,139 @@ class LaserMatchScrapeResponse(BaseModel):
     execution_time: float
 
 def fetch_and_extract_lasermatch():
-    """Fetch and extract LaserMatch data"""
+    """Fetch and extract LaserMatch data with FIXED parsing logic"""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
     
-    logging.info("🌐 Fetching LaserMatch.io homepage...")
-    response = requests.get('https://lasermatch.io/', headers=headers, timeout=10)
-    logging.info(f"✅ Status: {response.status_code}")
-    
-    soup = BeautifulSoup(response.text, 'html.parser')
-    all_items = []
-    
-    # Extract Hot List items
-    logging.info("🔥 Extracting Hot List items...")
-    hot_table = soup.find('table', id='dt-hotlist-items')
-    if hot_table:
-        tbody = hot_table.find('tbody')
-        if tbody:
-            rows = tbody.find_all('tr')
-            logging.info(f"📋 Processing {len(rows)} Hot List rows")
-            
-            for i, row in enumerate(rows):
-                try:
-                    # Handle potentially malformed HTML by finding all <a> tags in the row
-                    links = row.find_all('a')
-                    if len(links) >= 2:
-                        # First <a> tag = item name, Second <a> tag = description
-                        item_name = links[0].get_text().strip()
-                        description_raw = links[1].get_text().strip()
-                        
-                        logging.info(f"🔧 LINK METHOD - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
-                    else:
-                        # Fallback to cell method
+    try:
+        response = requests.get('https://lasermatch.io/', headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        all_items = []
+        
+        # Process Hot List section
+        hot_list_section = soup.find('div', {'id': 'hot-list'})
+        if hot_list_section:
+            tbody = hot_list_section.find('tbody')
+            if tbody:
+                rows = tbody.find_all('tr')
+                logging.info(f"🔥 Processing {len(rows)} Hot List rows")
+                
+                for i, row in enumerate(rows):
+                    try:
+                        # Get all cells in the row
                         cells = row.find_all('td')
                         if len(cells) >= 2:
-                            item_name = cells[0].get_text().strip()
-                            description_raw = cells[1].get_text().strip()
-                            logging.info(f"🔧 CELL METHOD - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
-                        else:
-                            continue
-                        
-                        # Parse brand and model from the item name
-                        if ':' in item_name:
-                            brand, model = item_name.split(':', 1)
-                            brand = brand.strip()
-                            model = model.strip()
-                        else:
-                            brand = item_name.split()[0] if item_name.split() else 'Unknown'
-                            model = item_name
-                        
-                        # Description is already clean from the second cell
-                        clean_description = description_raw
-                        
-                        item = {
-                            'id': f"hot_list_{i+1:03d}",
-                            'title': item_name,
-                            'brand': brand,
-                            'model': model,
-                            'condition': 'any',
-                            'price': None,
-                            'location': 'Various',
-                            'description': clean_description,
-                            'url': 'https://lasermatch.io/',
-                            'images': [],
-                            'discovered_at': datetime.now().isoformat(),
-                            'last_updated': datetime.now().isoformat(),
-                            'source': 'LaserMatch.io',
-                            'status': 'active',
-                            'category': 'hot-list',
-                            'availability': 'in-demand'
-                        }
-                        
-                        all_items.append(item)
-                        logging.info(f"✅ Hot: {brand}: {model}")
-                        
-                except Exception as e:
-                    logging.warning(f"⚠️ Error processing Hot List row {i}: {e}")
-    
-    # Extract In Demand items
-    logging.info("📈 Extracting In Demand items...")
-    demand_table = soup.find('table', id='dt-demand-items')
-    if demand_table:
-        tbody = demand_table.find('tbody')
-        if tbody:
-            rows = tbody.find_all('tr')
-            logging.info(f"📋 Processing {len(rows)} In Demand rows")
-            
-            for i, row in enumerate(rows):
-                try:
-                    # Handle potentially malformed HTML by finding all <a> tags in the row
-                    links = row.find_all('a')
-                    if len(links) >= 2:
-                        # First <a> tag = item name, Second <a> tag = description
-                        item_name = links[0].get_text().strip()
-                        description_raw = links[1].get_text().strip()
-                        
-                        logging.info(f"🔧 LINK METHOD - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
-                    else:
-                        # Fallback to cell method
+                            # First cell contains full text (brand + description)
+                            # Second cell contains just the description
+                            full_text = cells[0].get_text().strip()
+                            description_only = cells[1].get_text().strip()
+                            
+                            # Extract brand name from full text
+                            if ':' in full_text:
+                                brand = full_text.split(':', 1)[0].strip()
+                                # Use the description from the second cell
+                                clean_description = description_only
+                            else:
+                                # Fallback: use first word as brand
+                                words = full_text.split()
+                                brand = words[0] if words else 'Unknown'
+                                clean_description = description_only
+                            
+                            item = {
+                                'id': f"hot_list_{i+1:03d}",
+                                'title': brand,  # Use brand as title, not full text
+                                'brand': brand,
+                                'model': brand,  # Use brand as model for now
+                                'condition': 'any',
+                                'price': None,
+                                'location': 'Various',
+                                'description': clean_description,  # Clean description from second cell
+                                'url': 'https://lasermatch.io/',
+                                'images': [],
+                                'discovered_at': datetime.now().isoformat(),
+                                'last_updated': datetime.now().isoformat(),
+                                'source': 'LaserMatch.io',
+                                'status': 'active',
+                                'category': 'hot-list',
+                                'availability': 'available'
+                            }
+                            
+                            all_items.append(item)
+                            logging.info(f"✅ Hot: {brand} | Desc: {clean_description[:50]}...")
+                            
+                    except Exception as e:
+                        logging.warning(f"⚠️ Error processing Hot List row {i}: {e}")
+        
+        # Process In Demand section
+        in_demand_section = soup.find('div', {'id': 'in-demand'})
+        if in_demand_section:
+            tbody = in_demand_section.find('tbody')
+            if tbody:
+                rows = tbody.find_all('tr')
+                logging.info(f"📋 Processing {len(rows)} In Demand rows")
+                
+                for i, row in enumerate(rows):
+                    try:
+                        # Get all cells in the row
                         cells = row.find_all('td')
                         if len(cells) >= 2:
-                            item_name = cells[0].get_text().strip()
-                            description_raw = cells[1].get_text().strip()
-                            logging.info(f"🔧 CELL METHOD - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
-                        else:
-                            continue
-                        
-                        # Parse brand and model from the item name
-                        if ':' in item_name:
-                            brand, model = item_name.split(':', 1)
-                            brand = brand.strip()
-                            model = model.strip()
-                        else:
-                            brand = item_name.split()[0] if item_name.split() else 'Unknown'
-                            model = item_name
-                        
-                        # Description is already clean from the second cell
-                        clean_description = description_raw
-                        
-                        item = {
-                            'id': f"in_demand_{i+1:03d}",
-                            'title': item_name,
-                            'brand': brand,
-                            'model': model,
-                            'condition': 'any',
-                            'price': None,
-                            'location': 'Various',
-                            'description': clean_description,
-                            'url': 'https://lasermatch.io/',
-                            'images': [],
-                            'discovered_at': datetime.now().isoformat(),
-                            'last_updated': datetime.now().isoformat(),
-                            'source': 'LaserMatch.io',
-                            'status': 'active',
-                            'category': 'in-demand',
-                            'availability': 'in-demand'
-                        }
-                        
-                        all_items.append(item)
-                        logging.info(f"✅ Demand: {brand}: {model}")
-                        
-                except Exception as e:
-                    logging.warning(f"⚠️ Error processing In Demand row {i}: {e}")
-    
-    return all_items
+                            # First cell contains full text (brand + description)
+                            # Second cell contains just the description
+                            full_text = cells[0].get_text().strip()
+                            description_only = cells[1].get_text().strip()
+                            
+                            # Extract brand name from full text
+                            if ':' in full_text:
+                                brand = full_text.split(':', 1)[0].strip()
+                                # Use the description from the second cell
+                                clean_description = description_only
+                            else:
+                                # Fallback: use first word as brand
+                                words = full_text.split()
+                                brand = words[0] if words else 'Unknown'
+                                clean_description = description_only
+                            
+                            item = {
+                                'id': f"in_demand_{i+1:03d}",
+                                'title': brand,  # Use brand as title, not full text
+                                'brand': brand,
+                                'model': brand,  # Use brand as model for now
+                                'condition': 'any',
+                                'price': None,
+                                'location': 'Various',
+                                'description': clean_description,  # Clean description from second cell
+                                'url': 'https://lasermatch.io/',
+                                'images': [],
+                                'discovered_at': datetime.now().isoformat(),
+                                'last_updated': datetime.now().isoformat(),
+                                'source': 'LaserMatch.io',
+                                'status': 'active',
+                                'category': 'in-demand',
+                                'availability': 'in-demand'
+                            }
+                            
+                            all_items.append(item)
+                            logging.info(f"✅ Demand: {brand} | Desc: {clean_description[:50]}...")
+                            
+                    except Exception as e:
+                        logging.warning(f"⚠️ Error processing In Demand row {i}: {e}")
+        
+        logging.info(f"🎉 Successfully extracted {len(all_items)} items from LaserMatch.io")
+        return all_items
+        
+    except Exception as e:
+        logging.error(f"❌ Error fetching LaserMatch data: {e}")
+        raise Exception(f"Failed to fetch LaserMatch data: {e}")
 
 def run_lasermatch_scraper():
     """Run the LaserMatch scraper and return results"""
     try:
         start_time = datetime.now()
+        logging.info("🚀 Starting LaserMatch scraper...")
         
-        # Run the actual scraper
         items = fetch_and_extract_lasermatch()
         
         end_time = datetime.now()
@@ -212,7 +207,7 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
         _scraped_items = result['items']
         
         response = LaserMatchScrapeResponse(
-            message=f"VERSION_2.0 - Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
+            message=f"FIXED_VERSION - Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
             items_scraped=result['items_scraped'],
             items_added=result['items_added'],
             execution_time=result['execution_time']
@@ -229,57 +224,45 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
 _scraped_items = []
 
 @router.get("/items")
-async def get_lasermatch_items(skip: int = 0, limit: int = 100):
+async def get_lasermatch_items(
+    page: int = 1,
+    per_page: int = 20,
+    category: Optional[str] = None,
+    brand: Optional[str] = None
+):
     """
-    Get LaserMatch items from the database
+    Get paginated LaserMatch items
     """
     try:
-        # Return scraped items with pagination
-        total = len(_scraped_items)
-        items = _scraped_items[skip:skip + limit]
+        # Filter items if needed
+        filtered_items = _scraped_items
+        
+        if category:
+            filtered_items = [item for item in filtered_items if item.get('category') == category]
+        
+        if brand:
+            filtered_items = [item for item in filtered_items if item.get('brand', '').lower() == brand.lower()]
+        
+        # Calculate pagination
+        total_items = len(filtered_items)
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        
+        paginated_items = filtered_items[start_idx:end_idx]
         
         return {
-            "items": items,
-            "total": total,
-            "skip": skip,
-            "limit": limit
-        }
-    except Exception as e:
-        logging.error(f"Failed to get LaserMatch items: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve items: {str(e)}")
-
-@router.get("/debug-html")
-async def debug_html_structure():
-    """Debug endpoint to see actual HTML structure"""
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'items': paginated_items,
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total_items': total_items,
+                'total_pages': (total_items + per_page - 1) // per_page
+            }
         }
         
-        response = requests.get('https://lasermatch.io/', headers=headers, timeout=10)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Find the hot list table
-        hot_table = soup.find('table', id='dt-hotlist-items')
-        if hot_table:
-            tbody = hot_table.find('tbody')
-            if tbody:
-                rows = tbody.find_all('tr')
-                if rows:
-                    # Get first row for debugging
-                    first_row = rows[0]
-                    return {
-                        "row_html": str(first_row),
-                        "cells_count": len(first_row.find_all('td')),
-                        "links_count": len(first_row.find_all('a')),
-                        "cells_text": [cell.get_text().strip() for cell in first_row.find_all('td')],
-                        "links_text": [link.get_text().strip() for link in first_row.find_all('a')]
-                    }
-        
-        return {"error": "Could not find table structure"}
-        
     except Exception as e:
-        return {"error": str(e)}
+        logging.error(f"Error getting LaserMatch items: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get items: {str(e)}")
 
 @router.get("/stats")
 async def get_lasermatch_stats():
@@ -287,22 +270,22 @@ async def get_lasermatch_stats():
     Get LaserMatch statistics
     """
     try:
-        # Calculate stats from scraped items
         total_items = len(_scraped_items)
-        hot_list_items = len([item for item in _scraped_items if item.get('category') == 'hot-list'])
-        in_demand_items = len([item for item in _scraped_items if item.get('category') == 'in-demand'])
+        hot_list_count = len([item for item in _scraped_items if item.get('category') == 'hot-list'])
+        in_demand_count = len([item for item in _scraped_items if item.get('category') == 'in-demand'])
         
-        # Get latest update time
-        latest_update = None
-        if _scraped_items:
-            latest_update = max(item.get('last_updated', '') for item in _scraped_items)
+        # Get unique brands
+        brands = set(item.get('brand', 'Unknown') for item in _scraped_items)
         
         return {
-            "total_items": total_items,
-            "hot_list_items": hot_list_items,
-            "in_demand_items": in_demand_items,
-            "latest_update": latest_update
+            'total_items': total_items,
+            'hot_list_count': hot_list_count,
+            'in_demand_count': in_demand_count,
+            'unique_brands': len(brands),
+            'brands': sorted(list(brands)),
+            'last_updated': datetime.now().isoformat()
         }
+        
     except Exception as e:
-        logging.error(f"Failed to get LaserMatch stats: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve stats: {str(e)}")
+        logging.error(f"Error getting LaserMatch stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
