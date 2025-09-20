@@ -55,7 +55,10 @@ def fetch_and_extract_lasermatch():
                         item_name = item_link.get_text().strip() if item_link else cells[0].get_text().strip()
                         description_raw = desc_link.get_text().strip() if desc_link else cells[1].get_text().strip()
                         
-                        logging.info(f"✅ LINK EXTRACT - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                        # DEBUG: Print the actual HTML structure
+                        logging.info(f"🔍 CELL 0 HTML: {str(cells[0])[:200]}...")
+                        logging.info(f"🔍 CELL 1 HTML: {str(cells[1])[:200]}...")
+                        logging.info(f"✅ EXTRACTED - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -114,7 +117,10 @@ def fetch_and_extract_lasermatch():
                         item_name = item_link.get_text().strip() if item_link else cells[0].get_text().strip()
                         description_raw = desc_link.get_text().strip() if desc_link else cells[1].get_text().strip()
                         
-                        logging.info(f"✅ LINK EXTRACT - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                        # DEBUG: Print the actual HTML structure
+                        logging.info(f"🔍 CELL 0 HTML: {str(cells[0])[:200]}...")
+                        logging.info(f"🔍 CELL 1 HTML: {str(cells[1])[:200]}...")
+                        logging.info(f"✅ EXTRACTED - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
