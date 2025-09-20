@@ -48,12 +48,14 @@ def fetch_and_extract_lasermatch():
                 try:
                     cells = row.find_all('td')
                     if len(cells) >= 2:
-                        # SIMPLE: First cell = item name, Second cell = description
-                        # Extract text from the <a> tag inside each cell
-                        item_name = cells[0].get_text().strip()
-                        description_raw = cells[1].get_text().strip()
+                        # Extract text from <a> tag inside each <td> specifically
+                        item_link = cells[0].find('a')
+                        desc_link = cells[1].find('a')
                         
-                        logging.info(f"✅ FIXED - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                        item_name = item_link.get_text().strip() if item_link else cells[0].get_text().strip()
+                        description_raw = desc_link.get_text().strip() if desc_link else cells[1].get_text().strip()
+                        
+                        logging.info(f"✅ LINK EXTRACT - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -105,12 +107,14 @@ def fetch_and_extract_lasermatch():
                 try:
                     cells = row.find_all('td')
                     if len(cells) >= 2:
-                        # SIMPLE: First cell = item name, Second cell = description
-                        # Extract text from the <a> tag inside each cell
-                        item_name = cells[0].get_text().strip()
-                        description_raw = cells[1].get_text().strip()
+                        # Extract text from <a> tag inside each <td> specifically
+                        item_link = cells[0].find('a')
+                        desc_link = cells[1].find('a')
                         
-                        logging.info(f"✅ FIXED - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                        item_name = item_link.get_text().strip() if item_link else cells[0].get_text().strip()
+                        description_raw = desc_link.get_text().strip() if desc_link else cells[1].get_text().strip()
+                        
+                        logging.info(f"✅ LINK EXTRACT - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
