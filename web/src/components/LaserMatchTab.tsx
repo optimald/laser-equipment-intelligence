@@ -31,6 +31,19 @@ interface LaserMatchItem {
     addedBy?: 'spider' | 'manual'
     addedAt?: string
   }[]
+  spiderUrls?: {
+    id: string
+    url: string
+    source: string
+    contactId?: string
+    contactName?: string
+    price?: number
+    followUpDate?: string
+    status: 'new' | 'contacted' | 'quoted' | 'declined' | 'purchased'
+    addedBy: 'spider' | 'manual'
+    addedAt: string
+    notes?: string
+  }[]
   searchStatus?: 'idle' | 'searching' | 'completed' | 'error'
   // Procurement fields
   assignedRep?: string
@@ -81,6 +94,20 @@ export default function LaserMatchTab() {
     contactPhone: ''
   })
   const [currentUser] = useState('John Smith') // TODO: Get from auth context
+  const [addingSpiderUrl, setAddingSpiderUrl] = useState<string | null>(null)
+  const [newSpiderUrl, setNewSpiderUrl] = useState({
+    url: '',
+    source: '',
+    contactId: '',
+    price: '',
+    followUpDate: ''
+  })
+  // Mock contacts data - in real app this would come from contacts context/API
+  const [contacts] = useState([
+    { id: '1', name: 'John Smith', company: 'MedTech Solutions', email: 'john.smith@medtech.com' },
+    { id: '2', name: 'Sarah Johnson', company: 'Laser Dynamics Inc', email: 'sarah@laserdynamics.com' },
+    { id: '3', name: 'Mike Wilson', company: 'Equipment Direct', email: 'mike@equipmentdirect.com' }
+  ])
   const [stats, setStats] = useState<{
     total_items: number
     hot_list_items: number
@@ -288,6 +315,100 @@ export default function LaserMatchTab() {
     setAddingSource(null)
   }
 
+  const addSpiderUrl = (itemId: string) => {
+    if (!newSpiderUrl.url.trim() || !newSpiderUrl.source.trim()) return
+
+    const selectedContact = contacts.find(c => c.id === newSpiderUrl.contactId)
+    
+    const spiderUrl = {
+      id: Date.now().toString(),
+      url: newSpiderUrl.url.trim(),
+      source: newSpiderUrl.source.trim(),
+      contactId: newSpiderUrl.contactId || undefined,
+      contactName: selectedContact?.name,
+      price: newSpiderUrl.price ? Number(newSpiderUrl.price) : undefined,
+      followUpDate: newSpiderUrl.followUpDate || undefined,
+      status: 'new' as const,
+      addedBy: 'manual' as const,
+      addedAt: new Date().toISOString()
+    }
+
+    setItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        const currentSpiderUrls = item.spiderUrls || []
+        return {
+          ...item,
+          spiderUrls: [...currentSpiderUrls, spiderUrl]
+        }
+      }
+      return item
+    }))
+
+    // Reset form
+    setNewSpiderUrl({
+      url: '',
+      source: '',
+      contactId: '',
+      price: '',
+      followUpDate: ''
+    })
+    setAddingSpiderUrl(null)
+  }
+
+  const updateSpiderUrl = (itemId: string, spiderUrlId: string, updates: any) => {
+    setItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        const updatedSpiderUrls = item.spiderUrls?.map(spiderUrl =>
+          spiderUrl.id === spiderUrlId ? { ...spiderUrl, ...updates } : spiderUrl
+        )
+        return { ...item, spiderUrls: updatedSpiderUrls }
+      }
+      return item
+    }))
+  }
+
+  const deleteSpiderUrl = (itemId: string, spiderUrlId: string) => {
+    if (confirm('Are you sure you want to delete this source?')) {
+      setItems(prev => prev.map(item => {
+        if (item.id === itemId) {
+          const updatedSpiderUrls = item.spiderUrls?.filter(spiderUrl => spiderUrl.id !== spiderUrlId)
+          return { ...item, spiderUrls: updatedSpiderUrls }
+        }
+        return item
+      }))
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'new': return 'bg-blue-100 text-blue-800'
+      case 'contacted': return 'bg-yellow-100 text-yellow-800'
+      case 'quoted': return 'bg-purple-100 text-purple-800'
+      case 'declined': return 'bg-red-100 text-red-800'
+      case 'purchased': return 'bg-green-100 text-green-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const renderNoteWithSourceTags = (noteContent: string, spiderUrls?: any[]) => {
+    if (!spiderUrls || spiderUrls.length === 0) {
+      return noteContent
+    }
+
+    // Replace @source-X tags with highlighted spans
+    let processedContent = noteContent
+    spiderUrls.forEach((spiderUrl, index) => {
+      const tag = `@source-${index + 1}`
+      const regex = new RegExp(tag, 'gi')
+      processedContent = processedContent.replace(
+        regex,
+        `<span class="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">${tag}: ${spiderUrl.source}</span>`
+      )
+    })
+
+    return <div dangerouslySetInnerHTML={{ __html: processedContent }} />
+  }
+
   const formatPrice = (price?: number) => {
     if (!price) return 'N/A'
     return new Intl.NumberFormat('en-US', {
@@ -351,20 +472,20 @@ export default function LaserMatchTab() {
 
       {/* Items Cards */}
       <div className="space-y-3">
-        {items.map((item) => (
+              {items.map((item) => (
           <div key={item.id} className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
             {/* Main Card Content */}
             <div className="p-4">
               <div className="flex justify-between items-start mb-4">
-                {/* Equipment Info */}
+                  {/* Equipment Info */}
                 <div className="flex-1 min-w-0 mr-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-3 line-clamp-2">
                     {cleanTitle(item.title)}
                   </h3>
                   <div className="text-sm text-gray-600">
                     {item.description}
-                  </div>
-                </div>
+                      </div>
+                      </div>
 
                 {/* Actions */}
                 <div className="flex items-center space-x-2 flex-shrink-0">
@@ -404,8 +525,8 @@ export default function LaserMatchTab() {
                       </button>
                     </>
                   )}
-                </div>
-              </div>
+                      </div>
+                    </div>
 
               {/* All Key Fields in One Row */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -426,46 +547,46 @@ export default function LaserMatchTab() {
                       {formatPrice(item.price)}
                     </div>
                   )}
-                </div>
+                      </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                     Target Price
                   </label>
-                  {editingItem === item.id ? (
-                    <input
-                      type="number"
-                      value={item.targetPrice || ''}
-                      onChange={(e) => updateItem(item.id, { targetPrice: e.target.value ? Number(e.target.value) : undefined })}
+                    {editingItem === item.id ? (
+                      <input
+                        type="number"
+                        value={item.targetPrice || ''}
+                        onChange={(e) => updateItem(item.id, { targetPrice: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="Enter target price"
                       className="text-sm font-semibold border border-gray-300 rounded px-2 py-1 w-full"
-                    />
-                  ) : (
+                      />
+                    ) : (
                     <div className="text-sm font-semibold text-gray-900">
-                      {formatPrice(item.targetPrice)}
-                    </div>
-                  )}
+                        {formatPrice(item.targetPrice)}
+                      </div>
+                    )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
                     Status
                   </label>
-                  {editingItem === item.id ? (
-                    <select
-                      value={item.sourcingStatus}
-                      onChange={(e) => updateItem(item.id, { sourcingStatus: e.target.value as any })}
+                    {editingItem === item.id ? (
+                      <select
+                        value={item.sourcingStatus}
+                        onChange={(e) => updateItem(item.id, { sourcingStatus: e.target.value as any })}
                       className="w-full text-xs border border-gray-300 rounded px-2 py-1"
-                    >
-                      {SOURCING_STATUS_OPTIONS.map(status => (
-                        <option key={status.value} value={status.value}>
-                          {status.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
+                      >
+                        {SOURCING_STATUS_OPTIONS.map(status => (
+                          <option key={status.value} value={status.value}>
+                            {status.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.sourcingStatus)}`}>
-                      {SOURCING_STATUS_OPTIONS.find(s => s.value === item.sourcingStatus)?.label}
-                    </span>
-                  )}
+                        {SOURCING_STATUS_OPTIONS.find(s => s.value === item.sourcingStatus)?.label}
+                      </span>
+                    )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
@@ -485,6 +606,180 @@ export default function LaserMatchTab() {
                   ) : (
                     <div className="text-xs text-gray-900">
                       {item.assignedRep || 'Unassigned'}
+                        </div>
+                      )}
+                </div>
+              </div>
+
+              {/* Spider URLs Section - Full Width */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Spider Crawled URLs & Sources
+                  </label>
+                  {addingSpiderUrl !== item.id && (
+                    <button
+                      onClick={() => setAddingSpiderUrl(item.id)}
+                      className="text-xs text-blue-600 hover:text-blue-700"
+                    >
+                      Add Source
+                    </button>
+                  )}
+                </div>
+
+                {/* Add Spider URL Form */}
+                {addingSpiderUrl === item.id && (
+                  <div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
+                      <input
+                        type="url"
+                        placeholder="URL *"
+                        value={newSpiderUrl.url}
+                        onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, url: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Source name *"
+                        value={newSpiderUrl.source}
+                        onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, source: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                      <select
+                        value={newSpiderUrl.contactId}
+                        onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, contactId: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      >
+                        <option value="">Select Contact</option>
+                        {contacts.map(contact => (
+                          <option key={contact.id} value={contact.id}>
+                            {contact.name} - {contact.company}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={newSpiderUrl.price}
+                        onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, price: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                      <input
+                        type="date"
+                        placeholder="Follow-up date"
+                        value={newSpiderUrl.followUpDate}
+                        onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, followUpDate: e.target.value }))}
+                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => {
+                          setAddingSpiderUrl(null)
+                          setNewSpiderUrl({
+                            url: '',
+                            source: '',
+                            contactId: '',
+                            price: '',
+                            followUpDate: ''
+                          })
+                        }}
+                        className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => addSpiderUrl(item.id)}
+                        disabled={!newSpiderUrl.url.trim() || !newSpiderUrl.source.trim()}
+                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        Add Source
+                      </button>
+                    </div>
+                        </div>
+                      )}
+
+                {/* Spider URLs List */}
+                <div className="border border-gray-200 rounded-lg bg-white">
+                  {item.spiderUrls && item.spiderUrls.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Source
+                            </th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Contact
+                            </th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Price
+                            </th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Follow Up
+                            </th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {item.spiderUrls.map((spiderUrl) => (
+                            <tr key={spiderUrl.id} className="hover:bg-gray-50">
+                              <td className="px-3 py-2 whitespace-nowrap">
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900">{spiderUrl.source}</div>
+                                  <a
+                                    href={spiderUrl.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-blue-600 hover:text-blue-700 truncate block max-w-xs"
+                                  >
+                                    {spiderUrl.url}
+                                  </a>
+                                </div>
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                {spiderUrl.contactName || 'No contact'}
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                {formatPrice(spiderUrl.price)}
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                                {spiderUrl.followUpDate ? new Date(spiderUrl.followUpDate).toLocaleDateString() : 'Not set'}
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap">
+                                <select
+                                  value={spiderUrl.status}
+                                  onChange={(e) => updateSpiderUrl(item.id, spiderUrl.id, { status: e.target.value })}
+                                  className={`text-xs px-2 py-1 rounded-full border-0 font-medium ${getStatusColor(spiderUrl.status)}`}
+                                >
+                                  <option value="new">New</option>
+                                  <option value="contacted">Contacted</option>
+                                  <option value="quoted">Quoted</option>
+                                  <option value="declined">Declined</option>
+                                  <option value="purchased">Purchased</option>
+                                </select>
+                              </td>
+                              <td className="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
+                                <button
+                                  onClick={() => deleteSpiderUrl(item.id, spiderUrl.id)}
+                                  className="text-red-600 hover:text-red-700 text-xs"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center text-sm text-gray-500">
+                      No sources found yet. Spider crawls and manual entries will appear here.
                     </div>
                   )}
                 </div>
@@ -520,7 +815,9 @@ export default function LaserMatchTab() {
                                 {new Date(note.timestamp).toLocaleString()}
                               </span>
                             </div>
-                            <div className="text-sm text-gray-800">{note.content}</div>
+                            <div className="text-sm text-gray-800">
+                              {renderNoteWithSourceTags(note.content, item.spiderUrls)}
+                            </div>
                           </div>
                         ))}
                         
@@ -531,7 +828,9 @@ export default function LaserMatchTab() {
                               <span className="text-xs font-medium text-gray-700">Legacy Note</span>
                               <span className="text-xs text-gray-500">Unknown date</span>
                             </div>
-                            <div className="text-sm text-gray-800">{item.notes}</div>
+                            <div className="text-sm text-gray-800">
+                              {renderNoteWithSourceTags(item.notes, item.spiderUrls)}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -548,9 +847,28 @@ export default function LaserMatchTab() {
                       <textarea
                         value={newNoteContent}
                         onChange={(e) => setNewNoteContent(e.target.value)}
-                        placeholder="Add a new note..."
+                        placeholder="Add a new note... (Use @source-1, @source-2, etc. to tag specific sources)"
                         className="w-full text-sm border border-gray-300 rounded px-3 py-2 h-20 resize-none"
                       />
+                      {item.spiderUrls && item.spiderUrls.length > 0 && (
+                        <div className="mt-2 text-xs text-gray-500">
+                          <div className="font-medium mb-1">Available sources to tag:</div>
+                          <div className="flex flex-wrap gap-2">
+                            {item.spiderUrls.map((spiderUrl, index) => (
+                              <span
+                                key={spiderUrl.id}
+                                className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded cursor-pointer hover:bg-gray-200"
+                                onClick={() => {
+                                  const tag = `@source-${index + 1}`
+                                  setNewNoteContent(prev => prev + (prev ? ' ' : '') + tag)
+                                }}
+                              >
+                                @source-{index + 1}: {spiderUrl.source}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                       <div className="flex justify-end space-x-2">
                         <button
                           onClick={() => {
@@ -591,12 +909,12 @@ export default function LaserMatchTab() {
                       <div className="text-sm text-red-600">Search failed</div>
                     )}
                     {addingSource !== item.id && (
-                      <button
+                          <button
                         onClick={() => setAddingSource(item.id)}
                         className="text-xs text-blue-600 hover:text-blue-700"
-                      >
+                          >
                         Add Source
-                      </button>
+                          </button>
                     )}
                   </div>
                 </div>
@@ -649,7 +967,7 @@ export default function LaserMatchTab() {
                       />
                     </div>
                     <div className="flex justify-end space-x-2">
-                      <button
+                          <button
                         onClick={() => {
                           setAddingSource(null)
                           setNewSource({
@@ -664,14 +982,14 @@ export default function LaserMatchTab() {
                         className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
                       >
                         Cancel
-                      </button>
-                      <button
+                          </button>
+                          <button
                         onClick={() => addSource(item.id)}
                         disabled={!newSource.source.trim() || !newSource.url.trim()}
                         className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                       >
                         Add Source
-                      </button>
+                          </button>
                     </div>
                   </div>
                 )}
@@ -727,7 +1045,7 @@ export default function LaserMatchTab() {
                 )}
               </div>
             ) : null}
-          </div>
+        </div>
         ))}
       </div>
 
