@@ -198,7 +198,7 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
         _scraped_items = result['items']
         
         response = LaserMatchScrapeResponse(
-            message=f"SIMPLE_VERSION - Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
+            message=f"SIMPLE_VERSION_v2 - Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
             items_scraped=result['items_scraped'],
             items_added=result['items_added'],
             execution_time=result['execution_time']
