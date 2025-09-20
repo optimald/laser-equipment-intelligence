@@ -63,7 +63,7 @@ def fetch_and_extract_lasermatch():
                         # Remove any remaining carriage returns
                         item_name = item_name.replace('\r', '').strip()
                         
-                        logging.info(f"✅ Extracted clean item_name: '{item_name}'")
+                        logging.info(f"✅ VERSION_2.0 - Extracted clean item_name: '{item_name}'")
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -146,7 +146,7 @@ def fetch_and_extract_lasermatch():
                         # Remove any remaining carriage returns
                         item_name = item_name.replace('\r', '').strip()
                         
-                        logging.info(f"✅ Extracted clean item_name: '{item_name}'")
+                        logging.info(f"✅ VERSION_2.0 - Extracted clean item_name: '{item_name}'")
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -246,7 +246,7 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
         _scraped_items = result['items']
         
         response = LaserMatchScrapeResponse(
-            message=f"Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
+            message=f"VERSION_2.0 - Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
             items_scraped=result['items_scraped'],
             items_added=result['items_added'],
             execution_time=result['execution_time']
