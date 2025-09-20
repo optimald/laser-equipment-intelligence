@@ -67,20 +67,10 @@ class ApiService {
 
   // Search API methods
   async searchEquipment(params: SearchParams): Promise<EquipmentListing[]> {
-    const queryParams = new URLSearchParams();
-    
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        if (Array.isArray(value)) {
-          value.forEach(item => queryParams.append(key, item));
-        } else {
-          queryParams.append(key, value.toString());
-        }
-      }
+    return this.request<EquipmentListing[]>('/api/v1/search/equipment', {
+      method: 'POST',
+      body: JSON.stringify(params),
     });
-
-    const endpoint = `/api/v1/search/equipment?${queryParams.toString()}`;
-    return this.request<EquipmentListing[]>(endpoint);
   }
 
   async getAvailableSources(): Promise<string[]> {

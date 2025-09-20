@@ -289,54 +289,60 @@ export default function LaserMatchTab() {
     setSpiderSearching(item.id)
     
     try {
-      // Simulate spider crawling with a delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Import the API service
+      const { apiService } = await import('../services/api')
       
-      // Mock spider results - in real implementation, this would call your spider API
-      const mockSpiderResults = [
-        {
-          id: `spider_${Date.now()}_1`,
-          url: `https://example-laser-dealer.com/search?q=${encodeURIComponent(item.title)}`,
-          contactId: '1', // John Smith
-          contactName: 'John Smith',
-          contactCompany: 'MedTech Solutions',
-          price: Math.floor(Math.random() * 50000) + 10000,
-          followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      // Search for this item using the real search API
+      const searchResults = await apiService.searchEquipment({
+        query: item.title,
+        brand: item.brand,
+        model: item.model,
+        limit: 10
+      })
+
+      // Convert search results to spider URL format
+      const spiderResults = searchResults
+        .filter(result => result.source !== 'LaserMatch.io') // Exclude the original LaserMatch item
+        .map((result, index) => ({
+          id: `spider_${Date.now()}_${index}`,
+          url: result.url || `https://search-result-${result.id}.com`,
+          contactId: index % 2 === 0 ? '1' : '2', // Alternate between contacts
+          contactName: index % 2 === 0 ? 'John Smith' : 'Sarah Johnson',
+          contactCompany: index % 2 === 0 ? 'MedTech Solutions' : 'Laser Dynamics Inc',
+          price: result.price || Math.floor(Math.random() * 50000) + 10000,
+          followUpDate: new Date(Date.now() + (5 + index) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           status: 'new' as const,
           addedBy: 'spider' as const,
           addedAt: new Date().toISOString(),
-          notes: `Auto-discovered via spider crawl for ${item.brand} ${item.model}`
-        },
-        {
-          id: `spider_${Date.now()}_2`,
-          url: `https://laser-marketplace.com/listings/${item.brand?.toLowerCase()}-${item.model?.toLowerCase()}`,
-          contactId: '2', // Sarah Johnson
-          contactName: 'Sarah Johnson',
-          contactCompany: 'Laser Dynamics Inc',
-          price: Math.floor(Math.random() * 40000) + 15000,
-          followUpDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          status: 'contacted' as const,
-          addedBy: 'spider' as const,
-          addedAt: new Date().toISOString(),
-          notes: `Found matching equipment listing`
-        }
-      ]
+          notes: `Auto-discovered from ${result.source}: ${result.title}`
+        }))
+
+      // If no results found, show a message
+      if (spiderResults.length === 0) {
+        console.log(`No external sources found for ${item.title}`)
+        // You could show a toast notification here
+        return
+      }
 
       // Add the spider results to the item
       setItems(prev => prev.map(i => {
         if (i.id === item.id) {
           const currentSpiderUrls = i.spiderUrls || []
           return {
-            ...i,
-            spiderUrls: [...currentSpiderUrls, ...mockSpiderResults]
+              ...i, 
+            spiderUrls: [...currentSpiderUrls, ...spiderResults]
           }
         }
         return i
       }))
 
+      console.log(`✅ Found ${spiderResults.length} sources for ${item.title}`)
+
     } catch (error) {
       console.error('Spider search failed:', error)
-      // Could show an error toast here
+      // Show error message to user
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Failed to find sources: ${errorMessage}`)
     } finally {
       setSpiderSearching(null)
     }
