@@ -67,7 +67,12 @@ async def get_db_connection():
 
 async def init_db():
     """Initialize database tables"""
-    conn = await get_db_connection()
+    try:
+        conn = await get_db_connection()
+    except Exception as e:
+        print(f"Warning: Could not connect to database: {e}")
+        print("API will start without database connection")
+        return
     
     try:
         # Create listings table
