@@ -46,19 +46,23 @@ def fetch_and_extract_lasermatch():
             
             for i, row in enumerate(rows):
                 try:
-                    cells = row.find_all('td')
-                    if len(cells) >= 2:
-                        # Extract text from <a> tag inside each <td> specifically
-                        item_link = cells[0].find('a')
-                        desc_link = cells[1].find('a')
+                    # Handle potentially malformed HTML by finding all <a> tags in the row
+                    links = row.find_all('a')
+                    if len(links) >= 2:
+                        # First <a> tag = item name, Second <a> tag = description
+                        item_name = links[0].get_text().strip()
+                        description_raw = links[1].get_text().strip()
                         
-                        item_name = item_link.get_text().strip() if item_link else cells[0].get_text().strip()
-                        description_raw = desc_link.get_text().strip() if desc_link else cells[1].get_text().strip()
-                        
-                        # DEBUG: Print the actual HTML structure
-                        logging.info(f"🔍 CELL 0 HTML: {str(cells[0])[:200]}...")
-                        logging.info(f"🔍 CELL 1 HTML: {str(cells[1])[:200]}...")
-                        logging.info(f"✅ EXTRACTED - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                        logging.info(f"🔧 LINK METHOD - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                    else:
+                        # Fallback to cell method
+                        cells = row.find_all('td')
+                        if len(cells) >= 2:
+                            item_name = cells[0].get_text().strip()
+                            description_raw = cells[1].get_text().strip()
+                            logging.info(f"🔧 CELL METHOD - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                        else:
+                            continue
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -108,19 +112,23 @@ def fetch_and_extract_lasermatch():
             
             for i, row in enumerate(rows):
                 try:
-                    cells = row.find_all('td')
-                    if len(cells) >= 2:
-                        # Extract text from <a> tag inside each <td> specifically
-                        item_link = cells[0].find('a')
-                        desc_link = cells[1].find('a')
+                    # Handle potentially malformed HTML by finding all <a> tags in the row
+                    links = row.find_all('a')
+                    if len(links) >= 2:
+                        # First <a> tag = item name, Second <a> tag = description
+                        item_name = links[0].get_text().strip()
+                        description_raw = links[1].get_text().strip()
                         
-                        item_name = item_link.get_text().strip() if item_link else cells[0].get_text().strip()
-                        description_raw = desc_link.get_text().strip() if desc_link else cells[1].get_text().strip()
-                        
-                        # DEBUG: Print the actual HTML structure
-                        logging.info(f"🔍 CELL 0 HTML: {str(cells[0])[:200]}...")
-                        logging.info(f"🔍 CELL 1 HTML: {str(cells[1])[:200]}...")
-                        logging.info(f"✅ EXTRACTED - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                        logging.info(f"🔧 LINK METHOD - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                    else:
+                        # Fallback to cell method
+                        cells = row.find_all('td')
+                        if len(cells) >= 2:
+                            item_name = cells[0].get_text().strip()
+                            description_raw = cells[1].get_text().strip()
+                            logging.info(f"🔧 CELL METHOD - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
+                        else:
+                            continue
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
