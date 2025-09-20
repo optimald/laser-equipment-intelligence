@@ -82,7 +82,7 @@ def fetch_and_extract_lasermatch():
                             
                             item = {
                                 'id': f"hot_list_{i+1:03d}",
-                                'title': brand,  # Use brand as title, not full text
+                                'title': brand,  # Use clean brand name as title
                                 'brand': brand,
                                 'model': brand,  # Use brand as model for now
                                 'condition': 'any',
@@ -138,7 +138,7 @@ def fetch_and_extract_lasermatch():
                             
                             item = {
                                 'id': f"in_demand_{i+1:03d}",
-                                'title': brand,  # Use brand as title, not full text
+                                'title': brand,  # Use clean brand name as title
                                 'brand': brand,
                                 'model': brand,  # Use brand as model for now
                                 'condition': 'any',
