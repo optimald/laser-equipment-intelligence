@@ -36,21 +36,8 @@ class LaserMatchScrapeResponse(BaseModel):
     items_added: int
     execution_time: float
 
-def extract_brand_from_text(full_text):
-    """Extract clean brand name from full text"""
-    if ':' in full_text:
-        # Get everything before the first colon
-        brand_part = full_text.split(':', 1)[0].strip()
-        # Remove any newlines and get just the first line
-        brand = brand_part.split('\n')[0].strip()
-        return brand
-    else:
-        # Fallback: use first word
-        words = full_text.split()
-        return words[0] if words else 'Unknown'
-
 def fetch_and_extract_lasermatch():
-    """Fetch and extract LaserMatch data with SIMPLE parsing logic"""
+    """Fetch and extract LaserMatch data with FIXED parsing logic"""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
@@ -72,23 +59,36 @@ def fetch_and_extract_lasermatch():
                 
                 for i, row in enumerate(rows):
                     try:
+                        # Get all cells in the row
                         cells = row.find_all('td')
                         if len(cells) >= 2:
+                            # First cell contains full text (brand + description)
+                            # Second cell contains just the description
                             full_text = cells[0].get_text().strip()
-                            description_text = cells[1].get_text().strip()
+                            description_only = cells[1].get_text().strip()
                             
-                            # Extract clean brand name
-                            brand_name = extract_brand_from_text(full_text)
+                            # Extract ONLY the brand name from full text (before the colon)
+                            if ':' in full_text:
+                                brand = full_text.split(':', 1)[0].strip()
+                                # Remove any newlines or extra text from brand
+                                brand = brand.split('\n')[0].strip()
+                                # Use the description from the second cell
+                                clean_description = description_only
+                            else:
+                                # Fallback: use first word as brand
+                                words = full_text.split()
+                                brand = words[0] if words else 'Unknown'
+                                clean_description = description_only
                             
                             item = {
                                 'id': f"hot_list_{i+1:03d}",
-                                'title': brand_name,  # ONLY the brand name
-                                'brand': brand_name,
-                                'model': brand_name,
+                                'title': brand,  # Use clean brand name as title
+                                'brand': brand,
+                                'model': brand,  # Use brand as model for now
                                 'condition': 'any',
                                 'price': None,
                                 'location': 'Various',
-                                'description': description_text,  # Clean description
+                                'description': clean_description,  # Clean description from second cell
                                 'url': 'https://lasermatch.io/',
                                 'images': [],
                                 'discovered_at': datetime.now().isoformat(),
@@ -100,7 +100,7 @@ def fetch_and_extract_lasermatch():
                             }
                             
                             all_items.append(item)
-                            logging.info(f"✅ Hot: '{brand_name}' | Desc: '{description_text[:30]}...'")
+                            logging.info(f"✅ Hot: {brand} | Desc: {clean_description[:50]}...")
                             
                     except Exception as e:
                         logging.warning(f"⚠️ Error processing Hot List row {i}: {e}")
@@ -115,23 +115,36 @@ def fetch_and_extract_lasermatch():
                 
                 for i, row in enumerate(rows):
                     try:
+                        # Get all cells in the row
                         cells = row.find_all('td')
                         if len(cells) >= 2:
+                            # First cell contains full text (brand + description)
+                            # Second cell contains just the description
                             full_text = cells[0].get_text().strip()
-                            description_text = cells[1].get_text().strip()
+                            description_only = cells[1].get_text().strip()
                             
-                            # Extract clean brand name
-                            brand_name = extract_brand_from_text(full_text)
+                            # Extract ONLY the brand name from full text (before the colon)
+                            if ':' in full_text:
+                                brand = full_text.split(':', 1)[0].strip()
+                                # Remove any newlines or extra text from brand
+                                brand = brand.split('\n')[0].strip()
+                                # Use the description from the second cell
+                                clean_description = description_only
+                            else:
+                                # Fallback: use first word as brand
+                                words = full_text.split()
+                                brand = words[0] if words else 'Unknown'
+                                clean_description = description_only
                             
                             item = {
                                 'id': f"in_demand_{i+1:03d}",
-                                'title': brand_name,  # ONLY the brand name
-                                'brand': brand_name,
-                                'model': brand_name,
+                                'title': brand,  # Use clean brand name as title
+                                'brand': brand,
+                                'model': brand,  # Use brand as model for now
                                 'condition': 'any',
                                 'price': None,
                                 'location': 'Various',
-                                'description': description_text,  # Clean description
+                                'description': clean_description,  # Clean description from second cell
                                 'url': 'https://lasermatch.io/',
                                 'images': [],
                                 'discovered_at': datetime.now().isoformat(),
@@ -143,7 +156,7 @@ def fetch_and_extract_lasermatch():
                             }
                             
                             all_items.append(item)
-                            logging.info(f"✅ Demand: '{brand_name}' | Desc: '{description_text[:30]}...'")
+                            logging.info(f"✅ Demand: {brand} | Desc: {clean_description[:50]}...")
                             
                     except Exception as e:
                         logging.warning(f"⚠️ Error processing In Demand row {i}: {e}")
@@ -198,7 +211,7 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
         _scraped_items = result['items']
         
         response = LaserMatchScrapeResponse(
-            message=f"SIMPLE_VERSION - Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
+            message=f"FIXED_VERSION - Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
             items_scraped=result['items_scraped'],
             items_added=result['items_added'],
             execution_time=result['execution_time']
