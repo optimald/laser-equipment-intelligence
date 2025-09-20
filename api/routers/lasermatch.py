@@ -233,13 +233,16 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
     Scrape LaserMatch.io for new equipment listings
     """
     try:
-        logging.info("Starting LaserMatch scraper")
+        logging.info("Starting LaserMatch scraper - clearing cache first")
+        
+        # Clear cache first to ensure fresh data
+        global _scraped_items
+        _scraped_items = []
         
         # Run the scraper
         result = run_lasermatch_scraper()
         
         # Store items in global variable (in production, this would be saved to database)
-        global _scraped_items
         _scraped_items = result['items']
         
         response = LaserMatchScrapeResponse(
