@@ -422,6 +422,16 @@ export default function LaserMatchTab() {
     return statusOption?.color || 'bg-gray-100 text-gray-800'
   }
 
+  // Group items by brand
+  const groupedItems = items.reduce((groups, item) => {
+    const brand = item.brand || 'Unknown'
+    if (!groups[brand]) {
+      groups[brand] = []
+    }
+    groups[brand].push(item)
+    return groups
+  }, {} as Record<string, typeof items>)
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -461,17 +471,27 @@ export default function LaserMatchTab() {
         <button
           onClick={refreshLaserMatchItems}
           disabled={isRefreshing}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white px-4 py-2 rounded-md font-medium flex items-center transition-colors"
+          className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white px-4 py-2 rounded-md font-medium flex items-center transition-colors"
         >
           <ArrowPathIcon className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
           {isRefreshing ? 'Refreshing...' : 'Refresh Items'}
         </button>
       </div>
 
-      {/* Items Cards */}
-      <div className="space-y-3">
-              {items.map((item) => (
-          <div key={item.id} className="bg-gray-800 shadow-sm rounded-lg border border-gray-700 overflow-hidden">
+      {/* Grouped Items by Brand */}
+      <div className="space-y-8">
+        {Object.entries(groupedItems).map(([brand, brandItems]) => (
+          <div key={brand} className="space-y-4">
+            {/* Brand Title */}
+            <div className="text-center">
+              <h3 className="text-2xl font-bold text-orange-400 mb-2">{brand}</h3>
+              <div className="w-16 h-0.5 bg-orange-400 mx-auto"></div>
+            </div>
+            
+            {/* Brand Items */}
+            <div className="space-y-3">
+              {brandItems.map((item) => (
+          <div key={item.id} className="bg-gray-900 shadow-sm rounded-lg border border-gray-800 overflow-hidden">
             {/* Main Card Content */}
             <div className="p-4">
               <div className="flex justify-between items-start mb-4">
@@ -491,7 +511,7 @@ export default function LaserMatchTab() {
                     <>
                       <button
                         onClick={() => setEditingItem(null)}
-                        className="text-green-400 hover:text-green-300 p-2"
+                        className="text-gray-300 hover:text-white p-2"
                         title="Save"
                       >
                         <CheckIcon className="h-5 w-5" />
@@ -509,7 +529,7 @@ export default function LaserMatchTab() {
                       <button
                         onClick={() => findSources(item)}
                         disabled={item.searchStatus === 'searching'}
-                        className="text-blue-400 hover:text-blue-300 disabled:text-gray-600 p-2"
+                        className="text-gray-300 hover:text-white disabled:text-gray-600 p-2"
                         title="Find Sources"
                       >
                         <MagnifyingGlassIcon className="h-5 w-5" />
@@ -538,16 +558,16 @@ export default function LaserMatchTab() {
                       value={item.price || ''}
                       onChange={(e) => updateItem(item.id, { price: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="Enter current price"
-                      className="text-sm font-semibold border border-gray-300 rounded px-2 py-1 w-full"
+                      className="text-sm font-semibold border border-gray-600 bg-gray-800 text-white rounded px-2 py-1 w-full focus:border-gray-500 focus:outline-none"
                     />
                   ) : (
-                    <div className="text-sm font-semibold text-gray-900">
+                    <div className="text-sm font-semibold text-white">
                       {formatPrice(item.price)}
                     </div>
                   )}
                       </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
                     Target Price
                   </label>
                     {editingItem === item.id ? (
@@ -556,23 +576,23 @@ export default function LaserMatchTab() {
                         value={item.targetPrice || ''}
                         onChange={(e) => updateItem(item.id, { targetPrice: e.target.value ? Number(e.target.value) : undefined })}
                       placeholder="Enter target price"
-                      className="text-sm font-semibold border border-gray-300 rounded px-2 py-1 w-full"
+                      className="text-sm font-semibold border border-gray-600 bg-gray-800 text-white rounded px-2 py-1 w-full focus:border-gray-500 focus:outline-none"
                       />
                     ) : (
-                    <div className="text-sm font-semibold text-gray-900">
+                    <div className="text-sm font-semibold text-white">
                         {formatPrice(item.targetPrice)}
                       </div>
                     )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
                     Status
                   </label>
                     {editingItem === item.id ? (
                       <select
                         value={item.sourcingStatus}
                         onChange={(e) => updateItem(item.id, { sourcingStatus: e.target.value as any })}
-                      className="w-full text-xs border border-gray-300 rounded px-2 py-1"
+                      className="w-full text-xs border border-gray-600 bg-gray-800 text-white rounded px-2 py-1 focus:border-gray-500 focus:outline-none"
                       >
                         {SOURCING_STATUS_OPTIONS.map(status => (
                           <option key={status.value} value={status.value}>
@@ -587,14 +607,14 @@ export default function LaserMatchTab() {
                     )}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
                     Assigned Rep
                   </label>
                   {editingItem === item.id ? (
                     <select
                       value={item.assignedRep || ''}
                       onChange={(e) => updateItem(item.id, { assignedRep: e.target.value || undefined })}
-                      className="w-full text-xs border border-gray-300 rounded px-2 py-1"
+                      className="w-full text-xs border border-gray-600 bg-gray-800 text-white rounded px-2 py-1 focus:border-gray-500 focus:outline-none"
                     >
                       <option value="">Select Rep</option>
                       {DEFAULT_REPS.map(rep => (
@@ -602,7 +622,7 @@ export default function LaserMatchTab() {
                       ))}
                     </select>
                   ) : (
-                    <div className="text-xs text-gray-900">
+                    <div className="text-xs text-white">
                       {item.assignedRep || 'Unassigned'}
                         </div>
                       )}
@@ -612,13 +632,13 @@ export default function LaserMatchTab() {
               {/* Spider URLs Section - Full Width */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider">
                     Spider Crawled URLs & Sources
                   </label>
                   {addingSpiderUrl !== item.id && (
                     <button
                       onClick={() => setAddingSpiderUrl(item.id)}
-                      className="text-xs text-blue-600 hover:text-blue-700"
+                      className="text-xs text-gray-300 hover:text-white"
                     >
                       Add Source
                     </button>
@@ -627,19 +647,19 @@ export default function LaserMatchTab() {
 
                 {/* Add Spider URL Form */}
                 {addingSpiderUrl === item.id && (
-                  <div className="mb-4 p-3 bg-gray-50 rounded border border-gray-200">
+                  <div className="mb-4 p-3 bg-gray-800 rounded border border-gray-700">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
                       <input
                         type="url"
                         placeholder="URL *"
                         value={newSpiderUrl.url}
                         onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, url: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                       <select
                         value={newSpiderUrl.contactId}
                         onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, contactId: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       >
                         <option value="">Select Contact *</option>
                         {contacts.map(contact => (
@@ -653,14 +673,14 @@ export default function LaserMatchTab() {
                         placeholder="Price"
                         value={newSpiderUrl.price}
                         onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, price: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                       <input
                         type="date"
                         placeholder="Follow-up date"
                         value={newSpiderUrl.followUpDate}
                         onChange={(e) => setNewSpiderUrl(prev => ({ ...prev, followUpDate: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                     </div>
                     <div className="flex justify-end space-x-2">
@@ -674,14 +694,14 @@ export default function LaserMatchTab() {
                             followUpDate: ''
                           })
                         }}
-                        className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
+                        className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => addSpiderUrl(item.id)}
                         disabled={!newSpiderUrl.url.trim() || !newSpiderUrl.contactId.trim()}
-                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed"
                       >
                         Add Source
                       </button>
@@ -690,25 +710,25 @@ export default function LaserMatchTab() {
                       )}
 
                 {/* Spider URLs List */}
-                <div className="border border-gray-200 rounded-lg bg-white">
+                <div className="border border-gray-700 rounded-lg bg-gray-800">
                   {item.spiderUrls && item.spiderUrls.length > 0 ? (
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-700">
+                        <thead className="bg-gray-900">
                           <tr>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                               URL
                             </th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                               Contact
                             </th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                               Price
                             </th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                               Follow Up
                             </th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                               Status
                             </th>
                             <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -716,31 +736,31 @@ export default function LaserMatchTab() {
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-gray-800 divide-y divide-gray-700">
                           {item.spiderUrls.map((spiderUrl) => (
-                            <tr key={spiderUrl.id} className="hover:bg-gray-50">
+                            <tr key={spiderUrl.id} className="hover:bg-gray-700">
                               <td className="px-3 py-2 whitespace-nowrap">
                                 <a
                                   href={spiderUrl.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-sm text-blue-600 hover:text-blue-700 truncate block max-w-xs"
+                                  className="text-sm text-gray-300 hover:text-white truncate block max-w-xs"
                                 >
                                   {spiderUrl.url}
                                 </a>
                               </td>
                               <td className="px-3 py-2 whitespace-nowrap">
                                 <div>
-                                  <div className="text-sm font-medium text-gray-900">{spiderUrl.contactName || 'No contact'}</div>
+                                  <div className="text-sm font-medium text-white">{spiderUrl.contactName || 'No contact'}</div>
                                   {spiderUrl.contactCompany && (
-                                    <div className="text-xs text-gray-500">{spiderUrl.contactCompany}</div>
+                                    <div className="text-xs text-gray-400">{spiderUrl.contactCompany}</div>
                       )}
                     </div>
                   </td>
-                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-white">
                                 {formatPrice(spiderUrl.price)}
                               </td>
-                              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                              <td className="px-3 py-2 whitespace-nowrap text-sm text-white">
                                 {spiderUrl.followUpDate ? new Date(spiderUrl.followUpDate).toLocaleDateString() : 'Not set'}
                               </td>
                               <td className="px-3 py-2 whitespace-nowrap">
@@ -867,14 +887,14 @@ export default function LaserMatchTab() {
                             setEditingItem(null)
                             setNewNoteContent('')
                           }}
-                          className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
+                          className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300"
                         >
                           Cancel
                         </button>
                         <button
                           onClick={() => addNote(item.id, newNoteContent)}
                           disabled={!newNoteContent.trim()}
-                          className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          className="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed"
                         >
                           Add Note
                         </button>
@@ -920,42 +940,42 @@ export default function LaserMatchTab() {
                         placeholder="Source name *"
                         value={newSource.source}
                         onChange={(e) => setNewSource(prev => ({ ...prev, source: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                       <input
                         type="url"
                         placeholder="Website URL *"
                         value={newSource.url}
                         onChange={(e) => setNewSource(prev => ({ ...prev, url: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                       <input
                         type="number"
                         placeholder="Price"
                         value={newSource.price}
                         onChange={(e) => setNewSource(prev => ({ ...prev, price: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                       <input
                         type="text"
                         placeholder="Contact name"
                         value={newSource.contactName}
                         onChange={(e) => setNewSource(prev => ({ ...prev, contactName: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                       <input
                         type="email"
                         placeholder="Contact email"
                         value={newSource.contactEmail}
                         onChange={(e) => setNewSource(prev => ({ ...prev, contactEmail: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                       <input
                         type="tel"
                         placeholder="Contact phone"
                         value={newSource.contactPhone}
                         onChange={(e) => setNewSource(prev => ({ ...prev, contactPhone: e.target.value }))}
-                        className="text-sm border border-gray-300 rounded px-3 py-2"
+                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
                       />
                     </div>
                     <div className="flex justify-end space-x-2">
@@ -971,14 +991,14 @@ export default function LaserMatchTab() {
                             contactPhone: ''
                           })
                         }}
-                        className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
+                        className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300"
                       >
                         Cancel
                           </button>
                           <button
                         onClick={() => addSource(item.id)}
                         disabled={!newSource.source.trim() || !newSource.url.trim()}
-                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed"
                       >
                         Add Source
                           </button>
@@ -1038,6 +1058,9 @@ export default function LaserMatchTab() {
               </div>
             ) : null}
         </div>
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
