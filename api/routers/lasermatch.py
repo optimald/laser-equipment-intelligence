@@ -67,9 +67,11 @@ def fetch_and_extract_lasermatch():
                             full_text = cells[0].get_text().strip()
                             description_only = cells[1].get_text().strip()
                             
-                            # Extract brand name from full text
+                            # Extract ONLY the brand name from full text (before the colon)
                             if ':' in full_text:
                                 brand = full_text.split(':', 1)[0].strip()
+                                # Remove any newlines or extra text from brand
+                                brand = brand.split('\n')[0].strip()
                                 # Use the description from the second cell
                                 clean_description = description_only
                             else:
@@ -121,9 +123,11 @@ def fetch_and_extract_lasermatch():
                             full_text = cells[0].get_text().strip()
                             description_only = cells[1].get_text().strip()
                             
-                            # Extract brand name from full text
+                            # Extract ONLY the brand name from full text (before the colon)
                             if ':' in full_text:
                                 brand = full_text.split(':', 1)[0].strip()
+                                # Remove any newlines or extra text from brand
+                                brand = brand.split('\n')[0].strip()
                                 # Use the description from the second cell
                                 clean_description = description_only
                             else:
