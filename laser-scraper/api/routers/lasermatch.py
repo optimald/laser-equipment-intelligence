@@ -60,6 +60,9 @@ def fetch_and_extract_lasermatch():
                             brand = item_name.split()[0] if item_name.split() else 'Unknown'
                             model = item_name
                         
+                        # Clean up description to avoid repetition
+                        clean_description = description if description != item_name else f"In-demand equipment: {item_name}"
+                        
                         item = {
                             'id': f"hot_list_{i+1:03d}",
                             'title': item_name,
@@ -68,7 +71,7 @@ def fetch_and_extract_lasermatch():
                             'condition': 'any',
                             'price': None,
                             'location': 'Various',
-                            'description': description,
+                            'description': clean_description,
                             'url': 'https://lasermatch.io/',
                             'images': [],
                             'discovered_at': datetime.now().isoformat(),
@@ -110,6 +113,9 @@ def fetch_and_extract_lasermatch():
                             brand = item_name.split()[0] if item_name.split() else 'Unknown'
                             model = item_name
                         
+                        # Clean up description to avoid repetition
+                        clean_description = description if description != item_name else f"In-demand equipment: {item_name}"
+                        
                         item = {
                             'id': f"in_demand_{i+1:03d}",
                             'title': item_name,
@@ -118,7 +124,7 @@ def fetch_and_extract_lasermatch():
                             'condition': 'any',
                             'price': None,
                             'location': 'Various',
-                            'description': description,
+                            'description': clean_description,
                             'url': 'https://lasermatch.io/',
                             'images': [],
                             'discovered_at': datetime.now().isoformat(),
