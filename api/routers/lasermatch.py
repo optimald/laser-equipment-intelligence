@@ -48,22 +48,12 @@ def fetch_and_extract_lasermatch():
                 try:
                     cells = row.find_all('td')
                     if len(cells) >= 2:
-                        # Get the raw text from both cells
-                        item_name_raw = cells[0].get_text().strip()
+                        # SIMPLE: First cell = item name, Second cell = description
+                        # Extract text from the <a> tag inside each cell
+                        item_name = cells[0].get_text().strip()
                         description_raw = cells[1].get_text().strip()
                         
-                        # Debug: log what we're getting
-                        logging.info(f"Raw item_name: '{item_name_raw[:100]}...'")
-                        logging.info(f"Raw description: '{description_raw[:100]}...'")
-                        
-                        # SIMPLE FIX: Just take the first line before any newline
-                        # Based on API analysis, first line is always the equipment name
-                        item_name = item_name_raw.split('\n')[0].strip()
-                        
-                        # Remove any remaining carriage returns
-                        item_name = item_name.replace('\r', '').strip()
-                        
-                        logging.info(f"✅ VERSION_2.0 - Extracted clean item_name: '{item_name}'")
+                        logging.info(f"✅ FIXED - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -74,24 +64,8 @@ def fetch_and_extract_lasermatch():
                             brand = item_name.split()[0] if item_name.split() else 'Unknown'
                             model = item_name
                         
-                        # Clean up description - remove the item name from the beginning if it's repeated
+                        # Description is already clean from the second cell
                         clean_description = description_raw
-                        
-                        # Remove the exact item name from the beginning of description if it's there
-                        if clean_description.startswith(item_name):
-                            clean_description = clean_description[len(item_name):].strip()
-                        
-                        # Remove brand prefix if it's still there
-                        if clean_description.startswith(brand + ':'):
-                            clean_description = clean_description[len(brand + ':'):].strip()
-                        
-                        # Remove leading dash or hyphen
-                        if clean_description.startswith('-'):
-                            clean_description = clean_description[1:].strip()
-                        
-                        # If description is empty or too similar to title, create a meaningful one
-                        if not clean_description or len(clean_description) < 10:
-                            clean_description = f"In-demand laser equipment: {model}"
                         
                         item = {
                             'id': f"hot_list_{i+1:03d}",
@@ -131,22 +105,12 @@ def fetch_and_extract_lasermatch():
                 try:
                     cells = row.find_all('td')
                     if len(cells) >= 2:
-                        # Get the raw text from both cells
-                        item_name_raw = cells[0].get_text().strip()
+                        # SIMPLE: First cell = item name, Second cell = description
+                        # Extract text from the <a> tag inside each cell
+                        item_name = cells[0].get_text().strip()
                         description_raw = cells[1].get_text().strip()
                         
-                        # Debug: log what we're getting
-                        logging.info(f"Raw item_name: '{item_name_raw[:100]}...'")
-                        logging.info(f"Raw description: '{description_raw[:100]}...'")
-                        
-                        # SIMPLE FIX: Just take the first line before any newline
-                        # Based on API analysis, first line is always the equipment name
-                        item_name = item_name_raw.split('\n')[0].strip()
-                        
-                        # Remove any remaining carriage returns
-                        item_name = item_name.replace('\r', '').strip()
-                        
-                        logging.info(f"✅ VERSION_2.0 - Extracted clean item_name: '{item_name}'")
+                        logging.info(f"✅ FIXED - Item: '{item_name}' | Desc: '{description_raw[:50]}...'")
                         
                         # Parse brand and model from the item name
                         if ':' in item_name:
@@ -157,24 +121,8 @@ def fetch_and_extract_lasermatch():
                             brand = item_name.split()[0] if item_name.split() else 'Unknown'
                             model = item_name
                         
-                        # Clean up description - remove the item name from the beginning if it's repeated
+                        # Description is already clean from the second cell
                         clean_description = description_raw
-                        
-                        # Remove the exact item name from the beginning of description if it's there
-                        if clean_description.startswith(item_name):
-                            clean_description = clean_description[len(item_name):].strip()
-                        
-                        # Remove brand prefix if it's still there
-                        if clean_description.startswith(brand + ':'):
-                            clean_description = clean_description[len(brand + ':'):].strip()
-                        
-                        # Remove leading dash or hyphen
-                        if clean_description.startswith('-'):
-                            clean_description = clean_description[1:].strip()
-                        
-                        # If description is empty or too similar to title, create a meaningful one
-                        if not clean_description or len(clean_description) < 10:
-                            clean_description = f"In-demand laser equipment: {model}"
                         
                         item = {
                             'id': f"in_demand_{i+1:03d}",
