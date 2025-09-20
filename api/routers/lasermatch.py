@@ -57,8 +57,12 @@ def fetch_and_extract_lasermatch():
                         logging.info(f"Raw description: '{description_raw[:100]}...'")
                         
                         # The item name should be just the first part before any long description
-                        # Split on common separators and take the first meaningful part
-                        if ' - ' in item_name_raw:
+                        # First, split on newlines and take the first line (equipment name)
+                        if '\n' in item_name_raw:
+                            item_name = item_name_raw.split('\n')[0].strip()
+                        elif '\r' in item_name_raw:
+                            item_name = item_name_raw.split('\r')[0].strip()
+                        elif ' - ' in item_name_raw:
                             item_name = item_name_raw.split(' - ')[0].strip()
                         elif ' Looking for ' in item_name_raw:
                             item_name = item_name_raw.split(' Looking for ')[0].strip()
@@ -145,8 +149,12 @@ def fetch_and_extract_lasermatch():
                         logging.info(f"Raw description: '{description_raw[:100]}...'")
                         
                         # The item name should be just the first part before any long description
-                        # Split on common separators and take the first meaningful part
-                        if ' - ' in item_name_raw:
+                        # First, split on newlines and take the first line (equipment name)
+                        if '\n' in item_name_raw:
+                            item_name = item_name_raw.split('\n')[0].strip()
+                        elif '\r' in item_name_raw:
+                            item_name = item_name_raw.split('\r')[0].strip()
+                        elif ' - ' in item_name_raw:
                             item_name = item_name_raw.split(' - ')[0].strip()
                         elif ' Looking for ' in item_name_raw:
                             item_name = item_name_raw.split(' Looking for ')[0].strip()
