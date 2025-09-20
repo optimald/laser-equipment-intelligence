@@ -1,5 +1,6 @@
 [phases.setup]
-nixPkgs = ["python39", "python39Packages.pip"]
+nixPkgs = ["python39", "python39Packages.pip", "glibcLocales"]
+env = { LANG = "en_US.UTF-8", LC_ALL = "en_US.UTF-8" }
 
 [phases.install]
 cmds = ["pip install -r requirements.txt"]
