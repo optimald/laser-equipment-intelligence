@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react'
 import { ArrowPathIcon, MagnifyingGlassIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
+interface Note {
+  id: string
+  content: string
+  author: string
+  timestamp: string
+}
+
 interface LaserMatchItem {
   id: string
   title: string
@@ -24,7 +31,8 @@ interface LaserMatchItem {
   assignedRep?: string
   targetPrice?: number
   sourcingStatus: 'not_started' | 'in_progress' | 'quoted' | 'negotiating' | 'purchased' | 'declined'
-  notes?: string
+  notes?: string // Legacy field for backward compatibility
+  notesLog?: Note[] // New structured notes
 }
 
 const SOURCING_STATUS_OPTIONS = [
@@ -56,6 +64,7 @@ export default function LaserMatchTab() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [editingItem, setEditingItem] = useState<string | null>(null)
+  const [newNoteContent, setNewNoteContent] = useState('')
   const [stats, setStats] = useState<{
     total_items: number
     hot_list_items: number
@@ -198,6 +207,31 @@ export default function LaserMatchTab() {
     setItems(prev => prev.map(item => 
       item.id === itemId ? { ...item, ...updates } : item
     ))
+  }
+
+  const addNote = (itemId: string, content: string) => {
+    if (!content.trim()) return
+
+    const newNote: Note = {
+      id: Date.now().toString(),
+      content: content.trim(),
+      author: 'Current User', // In a real app, this would come from auth
+      timestamp: new Date().toISOString()
+    }
+
+    setItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        const currentNotes = item.notesLog || []
+        return {
+          ...item,
+          notesLog: [newNote, ...currentNotes] // Add new note at the beginning (newest first)
+        }
+      }
+      return item
+    }))
+
+    setNewNoteContent('')
+    setEditingItem(null)
   }
 
   const formatPrice = (price?: number) => {
@@ -349,8 +383,8 @@ export default function LaserMatchTab() {
                 </div>
               </div>
 
-              {/* Status, Rep, and Notes */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-3">
+              {/* Status and Rep */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 {/* Status */}
                 <div>
                   <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
@@ -397,25 +431,86 @@ export default function LaserMatchTab() {
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* Notes */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
-                    Notes
+              {/* Notes Log - Full Width */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notes Log
                   </label>
-                  {editingItem === item.id ? (
-                    <textarea
-                      value={item.notes || ''}
-                      onChange={(e) => updateItem(item.id, { notes: e.target.value })}
-                      placeholder="Add notes..."
-                      className="w-full text-sm border border-gray-300 rounded px-3 py-2 h-20 resize-none"
-                    />
-                  ) : (
-                    <div className="text-sm text-gray-600">
-                      {item.notes || 'No notes'}
-                    </div>
+                  {editingItem !== item.id && (
+                    <button
+                      onClick={() => setEditingItem(item.id)}
+                      className="text-xs text-blue-600 hover:text-blue-700"
+                    >
+                      Add Note
+                    </button>
                   )}
                 </div>
+                
+                {editingItem === item.id ? (
+                  <div className="space-y-2">
+                    <textarea
+                      value={newNoteContent}
+                      onChange={(e) => setNewNoteContent(e.target.value)}
+                      placeholder="Add a new note..."
+                      className="w-full text-sm border border-gray-300 rounded px-3 py-2 h-20 resize-none"
+                    />
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => {
+                          setEditingItem(null)
+                          setNewNoteContent('')
+                        }}
+                        className="px-3 py-1 text-xs text-gray-600 hover:text-gray-700"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => addNote(item.id, newNoteContent)}
+                        disabled={!newNoteContent.trim()}
+                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        Add Note
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border border-gray-200 rounded-lg bg-gray-50 max-h-32 overflow-y-auto">
+                    {(item.notesLog && item.notesLog.length > 0) || item.notes ? (
+                      <div className="p-3 space-y-2">
+                        {/* Show new structured notes first (newest first) */}
+                        {item.notesLog?.map((note) => (
+                          <div key={note.id} className="bg-white rounded border border-gray-100 p-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-gray-700">{note.author}</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(note.timestamp).toLocaleString()}
+                              </span>
+                            </div>
+                            <div className="text-sm text-gray-800">{note.content}</div>
+                          </div>
+                        ))}
+                        
+                        {/* Show legacy note if it exists and no structured notes */}
+                        {item.notes && (!item.notesLog || item.notesLog.length === 0) && (
+                          <div className="bg-white rounded border border-gray-100 p-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-gray-700">Legacy Note</span>
+                              <span className="text-xs text-gray-500">Unknown date</span>
+                            </div>
+                            <div className="text-sm text-gray-800">{item.notes}</div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="p-3 text-sm text-gray-500 text-center">
+                        No notes yet. Click "Add Note" to get started.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
