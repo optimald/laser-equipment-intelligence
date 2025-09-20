@@ -60,16 +60,24 @@ def fetch_and_extract_lasermatch():
                             brand = item_name.split()[0] if item_name.split() else 'Unknown'
                             model = item_name
                         
-                        # Clean up description - remove brand prefix and format properly
+                        # Clean up description - remove the item name from the beginning if it's repeated
                         clean_description = description_raw
+                        
+                        # Remove the exact item name from the beginning of description if it's there
+                        if clean_description.startswith(item_name):
+                            clean_description = clean_description[len(item_name):].strip()
+                        
+                        # Remove brand prefix if it's still there
                         if clean_description.startswith(brand + ':'):
                             clean_description = clean_description[len(brand + ':'):].strip()
+                        
+                        # Remove leading dash or hyphen
                         if clean_description.startswith('-'):
                             clean_description = clean_description[1:].strip()
                         
-                        # If description is still too similar to title, create a better one
-                        if not clean_description or clean_description.lower() == item_name.lower():
-                            clean_description = f"Hot list equipment: {model}"
+                        # If description is empty or too similar to title, create a meaningful one
+                        if not clean_description or len(clean_description) < 10:
+                            clean_description = f"In-demand laser equipment: {model}"
                         
                         item = {
                             'id': f"hot_list_{i+1:03d}",
@@ -121,16 +129,24 @@ def fetch_and_extract_lasermatch():
                             brand = item_name.split()[0] if item_name.split() else 'Unknown'
                             model = item_name
                         
-                        # Clean up description - remove brand prefix and format properly
+                        # Clean up description - remove the item name from the beginning if it's repeated
                         clean_description = description_raw
+                        
+                        # Remove the exact item name from the beginning of description if it's there
+                        if clean_description.startswith(item_name):
+                            clean_description = clean_description[len(item_name):].strip()
+                        
+                        # Remove brand prefix if it's still there
                         if clean_description.startswith(brand + ':'):
                             clean_description = clean_description[len(brand + ':'):].strip()
+                        
+                        # Remove leading dash or hyphen
                         if clean_description.startswith('-'):
                             clean_description = clean_description[1:].strip()
                         
-                        # If description is still too similar to title, create a better one
-                        if not clean_description or clean_description.lower() == item_name.lower():
-                            clean_description = f"Hot list equipment: {model}"
+                        # If description is empty or too similar to title, create a meaningful one
+                        if not clean_description or len(clean_description) < 10:
+                            clean_description = f"In-demand laser equipment: {model}"
                         
                         item = {
                             'id': f"in_demand_{i+1:03d}",
