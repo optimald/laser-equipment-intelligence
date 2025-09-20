@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowPathIcon, MagnifyingGlassIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 interface Note {
   id: string
@@ -84,15 +84,6 @@ export default function LaserMatchTab() {
   const [isLoading, setIsLoading] = useState(true)
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [newNoteContent, setNewNoteContent] = useState('')
-  const [addingSource, setAddingSource] = useState<string | null>(null)
-  const [newSource, setNewSource] = useState({
-    source: '',
-    url: '',
-    price: '',
-    contactName: '',
-    contactEmail: '',
-    contactPhone: ''
-  })
   const [currentUser] = useState('John Smith') // TODO: Get from auth context
   const [addingSpiderUrl, setAddingSpiderUrl] = useState<string | null>(null)
   const [newSpiderUrl, setNewSpiderUrl] = useState({
@@ -197,53 +188,6 @@ export default function LaserMatchTab() {
     }
   }
 
-  const findSources = async (item: LaserMatchItem) => {
-    // Update item status to searching
-    setItems(prev => prev.map(i => 
-      i.id === item.id 
-        ? { ...i, searchStatus: 'searching' as const }
-        : i
-    ))
-
-    try {
-      const { apiService } = await import('../services/api')
-      
-      // Search for this item across all configured sources
-      const searchResults = await apiService.searchEquipment({
-        query: item.title,
-        brand: item.brand,
-        model: item.model
-      })
-
-      // Filter out the original LaserMatch item and format sources
-      const sources = searchResults
-        .filter(result => result.source !== 'LaserMatch.io')
-        .map(result => ({
-          source: result.source,
-          url: result.url || '',
-          price: result.price,
-          found: true
-        }))
-
-      // Update item with found sources
-      setItems(prev => prev.map(i => 
-        i.id === item.id 
-          ? { 
-              ...i, 
-              sources,
-              searchStatus: 'completed' as const
-            }
-          : i
-      ))
-    } catch (error) {
-      console.error('Failed to find sources:', error)
-      setItems(prev => prev.map(i => 
-        i.id === item.id 
-          ? { ...i, searchStatus: 'error' as const }
-          : i
-      ))
-    }
-  }
 
   const updateItem = (itemId: string, updates: Partial<LaserMatchItem>) => {
     setItems(prev => prev.map(item => 
@@ -276,43 +220,6 @@ export default function LaserMatchTab() {
     setEditingItem(null)
   }
 
-  const addSource = (itemId: string) => {
-    if (!newSource.source.trim() || !newSource.url.trim()) return
-
-    const sourceToAdd = {
-      source: newSource.source.trim(),
-      url: newSource.url.trim(),
-      price: newSource.price ? Number(newSource.price) : undefined,
-      found: true,
-      contactName: newSource.contactName.trim() || undefined,
-      contactEmail: newSource.contactEmail.trim() || undefined,
-      contactPhone: newSource.contactPhone.trim() || undefined,
-      addedBy: 'manual' as const,
-      addedAt: new Date().toISOString()
-    }
-
-    setItems(prev => prev.map(item => {
-      if (item.id === itemId) {
-        const currentSources = item.sources || []
-        return {
-          ...item,
-          sources: [...currentSources, sourceToAdd]
-        }
-      }
-      return item
-    }))
-
-    // Reset form
-    setNewSource({
-      source: '',
-      url: '',
-      price: '',
-      contactName: '',
-      contactEmail: '',
-      contactPhone: ''
-    })
-    setAddingSource(null)
-  }
 
   const addSpiderUrl = (itemId: string) => {
     if (!newSpiderUrl.url.trim() || !newSpiderUrl.contactId.trim()) return
@@ -526,14 +433,6 @@ export default function LaserMatchTab() {
                     </>
                   ) : (
                     <>
-                      <button
-                        onClick={() => findSources(item)}
-                        disabled={item.searchStatus === 'searching'}
-                        className="text-gray-300 hover:text-white disabled:text-gray-600 p-2"
-                        title="Find Sources"
-                      >
-                        <MagnifyingGlassIcon className="h-5 w-5" />
-                      </button>
                       <button
                         onClick={() => setEditingItem(item.id)}
                         className="text-gray-400 hover:text-gray-300 p-2"
@@ -887,7 +786,7 @@ export default function LaserMatchTab() {
                         </div>
                       )}
                       <div className="flex justify-end space-x-2">
-                        <button
+                          <button
                           onClick={() => {
                             setEditingItem(null)
                             setNewNoteContent('')
@@ -895,14 +794,14 @@ export default function LaserMatchTab() {
                           className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300"
                         >
                           Cancel
-                        </button>
-                        <button
+                          </button>
+                          <button
                           onClick={() => addNote(item.id, newNoteContent)}
                           disabled={!newNoteContent.trim()}
                           className="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed"
                         >
                           Add Note
-                        </button>
+                          </button>
                       </div>
                     </div>
                   )}
@@ -910,158 +809,6 @@ export default function LaserMatchTab() {
               </div>
             </div>
 
-            {/* Sources Section - Nested Rows */}
-            {(item.sources && item.sources.length > 0) || item.searchStatus === 'searching' || item.searchStatus === 'error' || addingSource === item.id ? (
-              <div className="border-t border-gray-700 bg-gray-800 px-4 py-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-300">Sources</h4>
-                  <div className="flex items-center space-x-2">
-                    {item.searchStatus === 'searching' && (
-                      <div className="flex items-center text-sm text-blue-600">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                        Searching...
-                      </div>
-                    )}
-                    {item.searchStatus === 'error' && (
-                      <div className="text-sm text-red-600">Search failed</div>
-                    )}
-                    {addingSource !== item.id && (
-                          <button
-                        onClick={() => setAddingSource(item.id)}
-                        className="text-xs text-blue-600 hover:text-blue-700"
-                          >
-                        Add Source
-                          </button>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Add Source Form */}
-                {addingSource === item.id && (
-                  <div className="mb-4 p-3 bg-gray-700 rounded border border-gray-600">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                      <input
-                        type="text"
-                        placeholder="Source name *"
-                        value={newSource.source}
-                        onChange={(e) => setNewSource(prev => ({ ...prev, source: e.target.value }))}
-                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
-                      />
-                      <input
-                        type="url"
-                        placeholder="Website URL *"
-                        value={newSource.url}
-                        onChange={(e) => setNewSource(prev => ({ ...prev, url: e.target.value }))}
-                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Price"
-                        value={newSource.price}
-                        onChange={(e) => setNewSource(prev => ({ ...prev, price: e.target.value }))}
-                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Contact name"
-                        value={newSource.contactName}
-                        onChange={(e) => setNewSource(prev => ({ ...prev, contactName: e.target.value }))}
-                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Contact email"
-                        value={newSource.contactEmail}
-                        onChange={(e) => setNewSource(prev => ({ ...prev, contactEmail: e.target.value }))}
-                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Contact phone"
-                        value={newSource.contactPhone}
-                        onChange={(e) => setNewSource(prev => ({ ...prev, contactPhone: e.target.value }))}
-                        className="text-sm border border-gray-600 bg-gray-700 text-white rounded px-3 py-2 focus:border-gray-500 focus:outline-none"
-                      />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                          <button
-                        onClick={() => {
-                          setAddingSource(null)
-                          setNewSource({
-                            source: '',
-                            url: '',
-                            price: '',
-                            contactName: '',
-                            contactEmail: '',
-                            contactPhone: ''
-                          })
-                        }}
-                        className="px-3 py-1 text-xs text-gray-400 hover:text-gray-300"
-                      >
-                        Cancel
-                          </button>
-                          <button
-                        onClick={() => addSource(item.id)}
-                        disabled={!newSource.source.trim() || !newSource.url.trim()}
-                        className="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed"
-                      >
-                        Add Source
-                          </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Sources List */}
-                {item.sources && item.sources.length > 0 && (
-                  <div className="space-y-2">
-                    {item.sources.map((source, index) => (
-                      <div key={index} className="bg-gray-700 rounded border border-gray-600 p-3">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center space-x-3">
-                            <div className="text-sm font-medium text-white">
-                              {source.source}
-                            </div>
-                            {source.addedBy === 'manual' && (
-                              <span className="text-xs bg-green-700 text-green-200 px-2 py-1 rounded">
-                                Manual
-                              </span>
-                            )}
-                            {source.url && (
-                              <a
-                                href={source.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-blue-600 hover:text-blue-700"
-                              >
-                                View →
-                              </a>
-                            )}
-                          </div>
-                          <div className="text-sm font-semibold text-white">
-                            {formatPrice(source.price)}
-                          </div>
-                        </div>
-                        
-                        {/* Contact Information */}
-                        {(source.contactName || source.contactEmail || source.contactPhone) && (
-                          <div className="text-xs text-gray-400 space-y-1">
-                            {source.contactName && (
-                              <div>Contact: {source.contactName}</div>
-                            )}
-                            {source.contactEmail && (
-                              <div>Email: <a href={`mailto:${source.contactEmail}`} className="text-blue-400 hover:text-blue-300">{source.contactEmail}</a></div>
-                            )}
-                            {source.contactPhone && (
-                              <div>Phone: <a href={`tel:${source.contactPhone}`} className="text-blue-400 hover:text-blue-300">{source.contactPhone}</a></div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : null}
         </div>
               ))}
             </div>
