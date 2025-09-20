@@ -67,44 +67,7 @@ export default function ConfigurationTab() {
       setValue('refreshInterval', searchConfig.refreshInterval)
     } catch (error) {
       console.error('Failed to load configuration:', error)
-      // Fallback to mock data - ALL actual scrape targets from spec (NO LaserMatch)
-      const mockSources: SourceConfig[] = [
-        // Auction & Liquidation Platforms (Primary Targets)
-        { id: 'dotmed_auctions', name: 'DOTmed Auctions', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
-        { id: 'centurion_service_group', name: 'Centurion Service Group', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
-        { id: 'bidspotter', name: 'BidSpotter', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
-        { id: 'proxibid', name: 'Proxibid', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
-        { id: 'govdeals', name: 'GovDeals', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'gsa_auctions', name: 'GSA Auctions', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'govplanet', name: 'GovPlanet', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'heritage_global_partners', name: 'Heritage Global Partners', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
-        { id: 'iron_horse_auction', name: 'Iron Horse Auction', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
-        { id: 'kurtz_auction', name: 'Kurtz Auction', enabled: true, priority: 'HIGH', defaultSearchCount: 8, delay: 3 },
-        
-        // Dealer / Liquidator / Repossession
-        { id: 'asset_recovery_services', name: 'Asset Recovery Services', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'speedy_repo', name: 'Speedy Repo', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'resolvion', name: 'Resolvion', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'nassau_asset_management', name: 'Nassau Asset Management', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'capital_asset_recovery_group', name: 'Capital Asset Recovery Group', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'accelerated_asset_recovery', name: 'Accelerated Asset Recovery', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'med_asset_solutions', name: 'Med Asset Solutions', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'alliance_healthcare_services', name: 'Alliance HealthCare Services', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'southeast_medical_equipment', name: 'Southeast Medical Equipment Liquidators', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        
-        // Marketplaces / Classifieds (Stealth Required)
-        { id: 'ebay_laser', name: 'eBay', enabled: true, priority: 'HIGH', defaultSearchCount: 10, delay: 2 },
-        { id: 'facebook_marketplace', name: 'Facebook Marketplace', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
-        { id: 'craigslist', name: 'Craigslist', enabled: false, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
-        { id: 'labx', name: 'LabX', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        { id: 'used_line', name: 'Used-line', enabled: true, priority: 'MEDIUM', defaultSearchCount: 5, delay: 5 },
-        
-        // Notices / Financial Signals
-        { id: 'fdic_failed_bank_list', name: 'FDIC Failed Bank List', enabled: true, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
-        { id: 'naam_member_lists', name: 'NAAM Member Lists', enabled: true, priority: 'LOW', defaultSearchCount: 3, delay: 10 },
-        { id: 'ner_device_theft', name: 'NER Device Theft/Recovery', enabled: true, priority: 'LOW', defaultSearchCount: 3, delay: 10 }
-      ]
-      setSources(mockSources)
+      setSources([])
     } finally {
       setIsLoading(false)
     }
@@ -259,204 +222,170 @@ export default function ConfigurationTab() {
 
       {/* Data Sources */}
       <div className="card">
-        <div className="flex justify-between items-center mb-4">
+        <div className="mb-4">
           <h3 className="text-lg font-medium text-gray-900">Data Sources</h3>
-          <button
-            onClick={runAllSpiders}
-            className="btn-secondary"
-          >
-            Run All Spiders
-          </button>
         </div>
 
         <div className="space-y-6">
-          {/* Auction & Liquidation Platforms */}
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-3">Auction & Liquidation Platforms</h4>
-            <div className="space-y-3">
-              {sources.filter(s => ['dotmed_auctions', 'centurion_service_group', 'bidspotter', 'proxibid', 'govdeals', 'gsa_auctions', 'govplanet', 'heritage_global_partners', 'iron_horse_auction', 'kurtz_auction'].includes(s.id)).map((source) => (
-                <div key={source.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <input
-                      type="checkbox"
-                      checked={source.enabled}
-                      onChange={(e) => updateSource(source.id, e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    />
-                    <div className="flex-1">
-                      <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
-                      <div className="flex items-center space-x-3 mt-1">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
-                          {source.priority}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {source.defaultSearchCount} items • {source.delay}s delay
-                        </span>
+          {/* Show all sources grouped by category */}
+          {sources.length > 0 ? (
+            <>
+              {/* Auction & Liquidation Platforms */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">Auction & Liquidation Platforms</h4>
+                <div className="space-y-3">
+                  {sources.filter(s => 
+                    s.name.toLowerCase().includes('auction') || 
+                    s.name.toLowerCase().includes('bid') ||
+                    s.name.toLowerCase().includes('gov') ||
+                    s.name.toLowerCase().includes('heritage') ||
+                    s.name.toLowerCase().includes('iron horse') ||
+                    s.name.toLowerCase().includes('kurtz') ||
+                    s.name.toLowerCase().includes('centurion')
+                  ).map((source) => (
+                    <div key={source.id} className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={source.enabled}
+                          onChange={(e) => updateSource(source.id, e.target.checked)}
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                        />
+                        <div className="flex-1">
+                          <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                          <div className="flex items-center space-x-3 mt-1">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
+                              {source.priority}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {source.defaultSearchCount} items • {source.delay}s delay
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={async () => {
-                        try {
-                          const { apiService } = await import('../services/api')
-                          await apiService.runSpider(source.id)
-                          console.log(`Spider started for ${source.name}`)
-                        } catch (error) {
-                          console.error(`Failed to run spider for ${source.name}:`, error)
-                        }
-                      }}
-                      disabled={!source.enabled}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Run Spider
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Dealer / Liquidator / Repossession */}
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-3">Dealer / Liquidator / Repossession</h4>
-            <div className="space-y-3">
-              {sources.filter(s => ['asset_recovery_services', 'speedy_repo', 'resolvion', 'nassau_asset_management', 'capital_asset_recovery_group', 'accelerated_asset_recovery', 'med_asset_solutions', 'alliance_healthcare_services', 'southeast_medical_equipment'].includes(s.id)).map((source) => (
-                <div key={source.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <input
-                      type="checkbox"
-                      checked={source.enabled}
-                      onChange={(e) => updateSource(source.id, e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    />
-                    <div className="flex-1">
-                      <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
-                      <div className="flex items-center space-x-3 mt-1">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
-                          {source.priority}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {source.defaultSearchCount} items • {source.delay}s delay
-                        </span>
+              {/* Dealer / Liquidator / Repossession */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">Dealer / Liquidator / Repossession</h4>
+                <div className="space-y-3">
+                  {sources.filter(s => 
+                    s.name.toLowerCase().includes('asset') ||
+                    s.name.toLowerCase().includes('recovery') ||
+                    s.name.toLowerCase().includes('repo') ||
+                    s.name.toLowerCase().includes('liquidator') ||
+                    s.name.toLowerCase().includes('medical') ||
+                    s.name.toLowerCase().includes('healthcare') ||
+                    s.name.toLowerCase().includes('alliance') ||
+                    s.name.toLowerCase().includes('southeast')
+                  ).map((source) => (
+                    <div key={source.id} className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={source.enabled}
+                          onChange={(e) => updateSource(source.id, e.target.checked)}
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                        />
+                        <div className="flex-1">
+                          <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                          <div className="flex items-center space-x-3 mt-1">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
+                              {source.priority}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {source.defaultSearchCount} items • {source.delay}s delay
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={async () => {
-                        try {
-                          const { apiService } = await import('../services/api')
-                          await apiService.runSpider(source.id)
-                          console.log(`Spider started for ${source.name}`)
-                        } catch (error) {
-                          console.error(`Failed to run spider for ${source.name}:`, error)
-                        }
-                      }}
-                      disabled={!source.enabled}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Run Spider
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Marketplaces / Classifieds */}
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-3">Marketplaces / Classifieds</h4>
-            <div className="space-y-3">
-              {sources.filter(s => ['ebay_laser', 'facebook_marketplace', 'craigslist', 'labx', 'used_line'].includes(s.id)).map((source) => (
-                <div key={source.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <input
-                      type="checkbox"
-                      checked={source.enabled}
-                      onChange={(e) => updateSource(source.id, e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    />
-                    <div className="flex-1">
-                      <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
-                      <div className="flex items-center space-x-3 mt-1">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
-                          {source.priority}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {source.defaultSearchCount} items • {source.delay}s delay
-                        </span>
+              {/* Marketplaces / Classifieds */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">Marketplaces / Classifieds</h4>
+                <div className="space-y-3">
+                  {sources.filter(s => 
+                    s.name.toLowerCase().includes('ebay') ||
+                    s.name.toLowerCase().includes('facebook') ||
+                    s.name.toLowerCase().includes('craigslist') ||
+                    s.name.toLowerCase().includes('labx') ||
+                    s.name.toLowerCase().includes('used-line') ||
+                    s.name.toLowerCase().includes('marketplace')
+                  ).map((source) => (
+                    <div key={source.id} className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={source.enabled}
+                          onChange={(e) => updateSource(source.id, e.target.checked)}
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                        />
+                        <div className="flex-1">
+                          <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                          <div className="flex items-center space-x-3 mt-1">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
+                              {source.priority}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {source.defaultSearchCount} items • {source.delay}s delay
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={async () => {
-                        try {
-                          const { apiService } = await import('../services/api')
-                          await apiService.runSpider(source.id)
-                          console.log(`Spider started for ${source.name}`)
-                        } catch (error) {
-                          console.error(`Failed to run spider for ${source.name}:`, error)
-                        }
-                      }}
-                      disabled={!source.enabled}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Run Spider
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Notices / Financial Signals */}
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-3">Notices / Financial Signals</h4>
-            <div className="space-y-3">
-              {sources.filter(s => ['fdic_failed_bank_list', 'naam_member_lists', 'ner_device_theft'].includes(s.id)).map((source) => (
-                <div key={source.id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <input
-                      type="checkbox"
-                      checked={source.enabled}
-                      onChange={(e) => updateSource(source.id, e.target.checked)}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    />
-                    <div className="flex-1">
-                      <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
-                      <div className="flex items-center space-x-3 mt-1">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
-                          {source.priority}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {source.defaultSearchCount} items • {source.delay}s delay
-                        </span>
+              {/* Notices / Financial Signals */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-3">Notices / Financial Signals</h4>
+                <div className="space-y-3">
+                  {sources.filter(s => 
+                    s.name.toLowerCase().includes('fdic') ||
+                    s.name.toLowerCase().includes('naam') ||
+                    s.name.toLowerCase().includes('ner') ||
+                    s.name.toLowerCase().includes('bank') ||
+                    s.name.toLowerCase().includes('theft') ||
+                    s.name.toLowerCase().includes('financial')
+                  ).map((source) => (
+                    <div key={source.id} className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <input
+                          type="checkbox"
+                          checked={source.enabled}
+                          onChange={(e) => updateSource(source.id, e.target.checked)}
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                        />
+                        <div className="flex-1">
+                          <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                          <div className="flex items-center space-x-3 mt-1">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
+                              {source.priority}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {source.defaultSearchCount} items • {source.delay}s delay
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={async () => {
-                        try {
-                          const { apiService } = await import('../services/api')
-                          await apiService.runSpider(source.id)
-                          console.log(`Spider started for ${source.name}`)
-                        } catch (error) {
-                          console.error(`Failed to run spider for ${source.name}:`, error)
-                        }
-                      }}
-                      disabled={!source.enabled}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Run Spider
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No data sources available. Please check your API connection.</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
