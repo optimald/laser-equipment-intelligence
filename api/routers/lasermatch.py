@@ -248,6 +248,39 @@ async def get_lasermatch_items(skip: int = 0, limit: int = 100):
         logging.error(f"Failed to get LaserMatch items: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve items: {str(e)}")
 
+@router.get("/debug-html")
+async def debug_html_structure():
+    """Debug endpoint to see actual HTML structure"""
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        }
+        
+        response = requests.get('https://lasermatch.io/', headers=headers, timeout=10)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Find the hot list table
+        hot_table = soup.find('table', id='dt-hotlist-items')
+        if hot_table:
+            tbody = hot_table.find('tbody')
+            if tbody:
+                rows = tbody.find_all('tr')
+                if rows:
+                    # Get first row for debugging
+                    first_row = rows[0]
+                    return {
+                        "row_html": str(first_row),
+                        "cells_count": len(first_row.find_all('td')),
+                        "links_count": len(first_row.find_all('a')),
+                        "cells_text": [cell.get_text().strip() for cell in first_row.find_all('td')],
+                        "links_text": [link.get_text().strip() for link in first_row.find_all('a')]
+                    }
+        
+        return {"error": "Could not find table structure"}
+        
+    except Exception as e:
+        return {"error": str(e)}
+
 @router.get("/stats")
 async def get_lasermatch_stats():
     """

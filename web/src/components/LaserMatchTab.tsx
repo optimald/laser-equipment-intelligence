@@ -248,201 +248,216 @@ export default function LaserMatchTab() {
         </button>
       </div>
 
-      {/* Items Table */}
-      <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Equipment
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Assigned Rep
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Target Price
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sources
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Notes
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {items.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  {/* Equipment Info */}
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      <div className="text-sm font-medium text-gray-900 line-clamp-2">
-                        {item.title}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {item.brand} {item.model}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {item.condition} • {item.location}
-                      </div>
-                    </div>
-                  </td>
+      {/* Items Cards */}
+      <div className="space-y-4">
+        {items.map((item) => (
+          <div key={item.id} className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+            {/* Main Card Content */}
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                {/* Equipment Info */}
+                <div className="flex-1 min-w-0 mr-6">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2 line-clamp-2">
+                    {item.title}
+                  </h3>
+                  <div className="text-sm text-gray-500 mb-1">
+                    {item.brand} {item.model}
+                  </div>
+                  <div className="text-xs text-gray-400 mb-3">
+                    {item.condition} • {item.location}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {item.description}
+                  </div>
+                </div>
 
-                  {/* Current Price */}
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">
-                      {formatPrice(item.price)}
-                    </div>
-                  </td>
-
-                  {/* Assigned Rep */}
-                  <td className="px-6 py-4">
-                    {editingItem === item.id ? (
-                      <select
-                        value={item.assignedRep || ''}
-                        onChange={(e) => updateItem(item.id, { assignedRep: e.target.value || undefined })}
-                        className="text-sm border border-gray-300 rounded px-2 py-1"
+                {/* Actions */}
+                <div className="flex items-center space-x-2 flex-shrink-0">
+                  {editingItem === item.id ? (
+                    <>
+                      <button
+                        onClick={() => setEditingItem(null)}
+                        className="text-green-600 hover:text-green-700 p-2"
+                        title="Save"
                       >
-                        <option value="">Select Rep</option>
-                        {REPS.map(rep => (
-                          <option key={rep} value={rep}>{rep}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <div className="text-sm text-gray-900">
-                        {item.assignedRep || 'Unassigned'}
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Target Price */}
-                  <td className="px-6 py-4">
-                    {editingItem === item.id ? (
-                      <input
-                        type="number"
-                        value={item.targetPrice || ''}
-                        onChange={(e) => updateItem(item.id, { targetPrice: e.target.value ? Number(e.target.value) : undefined })}
-                        placeholder="Target price"
-                        className="text-sm border border-gray-300 rounded px-2 py-1 w-24"
-                      />
-                    ) : (
-                      <div className="text-sm text-gray-900">
-                        {formatPrice(item.targetPrice)}
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Sourcing Status */}
-                  <td className="px-6 py-4">
-                    {editingItem === item.id ? (
-                      <select
-                        value={item.sourcingStatus}
-                        onChange={(e) => updateItem(item.id, { sourcingStatus: e.target.value as any })}
-                        className="text-sm border border-gray-300 rounded px-2 py-1"
+                        <CheckIcon className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => setEditingItem(null)}
+                        className="text-gray-400 hover:text-gray-600 p-2"
+                        title="Cancel"
                       >
-                        {SOURCING_STATUS_OPTIONS.map(status => (
-                          <option key={status.value} value={status.value}>
-                            {status.label}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.sourcingStatus)}`}>
-                        {SOURCING_STATUS_OPTIONS.find(s => s.value === item.sourcingStatus)?.label}
-                      </span>
-                    )}
-                  </td>
+                        <XMarkIcon className="h-5 w-5" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => findSources(item)}
+                        disabled={item.searchStatus === 'searching'}
+                        className="text-blue-600 hover:text-blue-700 disabled:text-gray-400 p-2"
+                        title="Find Sources"
+                      >
+                        <MagnifyingGlassIcon className="h-5 w-5" />
+                      </button>
+                      <button
+                        onClick={() => setEditingItem(item.id)}
+                        className="text-gray-600 hover:text-gray-700 p-2"
+                        title="Edit"
+                      >
+                        <PencilIcon className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
 
-                  {/* Sources */}
-                  <td className="px-6 py-4">
-                    <div className="space-y-1">
-                      {item.searchStatus === 'searching' && (
-                        <div className="flex items-center text-xs text-blue-600">
-                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-1"></div>
-                          Searching...
-                        </div>
-                      )}
-                      {item.sources && item.sources.length > 0 && (
-                        <div className="text-xs text-gray-600">
-                          {item.sources.length} sources found
-                        </div>
-                      )}
-                      {item.searchStatus === 'error' && (
-                        <div className="text-xs text-red-600">Search failed</div>
-                      )}
+              {/* Price and Target Price Side by Side */}
+              <div className="grid grid-cols-2 gap-6 mb-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                    Current Price
+                  </label>
+                  <div className="text-lg font-semibold text-gray-900">
+                    {formatPrice(item.price)}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                    Target Price
+                  </label>
+                  {editingItem === item.id ? (
+                    <input
+                      type="number"
+                      value={item.targetPrice || ''}
+                      onChange={(e) => updateItem(item.id, { targetPrice: e.target.value ? Number(e.target.value) : undefined })}
+                      placeholder="Enter target price"
+                      className="text-lg font-semibold border border-gray-300 rounded px-3 py-1 w-full"
+                    />
+                  ) : (
+                    <div className="text-lg font-semibold text-gray-900">
+                      {formatPrice(item.targetPrice)}
                     </div>
-                  </td>
+                  )}
+                </div>
+              </div>
 
-                  {/* Notes */}
-                  <td className="px-6 py-4">
-                    {editingItem === item.id ? (
-                      <textarea
-                        value={item.notes || ''}
-                        onChange={(e) => updateItem(item.id, { notes: e.target.value })}
-                        placeholder="Add notes..."
-                        className="text-sm border border-gray-300 rounded px-2 py-1 w-32 h-16 resize-none"
-                      />
-                    ) : (
-                      <div className="text-sm text-gray-600 max-w-32 truncate">
-                        {item.notes || 'No notes'}
+              {/* Status, Rep, and Notes */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                {/* Status */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                    Status
+                  </label>
+                  {editingItem === item.id ? (
+                    <select
+                      value={item.sourcingStatus}
+                      onChange={(e) => updateItem(item.id, { sourcingStatus: e.target.value as any })}
+                      className="w-full text-sm border border-gray-300 rounded px-3 py-2"
+                    >
+                      {SOURCING_STATUS_OPTIONS.map(status => (
+                        <option key={status.value} value={status.value}>
+                          {status.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(item.sourcingStatus)}`}>
+                      {SOURCING_STATUS_OPTIONS.find(s => s.value === item.sourcingStatus)?.label}
+                    </span>
+                  )}
+                </div>
+
+                {/* Assigned Rep */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                    Assigned Rep
+                  </label>
+                  {editingItem === item.id ? (
+                    <select
+                      value={item.assignedRep || ''}
+                      onChange={(e) => updateItem(item.id, { assignedRep: e.target.value || undefined })}
+                      className="w-full text-sm border border-gray-300 rounded px-3 py-2"
+                    >
+                      <option value="">Select Rep</option>
+                      {REPS.map(rep => (
+                        <option key={rep} value={rep}>{rep}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="text-sm text-gray-900">
+                      {item.assignedRep || 'Unassigned'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                    Notes
+                  </label>
+                  {editingItem === item.id ? (
+                    <textarea
+                      value={item.notes || ''}
+                      onChange={(e) => updateItem(item.id, { notes: e.target.value })}
+                      placeholder="Add notes..."
+                      className="w-full text-sm border border-gray-300 rounded px-3 py-2 h-20 resize-none"
+                    />
+                  ) : (
+                    <div className="text-sm text-gray-600">
+                      {item.notes || 'No notes'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Sources Section - Nested Rows */}
+            {(item.sources && item.sources.length > 0) || item.searchStatus === 'searching' || item.searchStatus === 'error' ? (
+              <div className="border-t border-gray-200 bg-gray-50 px-6 py-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-gray-700">Sources</h4>
+                  {item.searchStatus === 'searching' && (
+                    <div className="flex items-center text-sm text-blue-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                      Searching...
+                    </div>
+                  )}
+                  {item.searchStatus === 'error' && (
+                    <div className="text-sm text-red-600">Search failed</div>
+                  )}
+                </div>
+                
+                {item.sources && item.sources.length > 0 && (
+                  <div className="space-y-2">
+                    {item.sources.map((source, index) => (
+                      <div key={index} className="flex items-center justify-between py-2 px-3 bg-white rounded border border-gray-200">
+                        <div className="flex items-center space-x-3">
+                          <div className="text-sm font-medium text-gray-900">
+                            {source.source}
+                          </div>
+                          {source.url && (
+                            <a
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 hover:text-blue-700"
+                            >
+                              View →
+                            </a>
+                          )}
+                        </div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          {formatPrice(source.price)}
+                        </div>
                       </div>
-                    )}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      {editingItem === item.id ? (
-                        <>
-                          <button
-                            onClick={() => setEditingItem(null)}
-                            className="text-green-600 hover:text-green-700"
-                          >
-                            <CheckIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setEditingItem(null)}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            <XMarkIcon className="h-4 w-4" />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => findSources(item)}
-                            disabled={item.searchStatus === 'searching'}
-                            className="text-blue-600 hover:text-blue-700 disabled:text-gray-400"
-                            title="Find Sources"
-                          >
-                            <MagnifyingGlassIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setEditingItem(item.id)}
-                            className="text-gray-600 hover:text-gray-700"
-                            title="Edit"
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        ))}
       </div>
 
       {items.length === 0 && (
