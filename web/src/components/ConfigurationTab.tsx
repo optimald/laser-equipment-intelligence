@@ -33,12 +33,15 @@ export default function ConfigurationTab() {
     refreshInterval: 60
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [laserMatchStats, setLaserMatchStats] = useState<any>(null)
+  const [isRefreshingLaserMatch, setIsRefreshingLaserMatch] = useState(false)
 
   const { register, handleSubmit, watch, setValue } = useForm<SearchConfig>()
 
   // Load configuration on mount
   useEffect(() => {
     loadConfiguration()
+    loadLaserMatchStats()
   }, [])
 
   const loadConfiguration = async () => {
@@ -71,6 +74,29 @@ export default function ConfigurationTab() {
       setSources([])
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadLaserMatchStats = async () => {
+    try {
+      const { apiService } = await import('../services/api')
+      const stats = await apiService.getLaserMatchStats()
+      setLaserMatchStats(stats)
+    } catch (error) {
+      console.error('Failed to load LaserMatch stats:', error)
+    }
+  }
+
+  const refreshLaserMatchItems = async () => {
+    setIsRefreshingLaserMatch(true)
+    try {
+      const { apiService } = await import('../services/api')
+      await apiService.scrapeLaserMatch()
+      await loadLaserMatchStats() // Reload stats after refresh
+    } catch (error) {
+      console.error('Failed to refresh LaserMatch items:', error)
+    } finally {
+      setIsRefreshingLaserMatch(false)
     }
   }
 
@@ -122,7 +148,7 @@ export default function ConfigurationTab() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <span className="ml-2 text-gray-600">Loading configuration...</span>
+        <span className="ml-2 text-gray-400">Loading configuration...</span>
       </div>
     )
   }
@@ -131,13 +157,56 @@ export default function ConfigurationTab() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Configuration</h2>
-        <p className="text-gray-600">Configure search sources, defaults, and system settings</p>
+        <h2 className="text-2xl font-bold text-white">Configuration</h2>
+        <p className="text-gray-400">Configure search sources, defaults, and system settings</p>
+      </div>
+
+      {/* LaserMatch Management */}
+      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h3 className="text-lg font-medium text-white">LaserMatch Data Source</h3>
+            <p className="text-gray-400">
+              {laserMatchStats ? (
+                <>
+                  Managing {laserMatchStats.total_items} items from LaserMatch.io
+                  {laserMatchStats.latest_update && (
+                    <span className="text-sm text-gray-400 ml-2">
+                      • Last updated: {new Date(laserMatchStats.latest_update).toLocaleString()}
+                    </span>
+                  )}
+                </>
+              ) : (
+                'LaserMatch.io equipment listings'
+              )}
+            </p>
+            {laserMatchStats && (
+              <div className="flex space-x-4 text-sm text-gray-400 mt-1">
+                <span>🔥 Hot List: {laserMatchStats.hot_list_items} items</span>
+                <span>📈 In Demand: {laserMatchStats.in_demand_items} items</span>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={refreshLaserMatchItems}
+            disabled={isRefreshingLaserMatch}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white px-4 py-2 rounded-md font-medium flex items-center transition-colors"
+          >
+            {isRefreshingLaserMatch ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Refreshing...
+              </>
+            ) : (
+              'Refresh LaserMatch Data'
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Search Configuration */}
       <div className="card">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Search Settings</h3>
+        <h3 className="text-lg font-medium text-white mb-4">Search Settings</h3>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -209,7 +278,7 @@ export default function ConfigurationTab() {
             <input
               {...register('autoRefresh')}
               type="checkbox"
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
             />
             <label className="ml-2 block text-sm text-gray-700">
               Enable auto-refresh of equipment items
@@ -225,7 +294,7 @@ export default function ConfigurationTab() {
       {/* Data Sources */}
       <div className="card">
         <div className="mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Data Sources</h3>
+          <h3 className="text-lg font-medium text-white">Data Sources</h3>
         </div>
 
         <div className="space-y-6">
@@ -234,7 +303,7 @@ export default function ConfigurationTab() {
             <>
               {/* Auction & Liquidation Platforms */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Auction & Liquidation Platforms</h4>
+                <h4 className="text-lg font-semibold text-white mb-3">Auction & Liquidation Platforms</h4>
                 <div className="space-y-3">
                   {sources.filter(s => 
                     s.name.toLowerCase().includes('auction') || 
@@ -245,16 +314,16 @@ export default function ConfigurationTab() {
                     s.name.toLowerCase().includes('kurtz') ||
                     s.name.toLowerCase().includes('centurion')
                   ).map((source) => (
-                    <div key={source.id} className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div key={source.id} className="flex items-center p-4 bg-gray-900 border border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-center space-x-4 flex-1">
                         <input
                           type="checkbox"
                           checked={source.enabled}
                           onChange={(e) => updateSource(source.id, e.target.checked)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
                         />
                         <div className="flex-1">
-                          <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                          <h4 className="text-base font-medium text-white">{source.name}</h4>
                           <div className="flex items-center space-x-3 mt-1">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
                               {source.priority}
@@ -272,7 +341,7 @@ export default function ConfigurationTab() {
 
               {/* Dealer / Liquidator / Repossession */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Dealer / Liquidator / Repossession</h4>
+                <h4 className="text-lg font-semibold text-white mb-3">Dealer / Liquidator / Repossession</h4>
                 <div className="space-y-3">
                   {sources.filter(s => 
                     s.name.toLowerCase().includes('asset') ||
@@ -284,16 +353,16 @@ export default function ConfigurationTab() {
                     s.name.toLowerCase().includes('alliance') ||
                     s.name.toLowerCase().includes('southeast')
                   ).map((source) => (
-                    <div key={source.id} className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div key={source.id} className="flex items-center p-4 bg-gray-900 border border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-center space-x-4 flex-1">
                         <input
                           type="checkbox"
                           checked={source.enabled}
                           onChange={(e) => updateSource(source.id, e.target.checked)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
                         />
                         <div className="flex-1">
-                          <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                          <h4 className="text-base font-medium text-white">{source.name}</h4>
                           <div className="flex items-center space-x-3 mt-1">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
                               {source.priority}
@@ -311,7 +380,7 @@ export default function ConfigurationTab() {
 
               {/* Marketplaces / Classifieds */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Marketplaces / Classifieds</h4>
+                <h4 className="text-lg font-semibold text-white mb-3">Marketplaces / Classifieds</h4>
                 <div className="space-y-3">
                   {sources.filter(s => 
                     s.name.toLowerCase().includes('ebay') ||
@@ -321,16 +390,16 @@ export default function ConfigurationTab() {
                     s.name.toLowerCase().includes('used-line') ||
                     s.name.toLowerCase().includes('marketplace')
                   ).map((source) => (
-                    <div key={source.id} className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div key={source.id} className="flex items-center p-4 bg-gray-900 border border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-center space-x-4 flex-1">
                         <input
                           type="checkbox"
                           checked={source.enabled}
                           onChange={(e) => updateSource(source.id, e.target.checked)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
                         />
                         <div className="flex-1">
-                          <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                          <h4 className="text-base font-medium text-white">{source.name}</h4>
                           <div className="flex items-center space-x-3 mt-1">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
                               {source.priority}
@@ -348,7 +417,7 @@ export default function ConfigurationTab() {
 
               {/* Notices / Financial Signals */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Notices / Financial Signals</h4>
+                <h4 className="text-lg font-semibold text-white mb-3">Notices / Financial Signals</h4>
                 <div className="space-y-3">
                   {sources.filter(s => 
                     s.name.toLowerCase().includes('fdic') ||
@@ -358,16 +427,16 @@ export default function ConfigurationTab() {
                     s.name.toLowerCase().includes('theft') ||
                     s.name.toLowerCase().includes('financial')
                   ).map((source) => (
-                    <div key={source.id} className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                    <div key={source.id} className="flex items-center p-4 bg-gray-900 border border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-center space-x-4 flex-1">
                         <input
                           type="checkbox"
                           checked={source.enabled}
                           onChange={(e) => updateSource(source.id, e.target.checked)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
                         />
                         <div className="flex-1">
-                          <h4 className="text-base font-medium text-gray-900">{source.name}</h4>
+                          <h4 className="text-base font-medium text-white">{source.name}</h4>
                           <div className="flex items-center space-x-3 mt-1">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
                               {source.priority}
@@ -393,7 +462,7 @@ export default function ConfigurationTab() {
 
       {/* System Status */}
       <div className="card">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">System Status</h3>
+        <h3 className="text-lg font-medium text-white mb-4">System Status</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-2xl font-bold text-green-600">

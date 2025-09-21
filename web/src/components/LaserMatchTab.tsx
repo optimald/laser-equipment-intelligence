@@ -414,17 +414,6 @@ export default function LaserMatchTab() {
 
   return (
     <div className="space-y-6">
-      {/* Refresh Button - Compact */}
-      <div className="flex justify-end">
-        <button
-          onClick={refreshLaserMatchItems}
-          disabled={isRefreshing}
-          className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white px-4 py-2 rounded-md font-medium flex items-center transition-colors"
-        >
-          <ArrowPathIcon className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          {isRefreshing ? 'Refreshing...' : 'Refresh Items'}
-        </button>
-      </div>
 
       {/* Grouped Items by Brand */}
       <div className="space-y-8">
@@ -434,8 +423,8 @@ export default function LaserMatchTab() {
             <div className="text-center">
               <h3 className="text-2xl font-bold text-orange-400 mb-2">{brand}</h3>
               <div className="w-16 h-0.5 bg-orange-400 mx-auto"></div>
-            </div>
-            
+      </div>
+
             {/* Brand Items */}
             <div className="space-y-3">
               {brandItems.map((item) => (
