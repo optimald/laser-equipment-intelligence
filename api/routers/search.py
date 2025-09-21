@@ -4,6 +4,11 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
+@router.get("/test")
+async def test_endpoint():
+    """Simple test endpoint"""
+    return {"message": "Search router is working", "status": "ok"}
+
 class SearchRequest(BaseModel):
     query: Optional[str] = None
     brand: Optional[str] = None
