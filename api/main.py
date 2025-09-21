@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 import os
 from contextlib import asynccontextmanager
 
+# FORCE RAILWAY REDEPLOY - VERSION 1.0.2
 from api.routers import search_simple as search, dashboard, configuration, lasermatch
 from api.models.database import init_db
 
@@ -50,7 +51,7 @@ app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["laserm
 
 @app.get("/")
 async def root():
-    return {"message": "Laser Equipment Intelligence API", "version": "1.0.1", "build": "2025-09-21-fix", "status": "database_disabled"}
+    return {"message": "Laser Equipment Intelligence API", "version": "1.0.2", "build": "2025-09-21-railway-fix", "status": "database_disabled", "deploy_time": "2025-09-21-03:00:00"}
 
 @app.get("/health")
 async def health_check():
