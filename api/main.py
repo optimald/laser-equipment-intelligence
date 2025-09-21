@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 import os
 from contextlib import asynccontextmanager
 
-from api.routers import search, dashboard, configuration, spiders, lasermatch
+from api.routers import search_simple as search, dashboard, configuration, spiders, lasermatch
 from api.models.database import init_db
 
 @asynccontextmanager
