@@ -43,7 +43,64 @@ async def search_equipment(search_request: SearchRequest):
     # TODO: Re-enable database connection once Railway PostgreSQL is set up
     use_mock_data = True
     
-    if not use_mock_data:
+    if use_mock_data:
+        # Use mock data directly
+        print("Using mock data (database disabled)")
+        from datetime import datetime
+        import random
+        
+        # Generate mock search results based on search criteria
+        mock_results = []
+        sources = ["eBay", "DOTmed Auctions", "BidSpotter", "Craigslist", "Facebook Marketplace"]
+        conditions = ["New", "Used - Excellent", "Used - Good", "Used - Fair", "Refurbished"]
+        brands = ["Aerolase", "Candela", "Cynosure", "Lumenis", "Syneron", "Alma", "Cutera", "Sciton"]
+        locations = ["California, USA", "Texas, USA", "New York, USA", "Florida, USA", "Illinois, USA"]
+        
+        # Generate 3-8 results based on search criteria
+        num_results = min(random.randint(3, 8), search_request.limit)
+        
+        for i in range(num_results):
+            # Use search criteria to make results more relevant
+            brand = search_request.brand if search_request.brand else random.choice(brands)
+            model = search_request.model if search_request.model else f"{brand} {random.choice(['Pro', 'Elite', 'Max', 'Plus', 'Neo'])}"
+            
+            # Generate realistic price based on search criteria
+            base_price = random.randint(15000, 85000)
+            if search_request.min_price:
+                base_price = max(base_price, int(search_request.min_price))
+            if search_request.max_price:
+                base_price = min(base_price, int(search_request.max_price))
+            
+            condition = search_request.condition if search_request.condition else random.choice(conditions)
+            source = random.choice(search_request.sources) if search_request.sources else random.choice(sources)
+            
+            # Create title based on search query or generate one
+            if search_request.query:
+                title = f"{brand} {model} - {search_request.query}"
+            else:
+                title = f"{brand} {model} Laser System"
+            
+            mock_results.append(SearchResponse(
+                id=1000 + i,
+                title=title,
+                brand=brand,
+                model=model,
+                condition=condition,
+                price=float(base_price),
+                source=source,
+                location=random.choice(locations),
+                description=f"Professional {brand} {model} laser system in {condition.lower()} condition. Includes all standard accessories and documentation.",
+                images=[f"https://example.com/image_{i+1}.jpg"],
+                discovered_at=datetime.now().isoformat(),
+                margin_estimate=random.uniform(15.0, 35.0),
+                score_overall=random.randint(75, 95),
+                url=f"https://{source.lower().replace(' ', '')}.com/listing/{1000+i}"
+            ))
+        
+        print(f"Generated {len(mock_results)} mock results")
+        return mock_results
+    
+    else:
         try:
             # Try database connection first
             try:
@@ -131,111 +188,10 @@ async def search_equipment(search_request: SearchRequest):
             
         except Exception as db_error:
             print(f"Database connection failed: {db_error}")
-            print("Falling back to mock data for search")
-            
-            # Fallback to mock data when database is not available
-            from datetime import datetime
-            import random
-            
-            # Generate mock search results based on search criteria
-            mock_results = []
-            sources = ["eBay", "DOTmed Auctions", "BidSpotter", "Craigslist", "Facebook Marketplace"]
-            conditions = ["New", "Used - Excellent", "Used - Good", "Used - Fair", "Refurbished"]
-            locations = ["California, USA", "Texas, USA", "Florida, USA", "New York, USA", "Illinois, USA"]
-            
-            # Create 3-8 mock results
-            num_results = min(random.randint(3, 8), search_request.limit)
-            
-            for i in range(num_results):
-                # Use search criteria to make results more relevant
-                brand = search_request.brand if search_request.brand else random.choice(["Aerolase", "Candela", "Cynosure", "Lumenis", "Syneron"])
-                model = search_request.model if search_request.model else random.choice(["Elite+", "GentleMax Pro", "PicoWay", "M22", "LightSheer"])
-                
-                title = f"{brand} {model}"
-                if search_request.query and search_request.query.lower() not in title.lower():
-                    title += f" {search_request.query}"
-                
-                price = None
-                if not search_request.max_price or random.random() > 0.3:
-                    base_price = random.randint(15000, 85000)
-                    if search_request.max_price:
-                        price = min(base_price, search_request.max_price - random.randint(1000, 5000))
-                    elif search_request.min_price:
-                        price = max(base_price, search_request.min_price + random.randint(1000, 5000))
-                    else:
-                        price = base_price
-                
-                mock_results.append(SearchResponse(
-                    id=1000 + i,
-                    title=title,
-                    brand=brand,
-                    model=model,
-                    condition=random.choice(conditions),
-                    price=float(price) if price else None,
-                    source=random.choice(sources),
-                    location=random.choice(locations),
-                    description=f"Professional {brand} {model} laser system. Excellent condition with low usage hours. Includes all standard accessories and documentation.",
-                    images=[],
-                    discovered_at=datetime.now().isoformat(),
-                    margin_estimate=float(random.randint(5000, 25000)) if price else None,
-                    score_overall=random.randint(75, 95),
-                    url=f"https://example.com/listing/{1000 + i}"
-                ))
-            
-            return mock_results
-    else:
-        # Use mock data directly
-        print("Using mock data (database disabled)")
-        from datetime import datetime
-        import random
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(db_error)}")
         
-        # Generate mock search results based on search criteria
-        mock_results = []
-        sources = ["eBay", "DOTmed Auctions", "BidSpotter", "Craigslist", "Facebook Marketplace"]
-        conditions = ["New", "Used - Excellent", "Used - Good", "Used - Fair", "Refurbished"]
-        locations = ["California, USA", "Texas, USA", "Florida, USA", "New York, USA", "Illinois, USA"]
-        
-        # Create 3-8 mock results
-        num_results = min(random.randint(3, 8), search_request.limit)
-        
-        for i in range(num_results):
-            # Use search criteria to make results more relevant
-            brand = search_request.brand if search_request.brand else random.choice(["Aerolase", "Candela", "Cynosure", "Lumenis", "Syneron"])
-            model = search_request.model if search_request.model else random.choice(["Elite+", "GentleMax Pro", "PicoWay", "M22", "LightSheer"])
-            
-            title = f"{brand} {model}"
-            if search_request.query and search_request.query.lower() not in title.lower():
-                title += f" {search_request.query}"
-            
-            price = None
-            if not search_request.max_price or random.random() > 0.3:
-                base_price = random.randint(15000, 85000)
-                if search_request.max_price:
-                    price = min(base_price, search_request.max_price - random.randint(1000, 5000))
-                elif search_request.min_price:
-                    price = max(base_price, search_request.min_price + random.randint(1000, 5000))
-                else:
-                    price = base_price
-            
-            mock_results.append(SearchResponse(
-                id=1000 + i,
-                title=title,
-                brand=brand,
-                model=model,
-                condition=random.choice(conditions),
-                price=float(price) if price else None,
-                source=random.choice(sources),
-                location=random.choice(locations),
-                description=f"Professional {brand} {model} laser system. Excellent condition with low usage hours. Includes all standard accessories and documentation.",
-                images=[],
-                discovered_at=datetime.now().isoformat(),
-                margin_estimate=float(random.randint(5000, 25000)) if price else None,
-                score_overall=random.randint(75, 95),
-                url=f"https://example.com/listing/{1000 + i}"
-            ))
-        
-        print(f"Generated {len(mock_results)} mock results")
-        return mock_results
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
 @router.get("/sources")
 async def get_available_sources():
