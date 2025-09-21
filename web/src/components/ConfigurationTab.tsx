@@ -218,7 +218,7 @@ export default function ConfigurationTab() {
                 type="number"
                 min="1"
                 max="50"
-                className="input-field"
+                className="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md focus:border-gray-500 focus:outline-none"
               />
               <p className="text-sm text-gray-400 mt-1">
                 Number of items to search for per source
@@ -234,7 +234,7 @@ export default function ConfigurationTab() {
                 type="number"
                 min="1"
                 max="10"
-                className="input-field"
+                className="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md focus:border-gray-500 focus:outline-none"
               />
               <p className="text-sm text-gray-400 mt-1">
                 Maximum number of simultaneous source searches
@@ -250,7 +250,7 @@ export default function ConfigurationTab() {
                 type="number"
                 min="10"
                 max="300"
-                className="input-field"
+                className="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md focus:border-gray-500 focus:outline-none"
               />
               <p className="text-sm text-gray-400 mt-1">
                 Maximum time to wait for each source search
@@ -266,7 +266,7 @@ export default function ConfigurationTab() {
                 type="number"
                 min="5"
                 max="1440"
-                className="input-field"
+                className="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md focus:border-gray-500 focus:outline-none"
               />
               <p className="text-sm text-gray-400 mt-1">
                 How often to automatically refresh equipment items
@@ -285,7 +285,7 @@ export default function ConfigurationTab() {
             </label>
           </div>
 
-          <button type="submit" className="btn-primary">
+          <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
             Save Configuration
           </button>
         </form>
