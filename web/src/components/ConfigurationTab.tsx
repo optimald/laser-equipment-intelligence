@@ -205,12 +205,12 @@ export default function ConfigurationTab() {
       </div>
 
       {/* Search Configuration */}
-      <div className="card">
+      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
         <h3 className="text-lg font-medium text-white mb-4">Search Settings</h3>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Default Search Count
               </label>
               <input
@@ -220,13 +220,13 @@ export default function ConfigurationTab() {
                 max="50"
                 className="input-field"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1">
                 Number of items to search for per source
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Max Concurrent Searches
               </label>
               <input
@@ -236,13 +236,13 @@ export default function ConfigurationTab() {
                 max="10"
                 className="input-field"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1">
                 Maximum number of simultaneous source searches
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Search Timeout (seconds)
               </label>
               <input
@@ -252,13 +252,13 @@ export default function ConfigurationTab() {
                 max="300"
                 className="input-field"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1">
                 Maximum time to wait for each source search
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-400 mb-2">
                 Auto Refresh Interval (minutes)
               </label>
               <input
@@ -268,7 +268,7 @@ export default function ConfigurationTab() {
                 max="1440"
                 className="input-field"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1">
                 How often to automatically refresh equipment items
               </p>
             </div>
@@ -280,7 +280,7 @@ export default function ConfigurationTab() {
               type="checkbox"
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
             />
-            <label className="ml-2 block text-sm text-gray-700">
+            <label className="ml-2 block text-sm text-gray-400">
               Enable auto-refresh of equipment items
             </label>
           </div>
@@ -292,7 +292,7 @@ export default function ConfigurationTab() {
       </div>
 
       {/* Data Sources */}
-      <div className="card">
+      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
         <div className="mb-4">
           <h3 className="text-lg font-medium text-white">Data Sources</h3>
         </div>
@@ -328,7 +328,7 @@ export default function ConfigurationTab() {
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
                               {source.priority}
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-400">
                               {source.defaultSearchCount} items • {source.delay}s delay
                             </span>
                           </div>
@@ -367,7 +367,7 @@ export default function ConfigurationTab() {
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
                               {source.priority}
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-400">
                               {source.defaultSearchCount} items • {source.delay}s delay
                             </span>
                           </div>
@@ -404,7 +404,7 @@ export default function ConfigurationTab() {
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
                               {source.priority}
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-400">
                               {source.defaultSearchCount} items • {source.delay}s delay
                             </span>
                           </div>
@@ -441,7 +441,7 @@ export default function ConfigurationTab() {
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(source.priority)}`}>
                               {source.priority}
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-400">
                               {source.defaultSearchCount} items • {source.delay}s delay
                             </span>
                           </div>
@@ -454,23 +454,23 @@ export default function ConfigurationTab() {
             </>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-500">No data sources available. Please check your API connection.</p>
+              <p className="text-gray-400">No data sources available. Please check your API connection.</p>
             </div>
           )}
         </div>
       </div>
 
       {/* System Status */}
-      <div className="card">
+      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
         <h3 className="text-lg font-medium text-white mb-4">System Status</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">
+          <div className="text-center p-4 bg-gray-800 rounded-lg">
+            <div className="text-2xl font-bold text-white">
               {sources.filter(s => s.enabled).length}
             </div>
             <div className="text-sm text-green-700">Active Sources</div>
           </div>
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
+          <div className="text-center p-4 bg-gray-800 rounded-lg">
             <div className="text-2xl font-bold text-blue-600">
               {sources.filter(s => s.priority === 'HIGH' && s.enabled).length}
             </div>
