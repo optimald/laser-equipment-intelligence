@@ -55,7 +55,7 @@ export default function Home() {
   const refreshLaserMatchData = async () => {
     setIsRefreshingLaserMatch(true)
     try {
-      const { apiService } = await import('./services/api')
+      const { apiService } = await import('../services/api')
       await apiService.scrapeLaserMatch()
       // The LaserMatchTab will automatically refresh its data
     } catch (error) {
