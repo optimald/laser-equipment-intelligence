@@ -14,8 +14,30 @@ export default function Home() {
   const [showRepFilter, setShowRepFilter] = useState(false)
   const [selectedReps, setSelectedReps] = useState<string[]>([])
   
-  // Mock data - in real app this would come from LaserMatch items
-  const availableReps = ['Unassigned', 'John Smith', 'Sarah Johnson', 'Mike Wilson']
+  // This will be replaced with actual LaserMatch items data
+  // For now using mock data to show the concept
+  const mockItems = [
+    { id: '1', assignedRep: 'Unassigned' },
+    { id: '2', assignedRep: 'Unassigned' },
+    { id: '3', assignedRep: 'John Smith' },
+    { id: '4', assignedRep: 'John Smith' },
+    { id: '5', assignedRep: 'John Smith' },
+    { id: '6', assignedRep: 'Sarah Johnson' },
+    { id: '7', assignedRep: 'Mike Wilson' }
+  ]
+
+  // Calculate rep counts
+  const repCounts = mockItems.reduce((counts, item) => {
+    const rep = item.assignedRep || 'Unassigned'
+    counts[rep] = (counts[rep] || 0) + 1
+    return counts
+  }, {} as Record<string, number>)
+
+  const availableReps = Object.keys(repCounts).sort((a, b) => {
+    if (a === 'Unassigned') return -1
+    if (b === 'Unassigned') return 1
+    return a.localeCompare(b)
+  })
   
   const toggleRepFilter = (rep: string) => {
     setSelectedReps(prev => 
@@ -104,14 +126,19 @@ export default function Home() {
                     <div className="absolute right-0 top-full mt-1 w-64 bg-gray-800 border border-gray-600 rounded-md shadow-lg z-50">
                       <div className="p-2 max-h-60 overflow-y-auto">
                         {availableReps.map((rep) => (
-                          <label key={rep} className="flex items-center p-2 hover:bg-gray-700 rounded cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={selectedReps.includes(rep)}
-                              onChange={() => toggleRepFilter(rep)}
-                              className="h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-                            />
-                            <span className="ml-2 text-sm text-white">{rep}</span>
+                          <label key={rep} className="flex items-center justify-between p-2 hover:bg-gray-700 rounded cursor-pointer">
+                            <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedReps.includes(rep)}
+                                onChange={() => toggleRepFilter(rep)}
+                                className="h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                              />
+                              <span className="ml-2 text-sm text-white">{rep}</span>
+                            </div>
+                            <span className="text-xs text-gray-400 bg-gray-700 px-2 py-0.5 rounded">
+                              {repCounts[rep]}
+                            </span>
                           </label>
                         ))}
                       </div>
