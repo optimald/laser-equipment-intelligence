@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MagnifyingGlassIcon, CogIcon, UserGroupIcon, UsersIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, CogIcon, UserGroupIcon, UsersIcon, ChevronDownIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 import LaserMatchTab from '@/components/LaserMatchTab'
 import ConfigurationTab from '@/components/ConfigurationTab'
 import ContactManager from '@/components/ContactManager'
@@ -13,6 +13,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('lasermatch')
   const [showRepFilter, setShowRepFilter] = useState(false)
   const [selectedReps, setSelectedReps] = useState<string[]>([])
+  const [isRefreshingLaserMatch, setIsRefreshingLaserMatch] = useState(false)
   
   // This will be replaced with actual LaserMatch items data
   // For now using mock data to show the concept
@@ -49,6 +50,19 @@ export default function Home() {
 
   const clearRepFilters = () => {
     setSelectedReps([])
+  }
+
+  const refreshLaserMatchData = async () => {
+    setIsRefreshingLaserMatch(true)
+    try {
+      const { apiService } = await import('./services/api')
+      await apiService.scrapeLaserMatch()
+      // The LaserMatchTab will automatically refresh its data
+    } catch (error) {
+      console.error('Failed to refresh LaserMatch data:', error)
+    } finally {
+      setIsRefreshingLaserMatch(false)
+    }
   }
 
   const tabs = [
@@ -97,6 +111,21 @@ export default function Home() {
                   >
                     <Icon className="h-5 w-5 mr-2" />
                     {tab.name}
+                    {tab.id === 'lasermatch' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          refreshLaserMatchData()
+                        }}
+                        disabled={isRefreshingLaserMatch}
+                        className="ml-2 p-1 rounded hover:bg-gray-700 transition-colors"
+                        title="Refresh LaserMatch data"
+                      >
+                        <ArrowPathIcon 
+                          className={`h-4 w-4 ${isRefreshingLaserMatch ? 'animate-spin' : ''}`} 
+                        />
+                      </button>
+                    )}
                   </button>
                 )
               })}

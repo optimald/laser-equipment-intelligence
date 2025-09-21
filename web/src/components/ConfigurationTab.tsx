@@ -33,15 +33,12 @@ export default function ConfigurationTab() {
     refreshInterval: 60
   })
   const [isLoading, setIsLoading] = useState(true)
-  const [laserMatchStats, setLaserMatchStats] = useState<any>(null)
-  const [isRefreshingLaserMatch, setIsRefreshingLaserMatch] = useState(false)
 
   const { register, handleSubmit, watch, setValue } = useForm<SearchConfig>()
 
   // Load configuration on mount
   useEffect(() => {
     loadConfiguration()
-    loadLaserMatchStats()
   }, [])
 
   const loadConfiguration = async () => {
@@ -77,28 +74,6 @@ export default function ConfigurationTab() {
     }
   }
 
-  const loadLaserMatchStats = async () => {
-    try {
-      const { apiService } = await import('../services/api')
-      const stats = await apiService.getLaserMatchStats()
-      setLaserMatchStats(stats)
-    } catch (error) {
-      console.error('Failed to load LaserMatch stats:', error)
-    }
-  }
-
-  const refreshLaserMatchItems = async () => {
-    setIsRefreshingLaserMatch(true)
-    try {
-      const { apiService } = await import('../services/api')
-      await apiService.scrapeLaserMatch()
-      await loadLaserMatchStats() // Reload stats after refresh
-    } catch (error) {
-      console.error('Failed to refresh LaserMatch items:', error)
-    } finally {
-      setIsRefreshingLaserMatch(false)
-    }
-  }
 
   const updateSource = async (sourceId: string, enabled: boolean) => {
     try {
@@ -161,48 +136,6 @@ export default function ConfigurationTab() {
         <p className="text-gray-400">Configure search sources, defaults, and system settings</p>
       </div>
 
-      {/* LaserMatch Management */}
-      <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h3 className="text-lg font-medium text-white">LaserMatch Data Source</h3>
-            <p className="text-gray-400">
-              {laserMatchStats ? (
-                <>
-                  Managing {laserMatchStats.total_items} items from LaserMatch.io
-                  {laserMatchStats.latest_update && (
-                    <span className="text-sm text-gray-400 ml-2">
-                      • Last updated: {new Date(laserMatchStats.latest_update).toLocaleString()}
-                    </span>
-                  )}
-                </>
-              ) : (
-                'LaserMatch.io equipment listings'
-              )}
-            </p>
-            {laserMatchStats && (
-              <div className="flex space-x-4 text-sm text-gray-400 mt-1">
-                <span>🔥 Hot List: {laserMatchStats.hot_list_items} items</span>
-                <span>📈 In Demand: {laserMatchStats.in_demand_items} items</span>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={refreshLaserMatchItems}
-            disabled={isRefreshingLaserMatch}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 text-white px-4 py-2 rounded-md font-medium flex items-center transition-colors"
-          >
-            {isRefreshingLaserMatch ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Refreshing...
-              </>
-            ) : (
-              'Refresh LaserMatch Data'
-            )}
-          </button>
-        </div>
-      </div>
 
       {/* Search Configuration */}
       <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
