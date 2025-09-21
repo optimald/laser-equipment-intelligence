@@ -68,6 +68,9 @@ async def get_db_connection():
 async def init_db():
     """Initialize database tables"""
     try:
+        print("Skipping database initialization - using mock data mode")
+        return
+        # Database initialization disabled for mock data mode
         conn = await get_db_connection()
         print("Database connection successful during init")
     except Exception as e:
