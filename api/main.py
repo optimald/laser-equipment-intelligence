@@ -56,6 +56,51 @@ async def root():
 async def health_check():
     return {"status": "healthy", "service": "laser-intelligence-api"}
 
+# Direct search endpoints for testing
+@app.get("/api/v1/search/test")
+async def search_test():
+    return {"message": "Search endpoint is working", "status": "ok"}
+
+@app.post("/api/v1/search/equipment")
+async def search_equipment_direct(search_request: dict):
+    """Direct search endpoint for testing"""
+    from datetime import datetime
+    import random
+    
+    # Generate mock search results
+    mock_results = []
+    sources = ["eBay", "DOTmed Auctions", "BidSpotter", "Craigslist", "Facebook Marketplace"]
+    conditions = ["New", "Used - Excellent", "Used - Good", "Used - Fair", "Refurbished"]
+    brands = ["Aerolase", "Candela", "Cynosure", "Lumenis", "Syneron", "Alma", "Cutera", "Sciton"]
+    locations = ["California, USA", "Texas, USA", "New York, USA", "Florida, USA", "Illinois, USA"]
+    
+    # Generate 3-5 results
+    num_results = min(random.randint(3, 5), search_request.get('limit', 50))
+    
+    for i in range(num_results):
+        brand = random.choice(brands)
+        model = f"{brand} {random.choice(['Pro', 'Elite', 'Max', 'Plus', 'Neo'])}"
+        base_price = random.randint(15000, 85000)
+        
+        mock_results.append({
+            "id": 1000 + i,
+            "title": f"{brand} {model} Laser System",
+            "brand": brand,
+            "model": model,
+            "condition": random.choice(conditions),
+            "price": float(base_price),
+            "source": random.choice(sources),
+            "location": random.choice(locations),
+            "description": f"Professional {brand} {model} laser system in excellent condition.",
+            "images": [f"https://example.com/image_{i+1}.jpg"],
+            "discovered_at": datetime.now().isoformat(),
+            "margin_estimate": random.uniform(15.0, 35.0),
+            "score_overall": random.randint(75, 95),
+            "url": f"https://example.com/listing/{1000+i}"
+        })
+    
+    return mock_results
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     return JSONResponse(
