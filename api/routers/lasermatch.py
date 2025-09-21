@@ -212,7 +212,63 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
         raise HTTPException(status_code=500, detail=f"Scraper failed: {str(e)}")
 
 # Global variable to store scraped items (in production, this would be in a database)
-_scraped_items = []
+# Initialize with mock data for testing
+_scraped_items = [
+    {
+        'id': 'mock_001',
+        'title': 'Aerolase LightPod Neo',
+        'brand': 'Aerolase',
+        'model': 'LightPod Neo',
+        'condition': 'Used - Excellent',
+        'price': 45000.0,
+        'location': 'California, USA',
+        'description': 'Professional Aerolase LightPod Neo laser system in excellent condition. Includes all accessories.',
+        'url': 'https://lasermatch.io/listing/001',
+        'images': ['https://example.com/aerolase1.jpg'],
+        'discovered_at': '2025-09-21T11:50:00',
+        'last_updated': '2025-09-21T11:50:00',
+        'source': 'LaserMatch.io',
+        'status': 'active',
+        'category': 'hot-list',
+        'availability': 'available'
+    },
+    {
+        'id': 'mock_002',
+        'title': 'Cynosure Icon',
+        'brand': 'Cynosure',
+        'model': 'Icon',
+        'condition': 'Refurbished',
+        'price': 65000.0,
+        'location': 'Texas, USA',
+        'description': 'Cynosure Icon laser system, professionally refurbished with warranty.',
+        'url': 'https://lasermatch.io/listing/002',
+        'images': ['https://example.com/cynosure1.jpg'],
+        'discovered_at': '2025-09-21T11:51:00',
+        'last_updated': '2025-09-21T11:51:00',
+        'source': 'LaserMatch.io',
+        'status': 'active',
+        'category': 'in-demand',
+        'availability': 'available'
+    },
+    {
+        'id': 'mock_003',
+        'title': 'Lumenis M22',
+        'brand': 'Lumenis',
+        'model': 'M22',
+        'condition': 'Used - Good',
+        'price': 55000.0,
+        'location': 'Florida, USA',
+        'description': 'Lumenis M22 multi-platform laser system in good working condition.',
+        'url': 'https://lasermatch.io/listing/003',
+        'images': ['https://example.com/lumenis1.jpg'],
+        'discovered_at': '2025-09-21T11:52:00',
+        'last_updated': '2025-09-21T11:52:00',
+        'source': 'LaserMatch.io',
+        'status': 'active',
+        'category': 'hot-list',
+        'availability': 'available'
+    }
+]
 
 @router.get("/items")
 async def get_lasermatch_items(
