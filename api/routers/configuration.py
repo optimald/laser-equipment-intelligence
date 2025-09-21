@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 from pydantic import BaseModel
-from api.models.database import get_db_connection
+# from api.models.database import get_db_connection  # Disabled for mock data mode
 
 router = APIRouter()
 
@@ -157,7 +157,7 @@ async def get_source_configurations():
 async def get_search_configurations():
     """Get all saved search configurations"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         rows = await conn.fetch("""
             SELECT id, name, sources, keywords, max_price, min_score, is_active, created_at, updated_at
@@ -190,7 +190,7 @@ async def get_search_configurations():
 async def create_search_configuration(config: SearchConfiguration):
     """Create a new search configuration"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         row = await conn.fetchrow("""
             INSERT INTO search_configurations (name, sources, keywords, max_price, min_score, is_active)
@@ -219,7 +219,7 @@ async def create_search_configuration(config: SearchConfiguration):
 async def update_search_configuration(config_id: int, config: SearchConfiguration):
     """Update an existing search configuration"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         row = await conn.fetchrow("""
             UPDATE search_configurations 
@@ -254,7 +254,7 @@ async def update_search_configuration(config_id: int, config: SearchConfiguratio
 async def delete_search_configuration(config_id: int):
     """Delete a search configuration"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         result = await conn.execute("""
             DELETE FROM search_configurations WHERE id = $1

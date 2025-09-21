@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import List, Optional
 from pydantic import BaseModel
-from api.models.database import get_db_connection
+# from api.models.database import get_db_connection  # Disabled for mock data mode
 import subprocess
 import asyncio
 from datetime import datetime
@@ -27,7 +27,7 @@ class SpiderStatus(BaseModel):
 
 async def run_spider_background(spider_name: str):
     """Run spider in background and update database"""
-    conn = await get_db_connection()
+    # conn = await get_db_connection()  # Disabled for mock data mode
     
     try:
         # Create spider run record
@@ -77,7 +77,7 @@ async def run_spider_background(spider_name: str):
 async def get_spider_status():
     """Get status of all spiders"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         # Get list of available spiders
         spiders = [
@@ -137,7 +137,7 @@ async def run_spider(spider_name: str, background_tasks: BackgroundTasks):
     """Run a specific spider"""
     try:
         # Check if spider is already running
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         running_check = await conn.fetchval("""
             SELECT COUNT(*) FROM spider_runs 
             WHERE spider_name = $1 AND status = 'running'
@@ -183,7 +183,7 @@ async def run_all_spiders(background_tasks: BackgroundTasks):
 async def get_spider_runs(limit: int = 50):
     """Get recent spider runs"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         rows = await conn.fetch("""
             SELECT id, spider_name, status, items_scraped, started_at, completed_at, error_message
@@ -215,7 +215,7 @@ async def get_spider_runs(limit: int = 50):
 async def get_spider_stats():
     """Get spider statistics"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         # Overall stats
         total_runs = await conn.fetchval("SELECT COUNT(*) FROM spider_runs")
