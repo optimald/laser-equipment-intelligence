@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MagnifyingGlassIcon, CogIcon, UserGroupIcon, UsersIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, CogIcon, UserGroupIcon, UsersIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import LaserMatchTab from '@/components/LaserMatchTab'
 import ConfigurationTab from '@/components/ConfigurationTab'
 import ContactManager from '@/components/ContactManager'
@@ -11,6 +11,23 @@ type TabType = 'lasermatch' | 'contacts' | 'users' | 'configuration'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('lasermatch')
+  const [showRepFilter, setShowRepFilter] = useState(false)
+  const [selectedReps, setSelectedReps] = useState<string[]>([])
+  
+  // Mock data - in real app this would come from LaserMatch items
+  const availableReps = ['Unassigned', 'John Smith', 'Sarah Johnson', 'Mike Wilson']
+  
+  const toggleRepFilter = (rep: string) => {
+    setSelectedReps(prev => 
+      prev.includes(rep) 
+        ? prev.filter(r => r !== rep)
+        : [...prev, rep]
+    )
+  }
+
+  const clearRepFilters = () => {
+    setSelectedReps([])
+  }
 
   const tabs = [
     { id: 'lasermatch', name: 'LaserMatch', icon: MagnifyingGlassIcon },
@@ -42,31 +59,82 @@ export default function Home() {
       {/* Navigation Tabs */}
       <div className="bg-gray-900 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as TabType)}
-                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-white text-white'
-                      : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
-                  }`}
-                >
-                  <Icon className="h-5 w-5 mr-2" />
-                  {tab.name}
-                </button>
-              )
-            })}
-          </nav>
+          <div className="flex justify-between items-center">
+            <nav className="flex space-x-8">
+              {tabs.map((tab) => {
+                const Icon = tab.icon
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as TabType)}
+                    className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
+                      activeTab === tab.id
+                        ? 'border-white text-white'
+                        : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 mr-2" />
+                    {tab.name}
+                  </button>
+                )
+              })}
+            </nav>
+            
+            {/* Rep Filter - Only show on LaserMatch tab */}
+            {activeTab === 'lasermatch' && (
+              <div className="relative">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-400">Filter</span>
+                  <button
+                    onClick={() => setShowRepFilter(!showRepFilter)}
+                    className="bg-gray-800 border border-gray-600 text-white px-3 py-1.5 rounded-md text-sm focus:border-gray-500 focus:outline-none flex items-center min-w-32"
+                  >
+                    <span className="flex-1 text-left">
+                      {selectedReps.length === 0 
+                        ? 'All Reps' 
+                        : selectedReps.length === 1 
+                          ? selectedReps[0] 
+                          : `${selectedReps.length} selected`
+                      }
+                    </span>
+                    <ChevronDownIcon className="h-4 w-4 ml-2" />
+                  </button>
+                  
+                  {showRepFilter && (
+                    <div className="absolute right-0 top-full mt-1 w-64 bg-gray-800 border border-gray-600 rounded-md shadow-lg z-50">
+                      <div className="p-2 max-h-60 overflow-y-auto">
+                        {availableReps.map((rep) => (
+                          <label key={rep} className="flex items-center p-2 hover:bg-gray-700 rounded cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedReps.includes(rep)}
+                              onChange={() => toggleRepFilter(rep)}
+                              className="h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                            />
+                            <span className="ml-2 text-sm text-white">{rep}</span>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="border-t border-gray-600 p-2">
+                        <button
+                          onClick={clearRepFilters}
+                          className="text-xs text-gray-400 hover:text-white"
+                        >
+                          Clear All
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'lasermatch' && <LaserMatchTab />}
+        {activeTab === 'lasermatch' && <LaserMatchTab selectedReps={selectedReps} />}
         {activeTab === 'contacts' && <ContactManager />}
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'configuration' && <ConfigurationTab />}

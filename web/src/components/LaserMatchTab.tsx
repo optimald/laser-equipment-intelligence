@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowPathIcon, PencilIcon, CheckIcon, XMarkIcon, SparklesIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon, PencilIcon, CheckIcon, XMarkIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
 interface Note {
   id: string
@@ -78,7 +78,11 @@ const cleanTitle = (title: string): string => {
   return words[0] || title
 }
 
-export default function LaserMatchTab() {
+interface LaserMatchTabProps {
+  selectedReps: string[]
+}
+
+export default function LaserMatchTab({ selectedReps }: LaserMatchTabProps) {
   const [items, setItems] = useState<LaserMatchItem[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -93,8 +97,6 @@ export default function LaserMatchTab() {
     price: '',
     followUpDate: ''
   })
-  const [showRepFilter, setShowRepFilter] = useState(false)
-  const [selectedReps, setSelectedReps] = useState<string[]>([])
   // Mock contacts data - in real app this would come from contacts context/API
   const [contacts] = useState([
     { id: '1', name: 'John Smith', company: 'MedTech Solutions', email: 'john.smith@medtech.com' },
@@ -395,24 +397,6 @@ export default function LaserMatchTab() {
     return statusOption?.color || 'bg-gray-100 text-gray-800'
   }
 
-  // Rep filter functions
-  const availableReps = Array.from(new Set([
-    'Unassigned',
-    ...items.map(item => item.assignedRep || 'Unassigned').filter(rep => rep !== 'Unassigned')
-  ]))
-
-  const toggleRepFilter = (rep: string) => {
-    setSelectedReps(prev => 
-      prev.includes(rep) 
-        ? prev.filter(r => r !== rep)
-        : [...prev, rep]
-    )
-  }
-
-  const clearRepFilters = () => {
-    setSelectedReps([])
-  }
-
   // Filter items by selected reps
   const filteredItems = selectedReps.length === 0 
     ? items 
@@ -442,55 +426,6 @@ export default function LaserMatchTab() {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="flex justify-end">
-        <div className="relative">
-          <label className="block text-sm font-medium text-gray-400 mb-2">Filter by Rep</label>
-          <div className="relative">
-            <button
-              onClick={() => setShowRepFilter(!showRepFilter)}
-              className="bg-gray-800 border border-gray-600 text-white px-4 py-2 rounded-md text-sm focus:border-gray-500 focus:outline-none flex items-center min-w-48"
-            >
-              <span className="flex-1 text-left">
-                {selectedReps.length === 0 
-                  ? 'All Reps' 
-                  : selectedReps.length === 1 
-                    ? selectedReps[0] 
-                    : `${selectedReps.length} reps selected`
-                }
-                  </span>
-              <ChevronDownIcon className="h-4 w-4 ml-2" />
-            </button>
-            
-            {showRepFilter && (
-              <div className="absolute right-0 mt-1 w-64 bg-gray-800 border border-gray-600 rounded-md shadow-lg z-10">
-                <div className="p-2 max-h-60 overflow-y-auto">
-                  {availableReps.map((rep) => (
-                    <label key={rep} className="flex items-center p-2 hover:bg-gray-700 rounded cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={selectedReps.includes(rep)}
-                        onChange={() => toggleRepFilter(rep)}
-                        className="h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
-                      />
-                      <span className="ml-2 text-sm text-white">{rep}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="border-t border-gray-600 p-2">
-                  <button
-                    onClick={clearRepFilters}
-                    className="text-xs text-gray-400 hover:text-white"
-                  >
-                    Clear All
-                  </button>
-                </div>
-              </div>
-            )}
-            </div>
-        </div>
-      </div>
-
       {/* Grouped Items by Brand */}
       <div className="space-y-8">
         {Object.entries(groupedItems).map(([brand, brandItems]) => (

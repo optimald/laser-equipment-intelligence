@@ -278,7 +278,7 @@ export default function ConfigurationTab() {
             <input
               {...register('autoRefresh')}
               type="checkbox"
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
+              className="h-4 w-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 focus:ring-offset-0 focus:ring-offset-gray-900 checked:bg-blue-600 checked:border-blue-600"
             />
             <label className="ml-2 block text-sm text-gray-400">
               Enable auto-refresh of equipment items
@@ -320,7 +320,7 @@ export default function ConfigurationTab() {
                           type="checkbox"
                           checked={source.enabled}
                           onChange={(e) => updateSource(source.id, e.target.checked)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
+                          className="h-4 w-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 focus:ring-offset-0 focus:ring-offset-gray-900 checked:bg-blue-600 checked:border-blue-600"
                         />
                         <div className="flex-1">
                           <h4 className="text-base font-medium text-white">{source.name}</h4>
@@ -359,7 +359,7 @@ export default function ConfigurationTab() {
                           type="checkbox"
                           checked={source.enabled}
                           onChange={(e) => updateSource(source.id, e.target.checked)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
+                          className="h-4 w-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 focus:ring-offset-0 focus:ring-offset-gray-900 checked:bg-blue-600 checked:border-blue-600"
                         />
                         <div className="flex-1">
                           <h4 className="text-base font-medium text-white">{source.name}</h4>
@@ -396,7 +396,7 @@ export default function ConfigurationTab() {
                           type="checkbox"
                           checked={source.enabled}
                           onChange={(e) => updateSource(source.id, e.target.checked)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
+                          className="h-4 w-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 focus:ring-offset-0 focus:ring-offset-gray-900 checked:bg-blue-600 checked:border-blue-600"
                         />
                         <div className="flex-1">
                           <h4 className="text-base font-medium text-white">{source.name}</h4>
@@ -433,7 +433,7 @@ export default function ConfigurationTab() {
                           type="checkbox"
                           checked={source.enabled}
                           onChange={(e) => updateSource(source.id, e.target.checked)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-600 bg-gray-800 text-white focus:border-gray-500 focus:outline-none rounded"
+                          className="h-4 w-4 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2 focus:ring-offset-0 focus:ring-offset-gray-900 checked:bg-blue-600 checked:border-blue-600"
                         />
                         <div className="flex-1">
                           <h4 className="text-base font-medium text-white">{source.name}</h4>
