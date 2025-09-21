@@ -165,3 +165,4 @@ For support and questions:
 # Test change
 # Vercel Build Test - Sat Sep 20 12:17:10 MDT 2025
 # Force redeploy Sat Sep 20 12:56:01 MDT 2025
+# Force Railway rebuild
