@@ -4,8 +4,8 @@ from fastapi.responses import JSONResponse
 import os
 from contextlib import asynccontextmanager
 
-# FORCE RAILWAY REDEPLOY - VERSION 1.0.3 - NO DATABASE
-from api.routers import search_simple as search, dashboard, configuration, lasermatch
+# FORCE RAILWAY REDEPLOY - VERSION 1.0.4 - FIXED ROUTER IMPORT
+from api.routers import search, dashboard, configuration, lasermatch
 # from api.models.database import init_db  # Disabled - using mock data
 
 @asynccontextmanager
@@ -46,7 +46,7 @@ app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["laserm
 
 @app.get("/")
 async def root():
-    return {"message": "Laser Equipment Intelligence API", "version": "1.0.3", "build": "2025-09-21-no-database", "status": "mock_data_mode", "deploy_time": "2025-09-21-03:15:00"}
+    return {"message": "Laser Equipment Intelligence API", "version": "1.0.4", "build": "2025-09-21-router-fix", "status": "mock_data_mode", "deploy_time": "2025-09-21-03:30:00"}
 
 @app.get("/health")
 async def health_check():
