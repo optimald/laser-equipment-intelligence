@@ -36,7 +36,7 @@ class SearchResponse(BaseModel):
 
 @router.post("/equipment", response_model=List[SearchResponse])
 async def search_equipment(search_request: SearchRequest):
-    """Search for laser equipment based on criteria"""
+    """Search for laser equipment based on criteria with fallback mock data"""
     try:
         # Try database connection first
         try:
