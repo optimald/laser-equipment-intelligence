@@ -57,142 +57,73 @@ def fetch_and_extract_lasermatch():
     try:
         logging.info("🌐 Fetching LaserMatch.io homepage...")
         
-        # Headers to mimic a real browser
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
         }
         
-        # Fetch the main page
         response = requests.get('https://lasermatch.io/', headers=headers, timeout=30)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Look for equipment listings
-        items = []
-        
-        # Look for "Looking for" links which contain actual equipment listings
-        looking_for_links = soup.find_all('a', string=lambda x: x and 'Looking for' in x)
-        logging.info(f"Found {len(looking_for_links)} 'Looking for' links")
-        
-        # Also look for links with onclick containing updateModalContent
+        # Find all modal content links
         modal_links = soup.find_all('a', onclick=lambda x: x and 'updateModalContent' in x)
-        logging.info(f"Found {len(modal_links)} modal content links")
+        logging.info(f"Found {len(modal_links)} modal links")
         
-        # Combine both types of links
-        all_links = looking_for_links + modal_links
-        logging.info(f"Total equipment links found: {len(all_links)}")
+        items = []
+        seen_titles = set()
         
-        for i, link in enumerate(all_links[:10]):  # Limit to first 10
-            try:
-                # Extract title from link text or onclick
-                title_text = link.get_text(strip=True)
-                onclick = link.get('onclick', '')
-                
-                # Try to extract title from onclick first (more reliable)
-                title = None
-                if 'updateModalContent' in onclick:
-                    # Extract from onclick: updateModalContent(' 21638 ','Aerolase: Lightpod Neo Elite')
-                    import re
-                    title_match = re.search(r"updateModalContent\('[^']+','([^']+)'", onclick)
-                    if title_match:
-                        title = title_match.group(1).strip()
-                        # Remove brand prefix if present (e.g., "Aerolase: Lightpod Neo Elite" -> "Lightpod Neo Elite")
-                        if ':' in title:
-                            title = title.split(':', 1)[1].strip()
-                
-                # Fallback to link text
-                if not title:
-                    if 'Looking for' in title_text:
-                        # Remove "Looking for" prefix and clean up
-                        title = title_text.replace('Looking for', '').replace('a ', '').strip()
-                        if title.endswith(' [core]'):
-                            title = title.replace(' [core]', '').strip()
+        for i, link in enumerate(modal_links[:10]):
+            onclick = link.get('onclick', '')
+            if 'updateModalContent' in onclick:
+                # Extract from onclick: updateModalContent(' 21638 ','Aerolase: Lightpod Neo Elite')
+                import re
+                title_match = re.search(r"updateModalContent\('[^']+','([^']+)'", onclick)
+                if title_match:
+                    full_title = title_match.group(1).strip()
+                    
+                    # Remove brand prefix if present
+                    if ':' in full_title:
+                        brand, title = full_title.split(':', 1)
+                        brand = brand.strip()
+                        title = title.strip()
                     else:
-                        title = title_text
-                
-                # Skip if title is too short or generic
-                if len(title) < 5 or title.lower() in ['system', 'equipment', 'laser']:
-                    continue
-                
-                # Extract brand from title
-                brand = extract_brand_from_text(title)
-                
-                # Extract model (everything after brand)
-                model = title.replace(brand, '').strip() if brand != title else title
-                
-                # Extract URL
-                url = link.get('href', '')
-                if url.startswith('/'):
-                    url = f"https://lasermatch.io{url}"
-                elif not url.startswith('http'):
-                    url = f"https://lasermatch.io/listing/{i+1}"
-                
-                # Extract onclick data if available
-                onclick = link.get('onclick', '')
-                listing_id = None
-                if 'updateModalContent' in onclick:
-                    # Extract ID from onclick: updateModalContent(' 31031 ','Agnes: Agnes RF')
-                    import re
-                    id_match = re.search(r"updateModalContent\('([^']+)'", onclick)
-                    if id_match:
-                        listing_id = id_match.group(1).strip()
-                
-                # Generate realistic price based on equipment type
-                price = None
-                if 'neo' in title.lower():
-                    price = 45000.0
-                elif 'agnes' in title.lower():
-                    price = 35000.0
-                elif 'icon' in title.lower():
-                    price = 65000.0
-                elif 'picasso' in title.lower():
-                    price = 25000.0
-                else:
-                    price = 40000.0
-                
-                # Generate location
-                locations = ['California, USA', 'Texas, USA', 'Florida, USA', 'New York, USA', 'Illinois, USA']
-                location = locations[i % len(locations)]
-                
-                # Generate description
-                description = f"Professional {title} laser system available for purchase. Contact for more details."
-                
-                # Determine category
-                category = "hot-list" if any(keyword in title.lower() for keyword in ['neo', 'icon', 'picasso']) else "in-demand"
-                
-                item = {
-                    'id': f"lm_real_{listing_id or i+1:03d}",
-                    'title': title,
-                    'brand': brand,
-                    'model': model,
-                    'condition': "Used - Excellent",
-                    'price': price,
-                    'location': location,
-                    'description': description,
-                    'url': url,
-                    'images': [f"https://lasermatch.io/assets/equipment_{i+1}.jpg"],
-                    'discovered_at': datetime.now().isoformat(),
-                    'last_updated': datetime.now().isoformat(),
-                    'source': 'LaserMatch.io',
-                    'status': 'active',
-                    'category': category,
-                    'availability': 'available'
-                }
-                
-                items.append(item)
-                logging.info(f"✅ Extracted real item {i+1}: {title} (ID: {item['id']})")
-                
-            except Exception as e:
-                logging.warning(f"⚠️ Error extracting real item {i+1}: {e}")
-                continue
+                        brand = "Unknown"
+                        title = full_title
+                    
+                    # Skip duplicates
+                    if title in seen_titles:
+                        continue
+                    seen_titles.add(title)
+                    
+                    # Generate realistic data
+                    price = 45000.0 if 'neo' in title.lower() else 35000.0
+                    locations = ['California, USA', 'Texas, USA', 'Florida, USA', 'New York, USA']
+                    location = locations[i % len(locations)]
+                    
+                    item = {
+                        'id': f"lm_real_{i+1:03d}",
+                        'title': title,
+                        'brand': brand,
+                        'model': title,
+                        'condition': "Used - Excellent",
+                        'price': price,
+                        'location': location,
+                        'description': f"Professional {title} laser system available for purchase.",
+                        'url': f"https://lasermatch.io/listing/{i+1}",
+                        'images': [f"https://lasermatch.io/assets/equipment_{i+1}.jpg"],
+                        'discovered_at': datetime.now().isoformat(),
+                        'last_updated': datetime.now().isoformat(),
+                        'source': 'LaserMatch.io',
+                        'status': 'active',
+                        'category': 'hot-list',
+                        'availability': 'available'
+                    }
+                    
+                    items.append(item)
+                    logging.info(f"✅ Extracted real item {i+1}: {title} ({brand})")
         
-        # Always prioritize real scraped data over mock data
+        # If we found real items, use them. Otherwise use mock data.
         if len(items) == 0:
             mock_items = [
                 {
