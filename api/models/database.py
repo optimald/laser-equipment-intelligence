@@ -8,10 +8,21 @@ from datetime import datetime
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/laser_intelligence")
 
-# SQLAlchemy setup
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# SQLAlchemy setup - disabled for mock data mode
+# engine = create_engine(DATABASE_URL)
+# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
+# Lazy engine creation to avoid startup database connections
+engine = None
+SessionLocal = None
+
+def get_engine():
+    global engine, SessionLocal
+    if engine is None:
+        engine = create_engine(DATABASE_URL)
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return engine
 
 # SQLAlchemy Models
 class Listing(Base):
