@@ -104,61 +104,29 @@ async def search_equipment(search_request: SearchRequest):
 @router.get("/sources")
 async def get_available_sources():
     """Get list of available data sources"""
-    try:
-        conn = await get_db_connection()
-        rows = await conn.fetch("SELECT DISTINCT source FROM listings ORDER BY source")
-        await conn.close()
-        
-        sources = [row['source'] for row in rows]
-        return {"sources": sources}
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get sources: {str(e)}")
+    # Return mock sources
+    sources = ["eBay", "DOTmed Auctions", "BidSpotter", "Craigslist", "Facebook Marketplace", "LaserMatch.io"]
+    return {"sources": sources}
 
 @router.get("/brands")
 async def get_available_brands():
     """Get list of available equipment brands"""
-    try:
-        conn = await get_db_connection()
-        rows = await conn.fetch("SELECT DISTINCT brand FROM listings WHERE brand IS NOT NULL ORDER BY brand")
-        await conn.close()
-        
-        brands = [row['brand'] for row in rows]
-        return {"brands": brands}
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get brands: {str(e)}")
+    # Return mock brands
+    brands = ["Aerolase", "Candela", "Cynosure", "Lumenis", "Syneron", "Alma", "Cutera", "Sciton"]
+    return {"brands": brands}
 
 @router.get("/stats")
 async def get_search_stats():
     """Get search statistics"""
-    try:
-        conn = await get_db_connection()
-        
-        # Total listings
-        total_listings = await conn.fetchval("SELECT COUNT(*) FROM listings")
-        
-        # Listings by source
-        source_stats = await conn.fetch("""
-            SELECT source, COUNT(*) as count 
-            FROM listings 
-            GROUP BY source 
-            ORDER BY count DESC
-        """)
-        
-        # Recent listings (last 24 hours)
-        recent_listings = await conn.fetchval("""
-            SELECT COUNT(*) FROM listings 
-            WHERE discovered_at >= NOW() - INTERVAL '24 hours'
-        """)
-        
-        await conn.close()
-        
-        return {
-            "total_listings": total_listings,
-            "recent_listings": recent_listings,
-            "source_stats": [{"source": row['source'], "count": row['count']} for row in source_stats]
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
+    # Return mock stats
+    return {
+        "total_listings": 1247,
+        "recent_listings": 23,
+        "source_stats": [
+            {"source": "eBay", "count": 456},
+            {"source": "DOTmed Auctions", "count": 321},
+            {"source": "BidSpotter", "count": 234},
+            {"source": "LaserMatch.io", "count": 156},
+            {"source": "Craigslist", "count": 80}
+        ]
+    }
