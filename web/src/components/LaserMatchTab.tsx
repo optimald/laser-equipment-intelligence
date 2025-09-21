@@ -414,31 +414,8 @@ export default function LaserMatchTab() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Refresh Button */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold text-white">LaserMatch Procurement</h2>
-          <p className="text-gray-400">
-            {stats ? (
-              <>
-                Managing {stats.total_items} items from LaserMatch.io
-                {stats.latest_update && (
-                  <span className="text-sm text-gray-400 ml-2">
-                    • Last updated: {new Date(stats.latest_update).toLocaleString()}
-                  </span>
-                )}
-              </>
-            ) : (
-              `Managing ${items.length} items from LaserMatch.io`
-            )}
-          </p>
-          {stats && (
-            <div className="flex space-x-4 text-sm text-gray-400 mt-1">
-              <span>🔥 Hot List: {stats.hot_list_items} items</span>
-              <span>📈 In Demand: {stats.in_demand_items} items</span>
-            </div>
-          )}
-        </div>
+      {/* Refresh Button - Compact */}
+      <div className="flex justify-end">
         <button
           onClick={refreshLaserMatchItems}
           disabled={isRefreshing}
