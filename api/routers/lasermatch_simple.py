@@ -310,9 +310,9 @@ async def get_lasermatch_items(
     Get LaserMatch items from in-memory storage
     """
     try:
+        global _lasermatch_items
         # If no items in memory, fetch them
         if not _lasermatch_items:
-            global _lasermatch_items
             _lasermatch_items = fetch_and_extract_lasermatch()
         
         # Apply filters
@@ -342,9 +342,9 @@ async def get_lasermatch_stats():
     Get LaserMatch statistics from in-memory storage
     """
     try:
+        global _lasermatch_items
         # If no items in memory, fetch them
         if not _lasermatch_items:
-            global _lasermatch_items
             _lasermatch_items = fetch_and_extract_lasermatch()
         
         # Calculate stats
