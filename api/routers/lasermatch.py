@@ -280,6 +280,65 @@ async def get_lasermatch_items(
         if where_conditions:
             where_clause = "WHERE " + " AND ".join(where_conditions)
         
+        # Check if we're in local dev mode (no database)
+        if hasattr(conn, '__class__') and 'MockConnection' in str(conn.__class__):
+            # Return mock data for local development
+            mock_items = [
+                {
+                    'id': 'dev_001',
+                    'title': 'Aerolase LightPod Neo',
+                    'brand': 'Aerolase',
+                    'model': 'LightPod Neo',
+                    'condition': 'Used - Excellent',
+                    'price': 45000.0,
+                    'location': 'California, USA',
+                    'description': 'Professional Aerolase LightPod Neo laser system in excellent condition.',
+                    'url': 'https://lasermatch.io/listing/001',
+                    'images': ['https://example.com/aerolase1.jpg'],
+                    'discovered_at': '2025-09-21T12:00:00',
+                    'last_updated': '2025-09-21T12:00:00',
+                    'source': 'LaserMatch.io',
+                    'status': 'active',
+                    'category': 'hot-list',
+                    'availability': 'available'
+                },
+                {
+                    'id': 'dev_002',
+                    'title': 'Cynosure Icon',
+                    'brand': 'Cynosure',
+                    'model': 'Icon',
+                    'condition': 'Refurbished',
+                    'price': 65000.0,
+                    'location': 'Texas, USA',
+                    'description': 'Cynosure Icon laser system, professionally refurbished.',
+                    'url': 'https://lasermatch.io/listing/002',
+                    'images': ['https://example.com/cynosure1.jpg'],
+                    'discovered_at': '2025-09-21T12:01:00',
+                    'last_updated': '2025-09-21T12:01:00',
+                    'source': 'LaserMatch.io',
+                    'status': 'active',
+                    'category': 'in-demand',
+                    'availability': 'available'
+                }
+            ]
+            
+            # Apply filters
+            filtered_items = mock_items
+            if category:
+                filtered_items = [item for item in filtered_items if item.get('category') == category]
+            if brand:
+                filtered_items = [item for item in filtered_items if item.get('brand', '').lower() == brand.lower()]
+            
+            # Apply pagination
+            start_idx = skip
+            end_idx = skip + limit
+            paginated_items = filtered_items[start_idx:end_idx]
+            
+            return {
+                'items': paginated_items,
+                'total': len(filtered_items)
+            }
+        
         # Get total count
         count_query = f"SELECT COUNT(*) FROM lasermatch_items {where_clause}"
         total_items = await conn.fetchval(count_query, *params)
@@ -329,6 +388,18 @@ async def get_lasermatch_stats():
     """
     try:
         conn = await get_db_connection()
+        
+        # Check if we're in local dev mode (no database)
+        if hasattr(conn, '__class__') and 'MockConnection' in str(conn.__class__):
+            # Return mock stats for local development
+            return {
+                'total_items': 2,
+                'hot_list_count': 1,
+                'in_demand_count': 1,
+                'unique_brands': 2,
+                'brands': ['Aerolase', 'Cynosure'],
+                'last_updated': datetime.now().isoformat()
+            }
         
         # Get total items count
         total_items = await conn.fetchval("SELECT COUNT(*) FROM lasermatch_items")

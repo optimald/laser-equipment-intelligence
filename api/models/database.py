@@ -8,9 +8,17 @@ from datetime import datetime
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/laser_intelligence")
 
-# SQLAlchemy setup
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# For local development without database, use a mock connection
+LOCAL_DEV_MODE = not os.getenv("DATABASE_URL")
+
+# SQLAlchemy setup - only for production with database
+if not LOCAL_DEV_MODE:
+    engine = create_engine(DATABASE_URL)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+else:
+    engine = None
+    SessionLocal = None
+
 Base = declarative_base()
 
 # SQLAlchemy Models
@@ -63,10 +71,28 @@ class SpiderRun(Base):
 # Async database functions for compatibility
 async def get_db_connection():
     """Get database connection"""
-    return await asyncpg.connect(DATABASE_URL)
+    if LOCAL_DEV_MODE:
+        # Return a mock connection for local development
+        class MockConnection:
+            async def execute(self, query, *args):
+                return None
+            async def fetchval(self, query, *args):
+                return 0
+            async def fetch(self, query, *args):
+                return []
+            async def close(self):
+                pass
+        
+        return MockConnection()
+    else:
+        return await asyncpg.connect(DATABASE_URL)
 
 async def init_db():
     """Initialize database tables"""
+    if LOCAL_DEV_MODE:
+        print("Local development mode - skipping database initialization")
+        return
+    
     try:
         conn = await get_db_connection()
         print("Database connection successful during init")
