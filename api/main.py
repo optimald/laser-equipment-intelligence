@@ -4,20 +4,14 @@ from fastapi.responses import JSONResponse
 import os
 from contextlib import asynccontextmanager
 
-# FORCE RAILWAY REDEPLOY - VERSION 1.0.5 - RESTORED DATABASE FUNCTIONALITY
+# SIMPLIFIED API - VERSION 1.0.6 - NO DATABASE DEPENDENCIES
 from api.routers import search, dashboard, configuration, lasermatch
-from api.models.database import init_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup - Initialize database
-    print("Starting API with database functionality")
-    try:
-        await init_db()
-        print("Database initialized successfully")
-    except Exception as e:
-        print(f"Warning: Database initialization failed: {e}")
-        print("Continuing with limited functionality")
+    # Startup - Simple initialization
+    print("Starting Laser Equipment Intelligence API - Simplified Mode")
+    print("No database dependencies - using in-memory storage")
     yield
     # Shutdown
     pass
@@ -52,7 +46,7 @@ app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["laserm
 
 @app.get("/")
 async def root():
-    return {"message": "Laser Equipment Intelligence API", "version": "1.0.4", "build": "2025-09-21-router-fix", "status": "mock_data_mode", "deploy_time": "2025-09-21-03:30:00"}
+    return {"message": "Laser Equipment Intelligence API", "version": "1.0.6", "build": "2025-09-21-simplified", "status": "simplified_mode", "deploy_time": "2025-09-21-12:00:00"}
 
 @app.get("/health")
 async def health_check():
