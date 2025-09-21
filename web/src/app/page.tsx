@@ -21,21 +21,23 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="bg-gray-900 shadow-sm border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-white">
-                Laser Equipment Intelligence
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-400">Procurement Tool</span>
+      {/* Header - Hidden for LaserMatch tab */}
+      {activeTab !== 'lasermatch' && (
+        <header className="bg-gray-900 shadow-sm border-b border-gray-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-6">
+              <div className="flex items-center">
+                <h1 className="text-3xl font-bold text-white">
+                  Laser Equipment Intelligence
+                </h1>
+              </div>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-400">Procurement Tool</span>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Navigation Tabs */}
       <div className="bg-gray-900 border-b border-gray-800">
