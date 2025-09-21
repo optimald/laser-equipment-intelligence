@@ -69,8 +69,9 @@ async def init_db():
     """Initialize database tables"""
     try:
         conn = await get_db_connection()
+        print("Database connection successful during init")
     except Exception as e:
-        print(f"Warning: Could not connect to database: {e}")
+        print(f"Warning: Could not connect to database during init: {e}")
         print("API will start without database connection")
         return
     

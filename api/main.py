@@ -10,7 +10,12 @@ from api.models.database import init_db
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    await init_db()
+    try:
+        await init_db()
+        print("Database initialized successfully")
+    except Exception as e:
+        print(f"Warning: Database initialization failed: {e}")
+        print("API will continue without database connection")
     yield
     # Shutdown
     pass
