@@ -4,19 +4,14 @@ from fastapi.responses import JSONResponse
 import os
 from contextlib import asynccontextmanager
 
-# FORCE RAILWAY REDEPLOY - VERSION 1.0.2
+# FORCE RAILWAY REDEPLOY - VERSION 1.0.3 - NO DATABASE
 from api.routers import search_simple as search, dashboard, configuration, lasermatch
-from api.models.database import init_db
+# from api.models.database import init_db  # Disabled - using mock data
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    try:
-        await init_db()
-        print("Database initialized successfully")
-    except Exception as e:
-        print(f"Warning: Database initialization failed: {e}")
-        print("API will continue without database connection")
+    # Startup - Mock data mode, no database needed
+    print("Starting API in mock data mode - no database connection required")
     yield
     # Shutdown
     pass
@@ -51,7 +46,7 @@ app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["laserm
 
 @app.get("/")
 async def root():
-    return {"message": "Laser Equipment Intelligence API", "version": "1.0.2", "build": "2025-09-21-railway-fix", "status": "database_disabled", "deploy_time": "2025-09-21-03:00:00"}
+    return {"message": "Laser Equipment Intelligence API", "version": "1.0.3", "build": "2025-09-21-no-database", "status": "mock_data_mode", "deploy_time": "2025-09-21-03:15:00"}
 
 @app.get("/health")
 async def health_check():
