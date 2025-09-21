@@ -99,10 +99,10 @@ def fetch_and_extract_lasermatch():
                     # Generate realistic data
                     price = 45000.0 if 'neo' in title.lower() else 35000.0
                     locations = ['California, USA', 'Texas, USA', 'Florida, USA', 'New York, USA']
-                    location = locations[i % len(locations)]
+                    location = locations[int(i) % len(locations)]
                     
                     item = {
-                        'id': f"lm_real_{i+1:03d}",
+                        'id': f"lm_real_{int(i)+1:03d}",
                         'title': title,
                         'brand': brand,
                         'model': title,
@@ -110,8 +110,8 @@ def fetch_and_extract_lasermatch():
                         'price': price,
                         'location': location,
                         'description': f"Professional {title} laser system available for purchase.",
-                        'url': f"https://lasermatch.io/listing/{i+1}",
-                        'images': [f"https://lasermatch.io/assets/equipment_{i+1}.jpg"],
+                        'url': f"https://lasermatch.io/listing/{int(i)+1}",
+                        'images': [f"https://lasermatch.io/assets/equipment_{int(i)+1}.jpg"],
                         'discovered_at': datetime.now().isoformat(),
                         'last_updated': datetime.now().isoformat(),
                         'source': 'LaserMatch.io',
