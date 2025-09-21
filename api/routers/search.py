@@ -1,8 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from pydantic import BaseModel
-from api.models.database import get_db_connection
-import asyncpg
 
 router = APIRouter()
 
