@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Any
 from pydantic import BaseModel
-from api.models.database import get_db_connection
+# from api.models.database import get_db_connection  # Disabled for mock data mode
 
 router = APIRouter()
 
@@ -18,7 +18,7 @@ class DashboardStats(BaseModel):
 async def get_dashboard_stats():
     """Get dashboard statistics"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         # Total listings
         total_listings = await conn.fetchval("SELECT COUNT(*) FROM listings")
@@ -122,7 +122,7 @@ async def get_dashboard_stats():
 async def get_recent_activity(limit: int = 20):
     """Get recent system activity"""
     try:
-        conn = await get_db_connection()
+        # conn = await get_db_connection()  # Disabled for mock data mode
         
         # Recent listings
         listings = await conn.fetch("""
