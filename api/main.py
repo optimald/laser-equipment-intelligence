@@ -54,7 +54,7 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "laser-intelligence-api"}
+    return {"status": "healthy", "service": "laser-intelligence-api", "timestamp": "2025-09-21-02:47:00", "magic_find_fix": "v3"}
 
 # Direct search endpoints for testing
 @app.get("/api/v1/search/test")
