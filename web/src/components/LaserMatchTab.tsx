@@ -797,7 +797,7 @@ export default function LaserMatchTab() {
                         value={newNoteContent}
                         onChange={(e) => setNewNoteContent(e.target.value)}
                         placeholder="Add a new note... (Use @source-1, @source-2, etc. to tag specific sources)"
-                        className="w-full text-sm border border-gray-300 rounded px-3 py-2 h-20 resize-none"
+                        className="w-full text-sm border border-gray-600 bg-gray-800 text-white rounded px-3 py-2 h-20 resize-none focus:border-gray-500 focus:outline-none"
                       />
                       {item.spiderUrls && item.spiderUrls.length > 0 && (
                         <div className="mt-2 text-xs text-gray-500">
