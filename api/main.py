@@ -4,14 +4,20 @@ from fastapi.responses import JSONResponse
 import os
 from contextlib import asynccontextmanager
 
-# FORCE RAILWAY REDEPLOY - VERSION 1.0.4 - FIXED ROUTER IMPORT
+# FORCE RAILWAY REDEPLOY - VERSION 1.0.5 - RESTORED DATABASE FUNCTIONALITY
 from api.routers import search, dashboard, configuration, lasermatch
-# from api.models.database import init_db  # Disabled - using mock data
+from api.models.database import init_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup - Mock data mode, no database needed
-    print("Starting API in mock data mode - no database connection required")
+    # Startup - Initialize database
+    print("Starting API with database functionality")
+    try:
+        await init_db()
+        print("Database initialized successfully")
+    except Exception as e:
+        print(f"Warning: Database initialization failed: {e}")
+        print("Continuing with limited functionality")
     yield
     # Shutdown
     pass

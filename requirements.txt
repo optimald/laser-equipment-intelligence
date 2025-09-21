@@ -1,8 +1,12 @@
-# Minimal FastAPI Backend Dependencies - Mock Data Mode
+# FastAPI Backend Dependencies with Database Support
 fastapi>=0.104.1
 uvicorn[standard]>=0.24.0
 pydantic>=2.8.0
 python-multipart>=0.0.6
+
+# Database
+asyncpg>=0.29.0
+sqlalchemy>=2.0.0
 
 # Utilities
 python-dotenv>=1.0.0

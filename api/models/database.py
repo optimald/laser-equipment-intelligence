@@ -8,21 +8,10 @@ from datetime import datetime
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/laser_intelligence")
 
-# SQLAlchemy setup - disabled for mock data mode
-# engine = create_engine(DATABASE_URL)
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# SQLAlchemy setup
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
-# Lazy engine creation to avoid startup database connections
-engine = None
-SessionLocal = None
-
-def get_engine():
-    global engine, SessionLocal
-    if engine is None:
-        engine = create_engine(DATABASE_URL)
-        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    return engine
 
 # SQLAlchemy Models
 class Listing(Base):
@@ -79,9 +68,6 @@ async def get_db_connection():
 async def init_db():
     """Initialize database tables"""
     try:
-        print("Skipping database initialization - using mock data mode")
-        return
-        # Database initialization disabled for mock data mode
         conn = await get_db_connection()
         print("Database connection successful during init")
     except Exception as e:
@@ -142,12 +128,37 @@ async def init_db():
             )
         """)
         
+        # Create LaserMatch items table
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS lasermatch_items (
+                id VARCHAR(50) PRIMARY KEY,
+                title VARCHAR(500) NOT NULL,
+                brand VARCHAR(100),
+                model VARCHAR(100),
+                condition VARCHAR(50),
+                price DECIMAL(12,2),
+                location VARCHAR(200),
+                description TEXT,
+                url TEXT NOT NULL,
+                images TEXT,
+                discovered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                source VARCHAR(100) DEFAULT 'LaserMatch.io',
+                status VARCHAR(50) DEFAULT 'active',
+                category VARCHAR(100),
+                availability VARCHAR(50) DEFAULT 'available'
+            )
+        """)
+        
         # Create indexes for better performance
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_source ON listings(source)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_title ON listings(title)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_discovered_at ON listings(discovered_at)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(price)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_score ON listings(score_overall)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_category ON lasermatch_items(category)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_brand ON lasermatch_items(brand)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_discovered_at ON lasermatch_items(discovered_at)")
         
     finally:
         await conn.close()

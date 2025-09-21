@@ -2,10 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import logging
+import json
 from datetime import datetime
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
+from api.models.database import get_db_connection
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -155,29 +157,72 @@ def fetch_and_extract_lasermatch():
         logging.error(f"❌ Error fetching LaserMatch data: {e}")
         raise Exception(f"Failed to fetch LaserMatch data: {e}")
 
-def run_lasermatch_scraper():
-    """Run the LaserMatch scraper and return results"""
+async def run_lasermatch_scraper():
+    """Run the LaserMatch scraper and save to database"""
     try:
         start_time = datetime.now()
         logging.info("🚀 Starting LaserMatch scraper...")
         
         items = fetch_and_extract_lasermatch()
         
+        # Save items to database
+        conn = await get_db_connection()
+        items_added = 0
+        
+        for item in items:
+            try:
+                # Check if item already exists
+                existing = await conn.fetchval(
+                    "SELECT id FROM lasermatch_items WHERE url = $1", 
+                    item['url']
+                )
+                
+                if not existing:
+                    # Insert new item
+                    await conn.execute("""
+                        INSERT INTO lasermatch_items 
+                        (id, title, brand, model, condition, price, location, description, 
+                         url, images, discovered_at, last_updated, source, status, category, availability)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+                    """, 
+                    item['id'], item['title'], item['brand'], item['model'], 
+                    item['condition'], item['price'], item['location'], item['description'],
+                    item['url'], json.dumps(item['images']), item['discovered_at'], 
+                    item['last_updated'], item['source'], item['status'], 
+                    item['category'], item['availability']
+                    )
+                    items_added += 1
+                    logging.info(f"✅ Added new item: {item['title']}")
+                else:
+                    logging.info(f"⏭️ Item already exists: {item['title']}")
+                    
+            except Exception as e:
+                logging.warning(f"⚠️ Error saving item {item['title']}: {e}")
+        
+        await conn.close()
+        
         end_time = datetime.now()
         execution_time = (end_time - start_time).total_seconds()
         
         return {
             'items_scraped': len(items),
-            'items_added': len(items),  # For now, assume all are new
+            'items_added': items_added,
             'execution_time': execution_time,
-            'output': f'Successfully scraped {len(items)} items from LaserMatch.io',
+            'output': f'Successfully scraped {len(items)} items, added {items_added} new items',
             'errors': '',
             'items': items
         }
         
     except Exception as e:
-        logging.error(f"LaserMatch scraper failed: {str(e)}")
-        raise Exception(f"Scraper execution failed: {str(e)}")
+        logging.error(f"❌ LaserMatch scraper failed: {e}")
+        return {
+            'items_scraped': 0,
+            'items_added': 0,
+            'execution_time': 0,
+            'output': f'Scraper failed: {e}',
+            'errors': str(e),
+            'items': []
+        }
 
 @router.post("/scrape", response_model=LaserMatchScrapeResponse)
 async def scrape_lasermatch(background_tasks: BackgroundTasks):
@@ -185,17 +230,10 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
     Scrape LaserMatch.io for new equipment listings
     """
     try:
-        logging.info("Starting LaserMatch scraper - clearing cache first")
-        
-        # Clear cache first to ensure fresh data
-        global _scraped_items
-        _scraped_items = []
+        logging.info("Starting LaserMatch scraper")
         
         # Run the scraper
-        result = run_lasermatch_scraper()
-        
-        # Store items in global variable (in production, this would be saved to database)
-        _scraped_items = result['items']
+        result = await run_lasermatch_scraper()
         
         response = LaserMatchScrapeResponse(
             message=f"SIMPLE_VERSION_v2 - Successfully scraped {result['items_scraped']} items, added {result['items_added']} new items",
@@ -211,100 +249,73 @@ async def scrape_lasermatch(background_tasks: BackgroundTasks):
         logging.error(f"LaserMatch scraper failed: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Scraper failed: {str(e)}")
 
-# Global variable to store scraped items (in production, this would be in a database)
-# Initialize with mock data for testing
-_scraped_items = [
-    {
-        'id': 'mock_001',
-        'title': 'Aerolase LightPod Neo',
-        'brand': 'Aerolase',
-        'model': 'LightPod Neo',
-        'condition': 'Used - Excellent',
-        'price': 45000.0,
-        'location': 'California, USA',
-        'description': 'Professional Aerolase LightPod Neo laser system in excellent condition. Includes all accessories.',
-        'url': 'https://lasermatch.io/listing/001',
-        'images': ['https://example.com/aerolase1.jpg'],
-        'discovered_at': '2025-09-21T11:50:00',
-        'last_updated': '2025-09-21T11:50:00',
-        'source': 'LaserMatch.io',
-        'status': 'active',
-        'category': 'hot-list',
-        'availability': 'available'
-    },
-    {
-        'id': 'mock_002',
-        'title': 'Cynosure Icon',
-        'brand': 'Cynosure',
-        'model': 'Icon',
-        'condition': 'Refurbished',
-        'price': 65000.0,
-        'location': 'Texas, USA',
-        'description': 'Cynosure Icon laser system, professionally refurbished with warranty.',
-        'url': 'https://lasermatch.io/listing/002',
-        'images': ['https://example.com/cynosure1.jpg'],
-        'discovered_at': '2025-09-21T11:51:00',
-        'last_updated': '2025-09-21T11:51:00',
-        'source': 'LaserMatch.io',
-        'status': 'active',
-        'category': 'in-demand',
-        'availability': 'available'
-    },
-    {
-        'id': 'mock_003',
-        'title': 'Lumenis M22',
-        'brand': 'Lumenis',
-        'model': 'M22',
-        'condition': 'Used - Good',
-        'price': 55000.0,
-        'location': 'Florida, USA',
-        'description': 'Lumenis M22 multi-platform laser system in good working condition.',
-        'url': 'https://lasermatch.io/listing/003',
-        'images': ['https://example.com/lumenis1.jpg'],
-        'discovered_at': '2025-09-21T11:52:00',
-        'last_updated': '2025-09-21T11:52:00',
-        'source': 'LaserMatch.io',
-        'status': 'active',
-        'category': 'hot-list',
-        'availability': 'available'
-    }
-]
+# Database operations for LaserMatch items
 
 @router.get("/items")
 async def get_lasermatch_items(
-    page: int = 1,
-    per_page: int = 20,
+    skip: int = 0,
+    limit: int = 100,
     category: Optional[str] = None,
     brand: Optional[str] = None
 ):
     """
-    Get paginated LaserMatch items
+    Get paginated LaserMatch items from database
     """
     try:
-        # Filter items if needed
-        filtered_items = _scraped_items
+        conn = await get_db_connection()
+        
+        # Build query with filters
+        where_conditions = []
+        params = []
         
         if category:
-            filtered_items = [item for item in filtered_items if item.get('category') == category]
+            where_conditions.append("category = $%d" % (len(params) + 1))
+            params.append(category)
         
         if brand:
-            filtered_items = [item for item in filtered_items if item.get('brand', '').lower() == brand.lower()]
+            where_conditions.append("LOWER(brand) = LOWER($%d)" % (len(params) + 1))
+            params.append(brand)
         
-        # Calculate pagination
-        total_items = len(filtered_items)
-        start_idx = (page - 1) * per_page
-        end_idx = start_idx + per_page
+        where_clause = ""
+        if where_conditions:
+            where_clause = "WHERE " + " AND ".join(where_conditions)
         
-        paginated_items = filtered_items[start_idx:end_idx]
+        # Get total count
+        count_query = f"SELECT COUNT(*) FROM lasermatch_items {where_clause}"
+        total_items = await conn.fetchval(count_query, *params)
+        
+        # Get paginated items
+        items_query = f"""
+            SELECT id, title, brand, model, condition, price, location, 
+                   description, url, images, discovered_at, last_updated, 
+                   source, status, category, availability
+            FROM lasermatch_items 
+            {where_clause}
+            ORDER BY discovered_at DESC 
+            LIMIT ${len(params) + 1} OFFSET ${len(params) + 2}
+        """
+        params.extend([limit, skip])
+        
+        rows = await conn.fetch(items_query, *params)
+        
+        # Convert to list of dicts
+        items = []
+        for row in rows:
+            item = dict(row)
+            # Convert images from string to list if needed
+            if item.get('images') and isinstance(item['images'], str):
+                try:
+                    import json
+                    item['images'] = json.loads(item['images'])
+                except:
+                    item['images'] = [item['images']]
+            items.append(item)
+        
+        await conn.close()
         
         return {
-            'items': paginated_items,
-            'pagination': {
-                'page': page,
-                'per_page': per_page,
-                'total_items': total_items,
-                'total_pages': (total_items + per_page - 1) // per_page
-            }
+            'items': items,
+            'total': total_items
         }
         
     except Exception as e:
@@ -314,23 +325,36 @@ async def get_lasermatch_items(
 @router.get("/stats")
 async def get_lasermatch_stats():
     """
-    Get LaserMatch statistics
+    Get LaserMatch statistics from database
     """
     try:
-        total_items = len(_scraped_items)
-        hot_list_count = len([item for item in _scraped_items if item.get('category') == 'hot-list'])
-        in_demand_count = len([item for item in _scraped_items if item.get('category') == 'in-demand'])
+        conn = await get_db_connection()
+        
+        # Get total items count
+        total_items = await conn.fetchval("SELECT COUNT(*) FROM lasermatch_items")
+        
+        # Get hot list count
+        hot_list_count = await conn.fetchval("SELECT COUNT(*) FROM lasermatch_items WHERE category = 'hot-list'")
+        
+        # Get in demand count
+        in_demand_count = await conn.fetchval("SELECT COUNT(*) FROM lasermatch_items WHERE category = 'in-demand'")
         
         # Get unique brands
-        brands = set(item.get('brand', 'Unknown') for item in _scraped_items)
+        brands_result = await conn.fetch("SELECT DISTINCT brand FROM lasermatch_items WHERE brand IS NOT NULL")
+        brands = [row['brand'] for row in brands_result]
+        
+        # Get latest update time
+        latest_update = await conn.fetchval("SELECT MAX(discovered_at) FROM lasermatch_items")
+        
+        await conn.close()
         
         return {
-            'total_items': total_items,
-            'hot_list_count': hot_list_count,
-            'in_demand_count': in_demand_count,
+            'total_items': total_items or 0,
+            'hot_list_count': hot_list_count or 0,
+            'in_demand_count': in_demand_count or 0,
             'unique_brands': len(brands),
-            'brands': sorted(list(brands)),
-            'last_updated': datetime.now().isoformat()
+            'brands': sorted(brands),
+            'last_updated': latest_update.isoformat() if latest_update else datetime.now().isoformat()
         }
         
     except Exception as e:
