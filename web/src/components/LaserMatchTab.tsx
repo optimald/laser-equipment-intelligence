@@ -651,7 +651,7 @@ export default function LaserMatchTab() {
 
                 {/* Spider URLs List */}
                 <div className="border border-gray-700 rounded-lg bg-gray-800">
-                  {item.spiderUrls && item.spiderUrls.length > 0 ? (
+                  {item.spiderUrls && item.spiderUrls.length > 0 && (
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-700">
                         <thead className="bg-gray-900">
@@ -734,10 +734,6 @@ export default function LaserMatchTab() {
                         </tbody>
                       </table>
                     </div>
-                  ) : (
-                    <div className="p-4 text-center text-sm text-gray-500">
-                      No sources found yet. Spider crawls and manual entries will appear here.
-                    </div>
                   )}
                 </div>
               </div>
@@ -761,7 +757,7 @@ export default function LaserMatchTab() {
                 <div className="space-y-3">
                   {/* Notes Log - Always Visible */}
                   <div className="border border-gray-700 rounded-lg bg-gray-800 max-h-32 overflow-y-auto">
-                    {(item.notesLog && item.notesLog.length > 0) || item.notes ? (
+                    {((item.notesLog && item.notesLog.length > 0) || item.notes) && (
                       <div className="p-3 space-y-2">
                         {/* Show new structured notes in reverse order (newest last, so newest appears at bottom) */}
                         {item.notesLog?.slice().reverse().map((note) => (
@@ -790,10 +786,6 @@ export default function LaserMatchTab() {
                             </div>
                           </div>
                         )}
-                      </div>
-                    ) : (
-                      <div className="p-3 text-sm text-gray-500 text-center">
-                        No notes yet. Click "Add Note" to get started.
                       </div>
                     )}
                   </div>
@@ -824,8 +816,8 @@ export default function LaserMatchTab() {
                               </span>
                             ))}
                           </div>
-                        </div>
-                      )}
+                      </div>
+                    )}
                       <div className="flex justify-end space-x-2">
                           <button
                           onClick={() => {
@@ -840,7 +832,7 @@ export default function LaserMatchTab() {
                           onClick={() => addNote(item.id, newNoteContent)}
                           disabled={!newNoteContent.trim()}
                           className="px-3 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-500 disabled:bg-gray-700 disabled:cursor-not-allowed"
-                        >
+                          >
                           Add Note
                           </button>
                       </div>
