@@ -11,13 +11,23 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/laser_intellige
 # For local development without database, use a mock connection
 LOCAL_DEV_MODE = not os.getenv("DATABASE_URL")
 
-# SQLAlchemy setup - only for production with database
-if not LOCAL_DEV_MODE:
-    engine = create_engine(DATABASE_URL)
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-else:
-    engine = None
-    SessionLocal = None
+# SQLAlchemy setup - lazy initialization to avoid import errors
+engine = None
+SessionLocal = None
+
+def get_sqlalchemy_engine():
+    global engine
+    if engine is None and not LOCAL_DEV_MODE:
+        engine = create_engine(DATABASE_URL)
+    return engine
+
+def get_sqlalchemy_session():
+    global SessionLocal
+    if SessionLocal is None and not LOCAL_DEV_MODE:
+        engine = get_sqlalchemy_engine()
+        if engine:
+            SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return SessionLocal
 
 Base = declarative_base()
 
