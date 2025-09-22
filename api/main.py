@@ -48,7 +48,7 @@ app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["laserm
 
 @app.get("/")
 async def root():
-    return {"message": "Laser Equipment Intelligence API", "version": "1.0.9", "build": "2025-09-21-cors-fix", "status": "cors_enabled", "deploy_time": "2025-09-21-19:00:00"}
+    return {"message": "Laser Equipment Intelligence API", "version": "1.0.10", "build": "2025-09-22-full-scrape", "status": "all_items_enabled", "deploy_time": "2025-09-22-15:30:00"}
 
 @app.get("/health")
 async def health_check():

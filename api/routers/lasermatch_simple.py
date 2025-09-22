@@ -73,7 +73,7 @@ def fetch_and_extract_lasermatch():
         items = []
         seen_titles = set()
         
-        for i, link in enumerate(modal_links[:10]):
+        for i, link in enumerate(modal_links):
             onclick = link.get('onclick', '')
             if 'updateModalContent' in onclick:
                 # Extract from onclick: updateModalContent(' 21638 ','Aerolase: Lightpod Neo Elite')
@@ -93,6 +93,7 @@ def fetch_and_extract_lasermatch():
                     
                     # Skip duplicates
                     if title in seen_titles:
+                        logging.info(f"⏭️ Skipping duplicate: {title}")
                         continue
                     seen_titles.add(title)
                     
@@ -120,8 +121,8 @@ def fetch_and_extract_lasermatch():
                         'availability': 'available'
                     }
                     
-                    items.append(item)
-                    logging.info(f"✅ Extracted real item {i+1}: {title} ({brand})")
+                        items.append(item)
+                        logging.info(f"✅ Extracted real item {len(items)}: {title} ({brand})")
         
         # If we found real items, use them. Otherwise use mock data.
         if len(items) == 0:
