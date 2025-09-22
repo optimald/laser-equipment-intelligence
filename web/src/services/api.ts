@@ -1,6 +1,9 @@
 // API service for connecting to the Railway backend
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://laser-backend-production.up.railway.app';
 
+// Debug: Log the API URL being used
+console.log('🔗 API_BASE_URL:', API_BASE_URL);
+
 export interface SearchParams {
   query?: string;
   brand?: string;
@@ -159,7 +162,9 @@ class ApiService {
     items: any[];
     total: number;
   }> {
-    return this.request(`/api/v1/lasermatch/items?skip=${skip}&limit=${limit}`);
+    const url = `/api/v1/lasermatch/items?skip=${skip}&limit=${limit}`;
+    console.log('🌐 Fetching LaserMatch items from:', API_BASE_URL + url);
+    return this.request(url);
   }
 
   async getLaserMatchStats(): Promise<{
