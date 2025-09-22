@@ -1,0 +1,6 @@
+web/
+scripts/
+package.json
+*.md
+.git/
+.gitignore
