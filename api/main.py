@@ -9,9 +9,14 @@ from api.routers import search, dashboard, configuration, lasermatch
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup - Simple initialization
-    print("Starting Laser Equipment Intelligence API - Simplified Mode")
-    print("No database dependencies - using in-memory storage")
+    # Startup - Initialize database
+    print("Starting Laser Equipment Intelligence API - Database Mode")
+    print("Initializing database connection...")
+    
+    # Import here to avoid circular imports
+    from api.models.database import init_db
+    await init_db()
+    
     yield
     # Shutdown
     pass
@@ -48,7 +53,7 @@ app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["laserm
 
 @app.get("/")
 async def root():
-    return {"message": "Laser Equipment Intelligence API", "version": "1.0.10", "build": "2025-09-22-full-scrape", "status": "all_items_enabled", "deploy_time": "2025-09-22-15:30:00"}
+    return {"message": "Laser Equipment Intelligence API", "version": "1.0.11", "build": "2025-09-22-database-enabled", "status": "database_persistent", "deploy_time": "2025-09-22-15:45:00"}
 
 @app.get("/health")
 async def health_check():

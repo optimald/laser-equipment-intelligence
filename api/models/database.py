@@ -78,6 +78,30 @@ class SpiderRun(Base):
     completed_at = Column(DateTime)
     error_message = Column(Text)
 
+class LaserMatchItem(Base):
+    __tablename__ = "lasermatch_items"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(500), nullable=False, index=True)
+    brand = Column(String(100))
+    model = Column(String(100))
+    condition = Column(String(50))
+    price = Column(Numeric(12, 2))
+    location = Column(String(200))
+    description = Column(Text)
+    url = Column(Text)
+    images = Column(ARRAY(String))
+    discovered_at = Column(DateTime, default=datetime.utcnow)
+    last_updated = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    source = Column(String(100), default='LaserMatch.io')
+    status = Column(String(50), default='active')
+    category = Column(String(100))
+    availability = Column(String(50))
+    assigned_rep = Column(String(100))
+    target_price = Column(Numeric(12, 2))
+    notes = Column(Text)
+    spider_urls = Column(Text)  # JSON string for spider URLs
+
 # Async database functions for compatibility
 async def get_db_connection():
     """Get database connection"""
@@ -164,10 +188,10 @@ async def init_db():
             )
         """)
         
-        # Create LaserMatch items table
+        # Create lasermatch items table
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS lasermatch_items (
-                id VARCHAR(50) PRIMARY KEY,
+                id SERIAL PRIMARY KEY,
                 title VARCHAR(500) NOT NULL,
                 brand VARCHAR(100),
                 model VARCHAR(100),
@@ -175,16 +199,21 @@ async def init_db():
                 price DECIMAL(12,2),
                 location VARCHAR(200),
                 description TEXT,
-                url TEXT NOT NULL,
-                images TEXT,
+                url TEXT,
+                images TEXT[],
                 discovered_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                 last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                 source VARCHAR(100) DEFAULT 'LaserMatch.io',
                 status VARCHAR(50) DEFAULT 'active',
                 category VARCHAR(100),
-                availability VARCHAR(50) DEFAULT 'available'
+                availability VARCHAR(50),
+                assigned_rep VARCHAR(100),
+                target_price DECIMAL(12,2),
+                notes TEXT,
+                spider_urls TEXT
             )
         """)
+        
         
         # Create indexes for better performance
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_source ON listings(source)")
@@ -192,8 +221,13 @@ async def init_db():
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_discovered_at ON listings(discovered_at)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_price ON listings(price)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_listings_score ON listings(score_overall)")
-        await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_category ON lasermatch_items(category)")
+        
+        # Create indexes for LaserMatch items
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_title ON lasermatch_items(title)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_brand ON lasermatch_items(brand)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_status ON lasermatch_items(status)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_assigned_rep ON lasermatch_items(assigned_rep)")
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_category ON lasermatch_items(category)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_lasermatch_discovered_at ON lasermatch_items(discovered_at)")
         
     finally:
