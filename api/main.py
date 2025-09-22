@@ -28,6 +28,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
         "https://laser-procurement-frontend-hydf8tsg6-optimaldev.vercel.app",
         "https://laser-procurement-frontend.vercel.app",
         "https://*.vercel.app"
@@ -46,7 +48,7 @@ app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["laserm
 
 @app.get("/")
 async def root():
-    return {"message": "Laser Equipment Intelligence API", "version": "1.0.8", "build": "2025-09-21-lasermatch-fix", "status": "lasermatch_real_data", "deploy_time": "2025-09-21-18:30:00"}
+    return {"message": "Laser Equipment Intelligence API", "version": "1.0.9", "build": "2025-09-21-cors-fix", "status": "cors_enabled", "deploy_time": "2025-09-21-19:00:00"}
 
 @app.get("/health")
 async def health_check():
