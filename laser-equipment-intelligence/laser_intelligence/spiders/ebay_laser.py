@@ -22,19 +22,41 @@ class EbayLaserSpider(scrapy.Spider):
     
     def parse_search_results(self, response):
         """Parse eBay search results page"""
-        items = response.css('div.s-item')
+        # Debug: Print response info
+        self.logger.info(f"Response URL: {response.url}")
+        self.logger.info(f"Response status: {response.status}")
+        
+        # Try different item selectors
+        items = (response.css('div.s-item') or 
+                response.css('div[data-view]') or
+                response.css('div[data-testid="item"]') or
+                response.css('div.item'))
+        
+        self.logger.info(f"Found {len(items)} potential items")
+        
+        # Debug: Print first few item structures
+        for i, item in enumerate(items[:3]):
+            self.logger.info(f"Item {i} HTML: {item.get()[:200]}...")
         
         for item in items:
             # Skip sponsored items and non-product items
-            if item.css('div.s-item__ads').get():
+            if item.css('div.s-item__ads').get() or item.css('[data-testid="ad-indicator"]').get():
                 continue
                 
-            title = item.css('h3.s-item__title::text').get()
-            if not title or 'Shop on eBay' in title:
+            # Try multiple title selectors
+            title = (item.css('h3.s-item__title::text').get() or 
+                    item.css('h3.s-item__title a::text').get() or
+                    item.css('a.s-item__link::text').get() or
+                    item.css('[data-testid="listing-title"]::text').get())
+            
+            if not title or 'Shop on eBay' in title or not title.strip():
                 continue
                 
-            # Extract price
-            price_text = item.css('span.s-item__price::text').get()
+            # Extract price - try multiple selectors
+            price_text = (item.css('span.s-item__price::text').get() or
+                         item.css('span.s-item__price span::text').get() or
+                         item.css('[data-testid="price"]::text').get())
+            
             price = None
             if price_text:
                 price_match = re.search(r'[\$£€]\s*([0-9,]+\.?[0-9]*)', price_text)
@@ -42,28 +64,31 @@ class EbayLaserSpider(scrapy.Spider):
                     price = float(price_match.group(1).replace(',', ''))
             
             # Extract URL
-            url = item.css('a.s-item__link::attr(href)').get()
+            url = (item.css('a.s-item__link::attr(href)').get() or
+                   item.css('[data-testid="listing-link"]::attr(href)').get())
             if not url:
                 continue
                 
             # Extract condition
-            condition = item.css('span.s-item__condition::text').get()
+            condition = (item.css('span.s-item__condition::text').get() or
+                        item.css('[data-testid="condition"]::text').get())
             if condition:
                 condition = condition.strip()
             else:
                 condition = "Used - Unknown"
                 
             # Extract location
-            location = item.css('span.s-item__location::text').get()
+            location = (item.css('span.s-item__location::text').get() or
+                       item.css('[data-testid="location"]::text').get())
             if location:
                 location = location.strip()
             else:
                 location = "Unknown"
                 
             # Extract image
-            image = item.css('img.s-item__image::attr(src)').get()
-            if not image:
-                image = item.css('img.s-item__image::attr(data-src)').get()
+            image = (item.css('img.s-item__image::attr(src)').get() or
+                    item.css('img.s-item__image::attr(data-src)').get() or
+                    item.css('[data-testid="listing-image"]::attr(src)').get())
                 
             # Extract brand and model from title
             brand = "Unknown"
@@ -71,7 +96,7 @@ class EbayLaserSpider(scrapy.Spider):
             if title:
                 title_lower = title.lower()
                 # Common laser brands
-                brands = ['aerolase', 'candela', 'cynosure', 'lumenis', 'syneron', 'alma', 'cutera', 'sciton', 'palomar', 'cooltouch']
+                brands = ['aerolase', 'candela', 'cynosure', 'lumenis', 'syneron', 'alma', 'cutera', 'sciton', 'palomar', 'cooltouch', 'allergan', 'btl', 'apyx']
                 for brand_name in brands:
                     if brand_name in title_lower:
                         brand = brand_name.title()

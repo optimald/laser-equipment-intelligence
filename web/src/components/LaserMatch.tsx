@@ -79,9 +79,11 @@ const cleanTitle = (title: string): string => {
 }
 
 export default function LaserMatch() {
+  console.log('🎯 LaserMatch component rendering...')
   const [items, setItems] = useState<LaserMatchItem[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [clickCount, setClickCount] = useState(0)
   const [editingItem, setEditingItem] = useState<string | null>(null)
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
   const [newNoteContent, setNewNoteContent] = useState('')
@@ -94,6 +96,7 @@ export default function LaserMatch() {
     price: '',
     followUpDate: ''
   })
+  const [activeTab, setActiveTab] = useState('LaserMatch')
   // Mock contacts data - in real app this would come from contacts context/API
   const [contacts] = useState([
     { id: '1', name: 'John Smith', company: 'MedTech Solutions', email: 'john.smith@medtech.com' },
@@ -109,8 +112,55 @@ export default function LaserMatch() {
 
   // Fetch LaserMatch items and stats on component mount
   useEffect(() => {
-    fetchLaserMatchItems()
-    fetchStats()
+    console.log('🚀 Component mounted, starting fetch...')
+    
+    const fetchData = async () => {
+      try {
+        console.log('🔍 Fetching LaserMatch items...')
+        const response = await fetch('http://localhost:8000/api/v1/lasermatch/items?limit=500')
+        console.log('📡 Response status:', response.status)
+        
+        if (response.ok) {
+          const data = await response.json()
+          console.log('📊 Received data:', data)
+          
+          if (data.items && data.items.length > 0) {
+            const convertedResults: LaserMatchItem[] = data.items.map((item: any) => ({
+              id: item.id.toString(),
+              title: item.title,
+              brand: item.brand,
+              model: item.model,
+              condition: item.condition,
+              price: item.price,
+              location: item.location,
+              description: item.description,
+              url: item.url || '',
+              sources: [],
+              sourcingStatus: 'not_started' as const,
+              assignedRep: undefined,
+              targetPrice: undefined,
+              notes: ''
+            }))
+            console.log('✅ Setting items:', convertedResults.length)
+            setItems(convertedResults)
+          } else {
+            console.log('⚠️ No items in response')
+            setItems([])
+          }
+        } else {
+          console.error('❌ Response not ok:', response.status)
+          setItems([])
+        }
+      } catch (error) {
+        console.error('❌ Fetch failed:', error)
+        setItems([])
+      } finally {
+        console.log('🏁 Setting isLoading to false')
+        setIsLoading(false)
+      }
+    }
+    
+    fetchData()
   }, [])
 
   const fetchStats = async () => {
@@ -127,8 +177,11 @@ export default function LaserMatch() {
     setIsLoading(true)
     try {
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
+      console.log('🔍 Fetching LaserMatch items from:', apiUrl)
       const response = await fetch(apiUrl)
+      console.log('📡 Response status:', response.status, response.statusText)
       const data = await response.json()
+      console.log('📊 Received data:', data)
       
       if (!data.items || data.items.length === 0) {
         console.log('No LaserMatch items found in database. Click "Refresh Items" to run the scraper.')
@@ -155,9 +208,14 @@ export default function LaserMatch() {
       }))
       setItems(convertedResults)
     } catch (error) {
-      console.error('Failed to fetch LaserMatch items:', error)
+      console.error('❌ Failed to fetch LaserMatch items:', error)
+      console.error('❌ Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })
       setItems([])
     } finally {
+      console.log('🏁 Setting isLoading to false')
       setIsLoading(false)
     }
   }
@@ -418,7 +476,45 @@ export default function LaserMatch() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <span className="ml-2 text-gray-400">Loading LaserMatch items...</span>
+        <span className="ml-2 text-gray-400">Loading LaserMatch items... (Debug: isLoading=true, items={items.length})</span>
+        <button 
+          onClick={async () => {
+            console.log('🔄 Manual fetch clicked')
+            try {
+              const response = await fetch('http://localhost:8000/api/v1/lasermatch/items?limit=5')
+              console.log('🔄 Response:', response.status)
+              if (response.ok) {
+                const data = await response.json()
+                console.log('🔄 Data:', data)
+                if (data.items && data.items.length > 0) {
+                  const convertedResults: LaserMatchItem[] = data.items.map((item: any) => ({
+                    id: item.id.toString(),
+                    title: item.title,
+                    brand: item.brand,
+                    model: item.model,
+                    condition: item.condition,
+                    price: item.price,
+                    location: item.location,
+                    description: item.description,
+                    url: item.url || '',
+                    sources: [],
+                    sourcingStatus: 'not_started' as const,
+                    assignedRep: undefined,
+                    targetPrice: undefined,
+                    notes: ''
+                  }))
+                  setItems(convertedResults)
+                  setIsLoading(false)
+                }
+              }
+            } catch (error) {
+              console.error('🔄 Manual fetch failed:', error)
+            }
+          }}
+          className="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Manual Fetch
+        </button>
       </div>
     )
   }
@@ -429,34 +525,66 @@ export default function LaserMatch() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             <nav className="flex space-x-8">
-              <button className="flex items-center py-4 px-1 border-b-2 font-medium text-sm border-white text-white">
-                LaserMatch
-              </button>
-              <button className="flex items-center py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700">
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={() => setActiveTab('LaserMatch')}
+                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 'LaserMatch' 
+                      ? 'border-white text-white' 
+                      : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
+                  }`}
+                >
+                  LaserMatch
+                </button>
+                <button
+                  onClick={refreshLaserMatchItems}
+                  disabled={isRefreshing}
+                  className="p-1 text-gray-400 hover:text-white disabled:text-gray-600 transition-colors"
+                  title={isRefreshing ? 'Refreshing...' : 'Refresh Items'}
+                >
+                  <ArrowPathIcon className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+              <button 
+                onClick={() => setActiveTab('Contacts')}
+                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'Contacts' 
+                    ? 'border-white text-white' 
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
+                }`}
+              >
                 Contacts
               </button>
-              <button className="flex items-center py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700">
+              <button 
+                onClick={() => setActiveTab('Users')}
+                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'Users' 
+                    ? 'border-white text-white' 
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
+                }`}
+              >
                 Users
               </button>
-              <button className="flex items-center py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700">
+              <button 
+                onClick={() => setActiveTab('Configuration')}
+                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'Configuration' 
+                    ? 'border-white text-white' 
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
+                }`}
+              >
                 Configuration
               </button>
             </nav>
-            <button
-              onClick={refreshLaserMatchItems}
-              disabled={isRefreshing}
-              className="bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white px-4 py-2 rounded-md font-medium flex items-center transition-colors"
-            >
-              <ArrowPathIcon className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh Items'}
-            </button>
           </div>
         </div>
       </div>
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
-          {items.length > 0 ? (
+          {activeTab === 'LaserMatch' && (
+            <>
+              {items.length > 0 ? (
             <div className="bg-gray-900 rounded-lg shadow overflow-hidden">
               <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
                 <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-300">
@@ -1012,6 +1140,119 @@ export default function LaserMatch() {
               >
                 Refresh Items
               </button>
+            </div>
+          )}
+            </>
+          )}
+
+          {activeTab === 'Contacts' && (
+            <div className="bg-gray-900 rounded-lg shadow overflow-hidden">
+              <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
+                <h2 className="text-xl font-bold text-white">Contacts</h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {contacts.map((contact) => (
+                    <div key={contact.id} className="bg-gray-800 rounded-lg p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-white font-medium">{contact.name}</h3>
+                          <p className="text-gray-400 text-sm">{contact.company}</p>
+                          <p className="text-gray-500 text-sm">{contact.email}</p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button className="text-blue-400 hover:text-blue-300 text-sm">Edit</button>
+                          <button className="text-red-400 hover:text-red-300 text-sm">Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                  Add New Contact
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'Users' && (
+            <div className="bg-gray-900 rounded-lg shadow overflow-hidden">
+              <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
+                <h2 className="text-xl font-bold text-white">Users</h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {DEFAULT_REPS.map((rep, index) => (
+                    <div key={index} className="bg-gray-800 rounded-lg p-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="text-white font-medium">{rep}</h3>
+                          <p className="text-gray-400 text-sm">Sales Representative</p>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button className="text-blue-400 hover:text-blue-300 text-sm">Edit</button>
+                          <button className="text-red-400 hover:text-red-300 text-sm">Deactivate</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                  Add New User
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'Configuration' && (
+            <div className="bg-gray-900 rounded-lg shadow overflow-hidden">
+              <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
+                <h2 className="text-xl font-bold text-white">Configuration</h2>
+              </div>
+              <div className="p-6">
+                <div className="space-y-6">
+                  <div className="bg-gray-800 rounded-lg p-4">
+                    <h3 className="text-white font-medium mb-4">API Settings</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-gray-300 text-sm mb-1">API URL</label>
+                        <input 
+                          type="text" 
+                          value={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} 
+                          className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white"
+                          readOnly
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-300 text-sm mb-1">Database Status</label>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-green-400 text-sm">Connected</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-800 rounded-lg p-4">
+                    <h3 className="text-white font-medium mb-4">Scraping Settings</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Auto-refresh interval</span>
+                        <select className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white text-sm">
+                          <option>5 minutes</option>
+                          <option>15 minutes</option>
+                          <option>30 minutes</option>
+                          <option>1 hour</option>
+                        </select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Enable Magic Find</span>
+                        <input type="checkbox" className="rounded" defaultChecked />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

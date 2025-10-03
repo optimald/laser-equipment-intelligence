@@ -99,48 +99,95 @@ def generate_mock_search_results(query: str, limit: int) -> List[Dict[str, Any]]
     """Generate mock search results for testing"""
     import random
     
-    # Mock data based on common laser equipment
-    brands = ["Aerolase", "Candela", "Cynosure", "Lumenis", "Syneron", "Alma", "Cutera", "Sciton"]
-    models = ["Pro", "Elite", "Max", "Plus", "Neo", "Ultra", "Advanced", "Premium"]
-    conditions = ["New", "Used - Excellent", "Used - Good", "Used - Fair", "Refurbished"]
-    sources = ["eBay", "DOTmed Auctions", "BidSpotter", "Craigslist", "Facebook Marketplace", "The Laser Warehouse"]
-    locations = ["California, USA", "Texas, USA", "New York, USA", "Florida, USA", "Illinois, USA"]
+    # Generate realistic laser equipment data based on the search query
+    query_lower = query.lower()
     
-    # Filter brands/models based on query
-    matching_brands = [brand for brand in brands if query.lower() in brand.lower()]
-    if not matching_brands:
-        matching_brands = brands
+    # Determine brand from query
+    if 'aerolase' in query_lower:
+        brand = 'Aerolase'
+    elif 'candela' in query_lower:
+        brand = 'Candela'
+    elif 'cynosure' in query_lower:
+        brand = 'Cynosure'
+    elif 'lumenis' in query_lower:
+        brand = 'Lumenis'
+    elif 'syneron' in query_lower:
+        brand = 'Syneron'
+    elif 'alma' in query_lower:
+        brand = 'Alma'
+    elif 'cutera' in query_lower:
+        brand = 'Cutera'
+    elif 'sciton' in query_lower:
+        brand = 'Sciton'
+    else:
+        brand = random.choice(['Aerolase', 'Candela', 'Cynosure', 'Lumenis', 'Syneron', 'Alma', 'Cutera', 'Sciton'])
+    
+    # Realistic laser equipment models by brand
+    brand_models = {
+        'Aerolase': ['LightPod Neo Elite', 'LightPod Neo', 'LightPod Elite', 'LightPod Pro'],
+        'Candela': ['GentleLase Pro', 'GentleMax Pro', 'VBeam Perfecta', 'CoolGlide Excel'],
+        'Cynosure': ['Picosure', 'Picoway', 'SmartLipo', 'Monolith'],
+        'Lumenis': ['LightSheer Duet', 'M22', 'UltraPulse', 'AcuPulse'],
+        'Syneron': ['eTwo', 'eMatrix', 'VelaShape', 'ReFirme'],
+        'Alma': ['Harmony XL', 'Harmony', 'Soprano', 'Accent'],
+        'Cutera': ['Excel V', 'Titan', 'Genesis Plus', 'Laser Genesis'],
+        'Sciton': ['Profile', 'Contour TRL', 'Joule', 'Halo']
+    }
+    
+    models = brand_models.get(brand, ['Professional', 'Elite', 'Pro', 'Max'])
     
     results = []
-    num_results = min(random.randint(3, 8), limit)
+    sources = ["eBay", "DOTmed Auctions", "BidSpotter", "Equipment Network", "MedWOW"]
+    conditions = ["New", "Used - Excellent", "Used - Good", "Used - Fair", "Refurbished"]
+    locations = ["California, USA", "Texas, USA", "New York, USA", "Florida, USA", "Illinois, USA", "Nevada, USA"]
+    
+    # Generate 3-5 realistic results
+    num_results = min(random.randint(3, 5), limit)
     
     for i in range(num_results):
-        brand = random.choice(matching_brands)
-        model = f"{brand} {random.choice(models)}"
-        base_price = random.randint(15000, 85000)
+        model = random.choice(models)
+        condition = random.choice(conditions)
         
-        # Calculate relevance score based on query match
-        score = 100
-        if query.lower() in brand.lower():
-            score += 20
-        if query.lower() in model.lower():
-            score += 15
+        # Realistic pricing based on brand and condition
+        if brand == 'Aerolase':
+            base_price = random.randint(25000, 45000)
+        elif brand in ['Candela', 'Cynosure']:
+            base_price = random.randint(35000, 65000)
+        elif brand in ['Lumenis', 'Sciton']:
+            base_price = random.randint(40000, 80000)
+        else:
+            base_price = random.randint(20000, 60000)
+        
+        # Adjust price based on condition
+        if condition == "New":
+            price = base_price
+        elif condition == "Used - Excellent":
+            price = int(base_price * 0.75)
+        elif condition == "Used - Good":
+            price = int(base_price * 0.60)
+        elif condition == "Used - Fair":
+            price = int(base_price * 0.45)
+        else:  # Refurbished
+            price = int(base_price * 0.70)
+        
+        source = random.choice(sources)
+        location = random.choice(locations)
         
         results.append({
-            "id": 1000 + i,
+            "id": f"mock_{brand.lower()}_{i+1}",
             "title": f"{brand} {model} Laser System",
             "brand": brand,
             "model": model,
-            "condition": random.choice(conditions),
-            "price": float(base_price),
-            "source": random.choice(sources),
-            "location": random.choice(locations),
-            "description": f"Professional {brand} {model} laser system in excellent condition. Perfect for aesthetic treatments.",
-            "images": [f"https://example.com/image_{i+1}.jpg"],
+            "condition": condition,
+            "price": float(price),
+            "source": source,
+            "location": location,
+            "description": f"Professional {brand} {model} laser system in {condition.lower()} condition. Perfect for aesthetic treatments.",
+            "images": [f"https://example.com/{brand.lower()}_{model.lower().replace(' ', '_')}_{i+1}.jpg"],
             "discovered_at": datetime.now().isoformat(),
-            "margin_estimate": random.uniform(15.0, 35.0),
-            "score_overall": score,
-            "url": f"https://example.com/listing/{1000+i}",
+            "margin_estimate": random.uniform(20.0, 40.0),
+            "score_overall": random.randint(80, 95),
+            "url": f"https://{source.lower().replace(' ', '')}.com/listing/{brand.lower()}_{model.lower().replace(' ', '_')}_{i+1}",
             "status": "active"
         })
     

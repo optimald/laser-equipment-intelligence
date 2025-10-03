@@ -85,9 +85,9 @@ def run_single_spider(spider_dir: str, spider_config: Dict[str, str]) -> List[Di
         output_file = temp_file.name
     
     try:
-        # Run scrapy crawl command
+        # Run scrapy crawl command using python3 -m scrapy
         cmd = [
-            "scrapy", "crawl", spider_name,
+            "python3", "-m", "scrapy", "crawl", spider_name,
             "-a", f"query={query}",
             "-o", output_file,
             "-s", "ROBOTSTXT_OBEY=False",  # Disable robots.txt for testing
