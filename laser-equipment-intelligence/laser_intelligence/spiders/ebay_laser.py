@@ -26,13 +26,20 @@ class EbayLaserSpider(scrapy.Spider):
         self.logger.info(f"Response URL: {response.url}")
         self.logger.info(f"Response status: {response.status}")
         
-        # Try different item selectors
+        # Try multiple selectors for modern eBay
         items = (response.css('div.s-item') or 
-                response.css('div[data-view]') or
+                response.css('div[data-view*="item"]') or
+                response.css('div.srp-river-answer') or
                 response.css('div[data-testid="item"]') or
                 response.css('div.item'))
         
         self.logger.info(f"Found {len(items)} potential items")
+        
+        # If no items found, try alternative approach
+        if not items:
+            # Look for any divs that might contain listings
+            items = response.css('div[class*="item"], div[class*="listing"], div[class*="product"]')
+            self.logger.info(f"Alternative search found {len(items)} potential items")
         
         # Debug: Print first few item structures
         for i, item in enumerate(items[:3]):
@@ -43,11 +50,14 @@ class EbayLaserSpider(scrapy.Spider):
             if item.css('div.s-item__ads').get() or item.css('[data-testid="ad-indicator"]').get():
                 continue
                 
-            # Try multiple title selectors
+            # Try multiple title selectors - more comprehensive
             title = (item.css('h3.s-item__title::text').get() or 
                     item.css('h3.s-item__title a::text').get() or
                     item.css('a.s-item__link::text').get() or
-                    item.css('[data-testid="listing-title"]::text').get())
+                    item.css('[data-testid="listing-title"]::text').get() or
+                    item.css('h3::text').get() or
+                    item.css('h2::text').get() or
+                    item.css('a[class*="title"]::text').get())
             
             if not title or 'Shop on eBay' in title or not title.strip():
                 continue
@@ -55,7 +65,9 @@ class EbayLaserSpider(scrapy.Spider):
             # Extract price - try multiple selectors
             price_text = (item.css('span.s-item__price::text').get() or
                          item.css('span.s-item__price span::text').get() or
-                         item.css('[data-testid="price"]::text').get())
+                         item.css('[data-testid="price"]::text').get() or
+                         item.css('span[class*="price"]::text').get() or
+                         item.css('span[class*="cost"]::text').get())
             
             price = None
             if price_text:
@@ -65,13 +77,16 @@ class EbayLaserSpider(scrapy.Spider):
             
             # Extract URL
             url = (item.css('a.s-item__link::attr(href)').get() or
-                   item.css('[data-testid="listing-link"]::attr(href)').get())
+                   item.css('[data-testid="listing-link"]::attr(href)').get() or
+                   item.css('a[class*="link"]::attr(href)').get() or
+                   item.css('a::attr(href)').get())
             if not url:
                 continue
                 
             # Extract condition
             condition = (item.css('span.s-item__condition::text').get() or
-                        item.css('[data-testid="condition"]::text').get())
+                        item.css('[data-testid="condition"]::text').get() or
+                        item.css('span[class*="condition"]::text').get())
             if condition:
                 condition = condition.strip()
             else:
@@ -79,7 +94,8 @@ class EbayLaserSpider(scrapy.Spider):
                 
             # Extract location
             location = (item.css('span.s-item__location::text').get() or
-                       item.css('[data-testid="location"]::text').get())
+                       item.css('[data-testid="location"]::text').get() or
+                       item.css('span[class*="location"]::text').get())
             if location:
                 location = location.strip()
             else:
@@ -88,7 +104,8 @@ class EbayLaserSpider(scrapy.Spider):
             # Extract image
             image = (item.css('img.s-item__image::attr(src)').get() or
                     item.css('img.s-item__image::attr(data-src)').get() or
-                    item.css('[data-testid="listing-image"]::attr(src)').get())
+                    item.css('[data-testid="listing-image"]::attr(src)').get() or
+                    item.css('img::attr(src)').get())
                 
             # Extract brand and model from title
             brand = "Unknown"

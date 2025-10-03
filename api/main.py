@@ -5,7 +5,7 @@ import os
 from contextlib import asynccontextmanager
 
 # SIMPLIFIED API - VERSION 1.0.6 - NO DATABASE DEPENDENCIES
-from api.routers import search, dashboard, configuration, spiders, lasermatch, exhaustive_search
+from api.routers import search, configuration, spiders, lasermatch
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,11 +49,9 @@ app.add_middleware(
 
 # Include routers
 app.include_router(search.router, prefix="/api/v1/search", tags=["search"])
-app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["dashboard"])
 app.include_router(configuration.router, prefix="/api/v1/config", tags=["configuration"])
 app.include_router(spiders.router, prefix="/api/v1/spiders", tags=["spiders"])
 app.include_router(lasermatch.router, prefix="/api/v1/lasermatch", tags=["lasermatch"])
-app.include_router(exhaustive_search.router, prefix="/api/v1/exhaustive", tags=["exhaustive-search"])
 
 @app.get("/")
 async def root():

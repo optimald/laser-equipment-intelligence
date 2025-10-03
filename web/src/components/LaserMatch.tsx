@@ -250,6 +250,36 @@ export default function LaserMatch() {
     ))
   }
 
+  const handleSavePrice = async (itemId: string, newPrice: number) => {
+    try {
+      // Update local state
+      setItems(prevItems =>
+        prevItems.map(item =>
+          item.id === itemId
+            ? { ...item, price: newPrice }
+            : item
+        )
+      )
+      
+      // Save to API/database
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items/${itemId}/price`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ price: newPrice })
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Failed to save price: ${response.statusText}`)
+      }
+      
+      setEditingItem(null)
+      alert(`Target price set to ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(newPrice)}!`)
+    } catch (error) {
+      console.error('Failed to save price:', error)
+      alert('Failed to save target price. Please try again.')
+    }
+  }
+
   const addNote = (itemId: string, content: string) => {
     if (!content.trim()) return
 
@@ -352,7 +382,8 @@ export default function LaserMatch() {
           query: item.title,
           brand: item.brand,
           model: item.model,
-          limit: 10
+          limit: 10,
+          max_price: item.price || undefined
         })
       })
       const searchResponse = await response.json()
@@ -714,10 +745,57 @@ export default function LaserMatch() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="text-2xl font-bold text-white">
-                                {item.price ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
-                              </div>
-                              <div className="text-sm text-gray-400">Listed Price</div>
+                              {editingItem === item.id ? (
+                                <div className="space-y-2">
+                                  <input
+                                    type="number"
+                                    value={item.price || ''}
+                                    onChange={(e) => {
+                                      const newPrice = parseFloat(e.target.value) || 0
+                                      setItems(prevItems =>
+                                        prevItems.map(prevItem =>
+                                          prevItem.id === item.id
+                                            ? { ...prevItem, price: newPrice }
+                                            : prevItem
+                                        )
+                                      )
+                                    }}
+                                    className="w-32 px-2 py-1 text-lg font-bold text-white bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="0"
+                                    min="0"
+                                    step="0.01"
+                                  />
+                                  <div className="text-sm text-gray-400">Target Price (Max Willing to Pay)</div>
+                                  <div className="flex space-x-2">
+                                    <button
+                                      onClick={() => handleSavePrice(item.id, item.price || 0)}
+                                      className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      onClick={() => setEditingItem(null)}
+                                      className="px-2 py-1 text-xs bg-gray-600 text-white rounded hover:bg-gray-700"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div 
+                                  className="cursor-pointer group"
+                                  onClick={() => setEditingItem(item.id)}
+                                  title="Click to set your target price (maximum willing to pay)"
+                                >
+                                  <div className="text-2xl font-bold text-white group-hover:text-blue-400 transition-colors">
+                                    {item.price && item.price > 0 
+                                      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) 
+                                      : 'Click to set target price'
+                                    }
+                                  </div>
+                                  <div className="text-sm text-gray-400 group-hover:text-blue-300 transition-colors">Target Price (Max Willing to Pay)</div>
+                                </div>
+                              )}
                             </div>
                           </div>
                           {item.description && (

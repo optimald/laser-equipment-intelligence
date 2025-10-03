@@ -128,50 +128,32 @@ async def get_lasermatch_items(
                 # Get the project root directory
                 project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
                 
-                # Try to load the prepared API data file first
-                api_data_file = os.path.join(project_root, "lasermatch_api_data.json")
-                if os.path.exists(api_data_file):
-                    print(f"Loading API data from: lasermatch_api_data.json")
-                    with open(api_data_file, 'r') as f:
-                        _lasermatch_items = json.load(f)
-                    print(f"✅ Loaded {len(_lasermatch_items)} items from API data file")
+                # Try to load the latest scraped data first
+                scraped_files = [f for f in os.listdir(project_root) if f.startswith('lasermatch_scraped_') and f.endswith('.json')]
+                if scraped_files:
+                    # Get the most recent scraped file
+                    latest_scraped = sorted(scraped_files)[-1]
+                    scraped_file_path = os.path.join(project_root, latest_scraped)
+                    print(f"Loading scraped data from: {latest_scraped}")
+                    with open(scraped_file_path, 'r') as f:
+                        raw_items = json.load(f)
+                    
+                    # Add sequential IDs to scraped items
+                    _lasermatch_items = []
+                    for i, item in enumerate(raw_items):
+                        item_with_id = item.copy()
+                        item_with_id['id'] = i + 1
+                        _lasermatch_items.append(item_with_id)
+                    
+                    print(f"✅ Loaded {len(_lasermatch_items)} items from scraped data file")
                 else:
-                    # Fall back to finding the most recent scraped file
-                    scraped_files = [f for f in os.listdir(project_root) if f.startswith("lasermatch_scraped_") and f.endswith(".json")]
-                    if scraped_files:
-                        latest_file = max(scraped_files)
-                        file_path = os.path.join(project_root, latest_file)
-                        
-                        print(f"Loading scraped data from: {latest_file}")
-                        
-                        with open(file_path, 'r') as f:
-                            raw_data = json.load(f)
-                        
-                        # Convert to API format
-                        _lasermatch_items = []
-                        for item in raw_data:
-                            _lasermatch_items.append({
-                                "id": i + 1,
-                                "title": item["title"],
-                                "brand": item["brand"],
-                                "model": item["model"],
-                                "condition": item["condition"],
-                                "price": item["price"] if item["price"] > 0 else 25000.0,
-                                "location": item["location"],
-                                "description": item["description"],
-                                "url": item["url"],
-                                "images": item["images"],
-                                "source": item["source"],
-                                "status": item["status"],
-                                "category": item["category"],
-                                "availability": item["availability"],
-                                "assigned_rep": item["assigned_rep"],
-                                "target_price": item["target_price"],
-                                "notes": item["notes"],
-                                "spider_urls": item["spider_urls"]
-                            })
-                        
-                        print(f"✅ Loaded {len(_lasermatch_items)} items from scraper")
+                    # Fallback to prepared API data file
+                    api_data_file = os.path.join(project_root, "lasermatch_api_data.json")
+                    if os.path.exists(api_data_file):
+                        print(f"Loading API data from: lasermatch_api_data.json")
+                        with open(api_data_file, 'r') as f:
+                            _lasermatch_items = json.load(f)
+                        print(f"✅ Loaded {len(_lasermatch_items)} items from API data file")
             except Exception as e:
                 print(f"Failed to load scraped data: {e}")
                 _lasermatch_items = []
@@ -563,3 +545,55 @@ async def get_lasermatch_stats():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
+
+@router.put("/items/{item_id}/price")
+async def update_item_price(item_id: int, price_update: dict):
+    """Update the target price (maximum willing to pay) for a specific LaserMatch item"""
+    global _lasermatch_items
+    try:
+        new_price = price_update.get('price')
+        if new_price is None:
+            raise HTTPException(status_code=400, detail="Target price is required")
+        
+        # Try database first
+        conn = await get_db_connection()
+        if conn:
+            try:
+                result = await conn.execute("""
+                    UPDATE lasermatch_items 
+                    SET price = $1, updated_at = NOW()
+                    WHERE id = $2
+                """, new_price, item_id)
+                
+                await conn.close()
+                
+                if result == "UPDATE 1":
+                    # Update in-memory data as well
+                    if _lasermatch_items:
+                        for item in _lasermatch_items:
+                            if item.get('id') == item_id:
+                                item['price'] = new_price
+                                break
+                    
+                    return {"message": "Target price updated successfully", "item_id": item_id, "new_price": new_price}
+                else:
+                    raise HTTPException(status_code=404, detail="Item not found")
+                    
+            except Exception as e:
+                print(f"Database target price update failed: {e}")
+                if conn:
+                    await conn.close()
+        
+        # Fallback to in-memory data
+        if _lasermatch_items:
+            for item in _lasermatch_items:
+                if item.get('id') == item_id:
+                    item['price'] = new_price
+                    return {"message": "Target price updated successfully", "item_id": item_id, "new_price": new_price}
+        
+        raise HTTPException(status_code=404, detail="Item not found")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update target price: {str(e)}")
