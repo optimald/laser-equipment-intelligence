@@ -1,0 +1,26 @@
+# Large directories that aren't needed for the API
+laser-equipment-intelligence/
+node_modules/
+web/
+test-app/
+backend/
+
+# Development files
+.git/
+.gitignore
+*.log
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+.venv/
+venv/
+
+# Documentation
+docs/
+README.md
+
+# Frontend files
+package.json
+package-lock.json
+vercel.json

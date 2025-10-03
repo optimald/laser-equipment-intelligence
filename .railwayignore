@@ -1,0 +1,9 @@
+web/
+scripts/
+package.json
+web/package.json
+*.md
+.git/
+.gitignore
+node_modules/
+.next/

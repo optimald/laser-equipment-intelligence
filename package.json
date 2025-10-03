@@ -1,0 +1,15 @@
+{
+  "name": "laser-equipment-intelligence",
+  "version": "1.0.0",
+  "description": "Laser Equipment Intelligence procurement tool",
+  "scripts": {
+    "dev": "./scripts/dev.sh",
+    "dev:frontend": "cd web && npm run dev:3001",
+    "dev:api": "cd api && python -m uvicorn main:app --host 0.0.0.0 --port 8000",
+    "install": "cd web && npm install",
+    "build": "cd web && npm run build"
+  },
+  "keywords": ["laser", "equipment", "procurement", "intelligence"],
+  "author": "Laser Equipment Intelligence Team",
+  "license": "MIT"
+}
