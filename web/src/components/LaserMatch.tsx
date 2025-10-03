@@ -928,7 +928,7 @@ export default function LaserMatch() {
                                     value={newNoteContent}
                                     onChange={(e) => setNewNoteContent(e.target.value)}
                                     placeholder="Add a new note... (Use @source-1, @source-2, etc. to tag specific sources)"
-                                    className="w-full text-sm border border-gray-300 rounded px-3 py-2 h-20 resize-none"
+                                    className="w-full text-sm bg-gray-700 border border-gray-600 rounded px-3 py-2 h-20 resize-none text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                   />
                                   {item.spiderUrls && item.spiderUrls.length > 0 && (
                                     <div className="mt-2 text-xs text-gray-500">
@@ -937,7 +937,7 @@ export default function LaserMatch() {
                                         {item.spiderUrls.map((spiderUrl, index) => (
                                           <span
                                             key={spiderUrl.id}
-                                            className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 rounded cursor-pointer hover:bg-gray-200"
+                                            className="inline-flex items-center px-2 py-1 bg-gray-600 text-gray-200 rounded cursor-pointer hover:bg-gray-500"
                                             onClick={() => {
                                               const tag = `@source-${index + 1}`
                                               setNewNoteContent(prev => prev + (prev ? ' ' : '') + tag)
