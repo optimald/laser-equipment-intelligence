@@ -113,16 +113,139 @@ export default function LaserMatch() {
   const [searchLogModalOpen, setSearchLogModalOpen] = useState(false)
   const [searchLogs, setSearchLogs] = useState<string[]>([])
   const [currentSearchItem, setCurrentSearchItem] = useState<string | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [isUsingFallback, setIsUsingFallback] = useState(false)
+
+  // Fallback data for when API is unavailable
+  const tryFallbackData = () => {
+    console.log('📱 Loading fallback data for mobile...')
+    setIsUsingFallback(true)
+    
+    const fallbackItems: LaserMatchItem[] = [
+      {
+        id: 'fallback_1',
+        title: 'Aerolase: Lightpod Neo Elite',
+        brand: 'Aerolase',
+        model: 'Lightpod Neo Elite',
+        condition: 'Used - Good',
+        price: 35000,
+        location: 'California, USA',
+        description: 'Professional Aerolase Lightpod Neo Elite laser system in good condition.',
+        url: 'https://lasermatch.io/listing/aerolase-lightpod-neo-elite',
+        sources: [],
+        sourcingStatus: 'not_started',
+        assignedRep: undefined,
+        targetPrice: undefined,
+        notes: ''
+      },
+      {
+        id: 'fallback_2',
+        title: 'Candela: GentleMax Pro',
+        brand: 'Candela',
+        model: 'GentleMax Pro',
+        condition: 'Used - Excellent',
+        price: 45000,
+        location: 'Texas, USA',
+        description: 'High-quality Candela GentleMax Pro laser system in excellent condition.',
+        url: 'https://lasermatch.io/listing/candela-gentlemax-pro',
+        sources: [],
+        sourcingStatus: 'not_started',
+        assignedRep: undefined,
+        targetPrice: undefined,
+        notes: ''
+      },
+      {
+        id: 'fallback_3',
+        title: 'Cynosure: Picosure',
+        brand: 'Cynosure',
+        model: 'Picosure',
+        condition: 'Used - Good',
+        price: 55000,
+        location: 'New York, USA',
+        description: 'Professional Cynosure Picosure laser system for aesthetic treatments.',
+        url: 'https://lasermatch.io/listing/cynosure-picosure',
+        sources: [],
+        sourcingStatus: 'not_started',
+        assignedRep: undefined,
+        targetPrice: undefined,
+        notes: ''
+      },
+      {
+        id: 'fallback_4',
+        title: 'Lumenis: M22',
+        brand: 'Lumenis',
+        model: 'M22',
+        condition: 'Used - Fair',
+        price: 40000,
+        location: 'Florida, USA',
+        description: 'Lumenis M22 multi-application platform laser system.',
+        url: 'https://lasermatch.io/listing/lumenis-m22',
+        sources: [],
+        sourcingStatus: 'not_started',
+        assignedRep: undefined,
+        targetPrice: undefined,
+        notes: ''
+      },
+      {
+        id: 'fallback_5',
+        title: 'Alma: Harmony XL',
+        brand: 'Alma',
+        model: 'Harmony XL',
+        condition: 'Used - Good',
+        price: 38000,
+        location: 'Illinois, USA',
+        description: 'Alma Harmony XL laser system for comprehensive aesthetic treatments.',
+        url: 'https://lasermatch.io/listing/alma-harmony-xl',
+        sources: [],
+        sourcingStatus: 'not_started',
+        assignedRep: undefined,
+        targetPrice: undefined,
+        notes: ''
+      }
+    ]
+    
+    console.log('✅ Loaded fallback data:', fallbackItems.length, 'items')
+    setItems(fallbackItems)
+    setApiError('Using fallback data - API unavailable')
+  }
 
   // Fetch LaserMatch items and stats on component mount
   useEffect(() => {
     console.log('🚀 Component mounted, starting fetch...')
+    console.log('📱 User Agent:', navigator.userAgent)
+    console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
     
     const fetchData = async () => {
+      // Check if we're on mobile or if localhost API is not accessible
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      
+      console.log('📱 Mobile detected:', isMobile)
+      console.log('🏠 Localhost detected:', isLocalhost)
+      
+      // If mobile and not localhost, use fallback data immediately
+      if (isMobile && !isLocalhost) {
+        console.log('📱 Mobile device detected, using fallback data')
+        tryFallbackData()
+        return
+      }
+      
       try {
-        console.log('🔍 Fetching LaserMatch items...')
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`)
-        console.log('📡 Response status:', response.status)
+        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
+        console.log('🔍 Fetching LaserMatch items from:', apiUrl)
+        
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          // Add credentials for CORS if needed
+          credentials: 'include',
+        })
+        
+        console.log('📡 Response status:', response.status, response.statusText)
+        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
         
         if (response.ok) {
           const data = await response.json()
@@ -152,12 +275,24 @@ export default function LaserMatch() {
             setItems([])
           }
         } else {
-          console.error('❌ Response not ok:', response.status)
+          console.error('❌ Response not ok:', response.status, response.statusText)
+          const errorText = await response.text()
+          console.error('❌ Error response body:', errorText)
+          setApiError(`API Error: ${response.status} ${response.statusText}`)
           setItems([])
         }
       } catch (error) {
         console.error('❌ Fetch failed:', error)
-        setItems([])
+        console.error('❌ Error details:', {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          name: error instanceof Error ? error.name : undefined
+        })
+        setApiError(`Network Error: ${error instanceof Error ? error.message : String(error)}`)
+        
+        // Try fallback data for mobile
+        console.log('🔄 Attempting fallback data for mobile...')
+        tryFallbackData()
       } finally {
         console.log('🏁 Setting isLoading to false')
         setIsLoading(false)
@@ -179,11 +314,46 @@ export default function LaserMatch() {
 
   const fetchLaserMatchItems = async () => {
     setIsLoading(true)
+    setApiError(null) // Clear any previous errors
+    
+    // Check if we're on mobile or if localhost API is not accessible
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    
+    console.log('📱 Mobile detected:', isMobile)
+    console.log('🏠 Localhost detected:', isLocalhost)
+    
+    // If mobile and not localhost, use fallback data immediately
+    if (isMobile && !isLocalhost) {
+      console.log('📱 Mobile device detected, using fallback data')
+      tryFallbackData()
+      return
+    }
+    
     try {
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
       console.log('🔍 Fetching LaserMatch items from:', apiUrl)
-      const response = await fetch(apiUrl)
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        credentials: 'include',
+      })
+      
       console.log('📡 Response status:', response.status, response.statusText)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Response not ok:', response.status, response.statusText)
+        console.error('❌ Error response body:', errorText)
+        setApiError(`API Error: ${response.status} ${response.statusText}`)
+        setItems([])
+        return
+      }
+      
       const data = await response.json()
       console.log('📊 Received data:', data)
       
@@ -217,7 +387,11 @@ export default function LaserMatch() {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
       })
-      setItems([])
+      setApiError(`Network Error: ${error instanceof Error ? error.message : String(error)}`)
+      
+      // Try fallback data for mobile
+      console.log('🔄 Attempting fallback data for mobile...')
+      tryFallbackData()
     } finally {
       console.log('🏁 Setting isLoading to false')
       setIsLoading(false)
@@ -598,7 +772,7 @@ export default function LaserMatch() {
       <div className="bg-gray-900 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <nav className="flex space-x-8">
+            <nav className="flex flex-wrap space-x-4 md:space-x-8">
               <div className="flex items-center space-x-2">
                 <button 
                   onClick={() => setActiveTab('LaserMatch')}
@@ -660,14 +834,24 @@ export default function LaserMatch() {
             <>
               {items.length > 0 ? (
             <div className="bg-gray-900 rounded-lg shadow overflow-hidden">
+              {isUsingFallback && (
+                <div className="bg-yellow-900 border-b border-yellow-700 px-6 py-2">
+                  <p className="text-yellow-200 text-sm text-center">
+                    📱 Fallback Mode: Showing sample data - API unavailable
+                  </p>
+                </div>
+              )}
               <div className="bg-gray-800 px-6 py-4 border-b border-gray-700">
-                <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-300">
+                <div className="hidden md:grid grid-cols-12 gap-4 text-sm font-medium text-gray-300">
                   <div className="col-span-4">Equipment</div>
                   <div className="col-span-2">Brand</div>
                   <div className="col-span-2">Condition</div>
                   <div className="col-span-2">Price</div>
                   <div className="col-span-1">Source</div>
                   <div className="col-span-1">Actions</div>
+                </div>
+                <div className="md:hidden text-sm font-medium text-gray-300">
+                  LaserMatch Equipment
                 </div>
               </div>
               
@@ -680,7 +864,8 @@ export default function LaserMatch() {
                         className="px-6 py-4 hover:bg-gray-800 transition-colors cursor-pointer"
                         onClick={() => setExpandedItem(item.id)}
                       >
-                        <div className="grid grid-cols-12 gap-4 items-center">
+                        {/* Desktop Layout */}
+                        <div className="hidden md:grid grid-cols-12 gap-4 items-center">
                           <div className="col-span-4">
                             <div className="flex items-center space-x-3">
                               <div className="flex-shrink-0">
@@ -747,6 +932,67 @@ export default function LaserMatch() {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                               </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mobile Layout */}
+                        <div className="md:hidden">
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0">
+                              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                                <span className="text-white font-bold text-lg">
+                                  {item.brand?.charAt(0) || 'L'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-white font-medium text-base leading-tight">{item.title}</h3>
+                              <p className="text-gray-400 text-sm mt-1">{item.model}</p>
+                              <div className="flex items-center justify-between mt-2">
+                                <div className="flex items-center space-x-3">
+                                  <span className="text-gray-300 text-sm">{item.brand}</span>
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    {item.condition}
+                                  </span>
+                                </div>
+                                <span className="text-white font-semibold text-sm">
+                                  {item.price ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
+                                </span>
+                              </div>
+                              {item.location && (
+                                <p className="text-gray-400 text-xs mt-1">{item.location}</p>
+                              )}
+                              <div className="flex items-center justify-between mt-3">
+                                <span className="text-gray-400 text-xs">LaserMatch.io</span>
+                                <div className="flex items-center space-x-3">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      window.open(item.url, '_blank')
+                                    }}
+                                    className="text-blue-400 hover:text-blue-300 transition-colors"
+                                    title="View Original Listing"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setExpandedItem(item.id)
+                                    }}
+                                    className="text-green-400 hover:text-green-300 transition-colors"
+                                    title="View Procurement Details"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -848,7 +1094,7 @@ export default function LaserMatch() {
                           )}
 
                           {/* All Key Fields in One Row */}
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                             <div>
                               <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">
                                 Current Price
@@ -1050,7 +1296,7 @@ export default function LaserMatch() {
                               {item.spiderUrls && item.spiderUrls.length > 0 ? (
                                 <div className="overflow-x-auto">
                                   <table className="min-w-full divide-y divide-gray-700">
-                                    <thead className="bg-gray-900">
+                                    <thead className="bg-gray-900 hidden md:table-header-group">
                                       <tr>
                                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                           URL
@@ -1075,7 +1321,8 @@ export default function LaserMatch() {
                                     <tbody className="bg-gray-800 divide-y divide-gray-700">
                                       {item.spiderUrls.map((spiderUrl) => (
                                         <tr key={spiderUrl.id} className="hover:bg-gray-700">
-                                          <td className="px-3 py-2 whitespace-nowrap">
+                                          {/* Desktop Table Cells */}
+                                          <td className="px-3 py-2 whitespace-nowrap hidden md:table-cell">
                                             <div className="flex items-center space-x-2">
                                               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-300">
                                                 Source {(item.spiderUrls?.indexOf(spiderUrl) ?? -1) + 1}
@@ -1090,7 +1337,7 @@ export default function LaserMatch() {
                                               </a>
                                             </div>
                                           </td>
-                                          <td className="px-3 py-2 whitespace-nowrap">
+                                          <td className="px-3 py-2 whitespace-nowrap hidden md:table-cell">
                                             <div>
                                               <div className="text-sm font-medium text-white">{spiderUrl.contactName || 'No contact'}</div>
                                               {spiderUrl.contactCompany && (
@@ -1098,13 +1345,13 @@ export default function LaserMatch() {
                                               )}
                                             </div>
                                           </td>
-                                          <td className="px-3 py-2 whitespace-nowrap text-sm text-white">
+                                          <td className="px-3 py-2 whitespace-nowrap text-sm text-white hidden md:table-cell">
                                             {formatPrice(spiderUrl.price)}
                                           </td>
-                                          <td className="px-3 py-2 whitespace-nowrap text-sm text-white">
+                                          <td className="px-3 py-2 whitespace-nowrap text-sm text-white hidden md:table-cell">
                                             {spiderUrl.followUpDate ? new Date(spiderUrl.followUpDate).toLocaleDateString() : 'Not set'}
                                           </td>
-                                          <td className="px-3 py-2 whitespace-nowrap">
+                                          <td className="px-3 py-2 whitespace-nowrap hidden md:table-cell">
                                             <select
                                               value={spiderUrl.status}
                                               onChange={(e) => updateSpiderUrl(item.id, spiderUrl.id, { status: e.target.value })}
@@ -1117,13 +1364,70 @@ export default function LaserMatch() {
                                               <option value="purchased">Purchased</option>
                                             </select>
                                           </td>
-                                          <td className="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
+                                          <td className="px-3 py-2 whitespace-nowrap text-right text-sm font-medium hidden md:table-cell">
                                             <button
                                               onClick={() => deleteSpiderUrl(item.id, spiderUrl.id)}
                                               className="text-red-600 hover:text-red-700 text-xs"
                                             >
                                               Delete
                                             </button>
+                                          </td>
+
+                                          {/* Mobile Layout */}
+                                          <td className="px-3 py-4 md:hidden" colSpan={6}>
+                                            <div className="space-y-3">
+                                              <div className="flex items-center justify-between">
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-300">
+                                                  Source {(item.spiderUrls?.indexOf(spiderUrl) ?? -1) + 1}
+                                                </span>
+                                                <div className="flex items-center space-x-2">
+                                                  <select
+                                                    value={spiderUrl.status}
+                                                    onChange={(e) => updateSpiderUrl(item.id, spiderUrl.id, { status: e.target.value })}
+                                                    className={`text-xs px-2 py-1 rounded-full border-0 font-medium ${getSpiderUrlStatusColor(spiderUrl.status)}`}
+                                                  >
+                                                    <option value="new">New</option>
+                                                    <option value="contacted">Contacted</option>
+                                                    <option value="quoted">Quoted</option>
+                                                    <option value="declined">Declined</option>
+                                                    <option value="purchased">Purchased</option>
+                                                  </select>
+                                                  <button
+                                                    onClick={() => deleteSpiderUrl(item.id, spiderUrl.id)}
+                                                    className="text-red-600 hover:text-red-700 text-xs"
+                                                  >
+                                                    Delete
+                                                  </button>
+                                                </div>
+                                              </div>
+                                              <div>
+                                                <a
+                                                  href={spiderUrl.url}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-sm text-blue-400 hover:text-blue-300 underline block truncate"
+                                                >
+                                                  {spiderUrl.url}
+                                                </a>
+                                              </div>
+                                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                                <div>
+                                                  <span className="text-gray-400">Contact:</span>
+                                                  <div className="text-white font-medium">{spiderUrl.contactName || 'No contact'}</div>
+                                                  {spiderUrl.contactCompany && (
+                                                    <div className="text-xs text-gray-400">{spiderUrl.contactCompany}</div>
+                                                  )}
+                                                </div>
+                                                <div>
+                                                  <span className="text-gray-400">Price:</span>
+                                                  <div className="text-white">{formatPrice(spiderUrl.price)}</div>
+                                                </div>
+                                                <div>
+                                                  <span className="text-gray-400">Follow Up:</span>
+                                                  <div className="text-white">{spiderUrl.followUpDate ? new Date(spiderUrl.followUpDate).toLocaleDateString() : 'Not set'}</div>
+                                                </div>
+                                              </div>
+                                            </div>
                                           </td>
                                         </tr>
                                       ))}
@@ -1279,12 +1583,51 @@ export default function LaserMatch() {
               </div>
               <h3 className="text-lg font-medium text-white mb-2">No items found</h3>
               <p className="text-gray-500 mb-4">Click "Refresh Items" to load LaserMatch items.</p>
-              <button 
-                onClick={fetchLaserMatchItems}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Refresh Items
-              </button>
+              
+              {apiError && (
+                <div className={`mb-4 p-3 border rounded-md ${
+                  isUsingFallback 
+                    ? 'bg-yellow-900 border-yellow-700' 
+                    : 'bg-red-900 border-red-700'
+                }`}>
+                  <p className={`text-sm mb-2 ${
+                    isUsingFallback ? 'text-yellow-200' : 'text-red-200'
+                  }`}>
+                    {isUsingFallback ? 'Fallback Mode:' : 'Error Details:'}
+                  </p>
+                  <p className={`text-xs break-all ${
+                    isUsingFallback ? 'text-yellow-300' : 'text-red-300'
+                  }`}>
+                    {apiError}
+                  </p>
+                  <p className={`text-xs mt-2 ${
+                    isUsingFallback ? 'text-yellow-200' : 'text-red-200'
+                  }`}>
+                    {isUsingFallback 
+                      ? 'Showing sample data - API connection failed' 
+                      : 'Check browser console for more details'
+                    }
+                  </p>
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <button 
+                  onClick={fetchLaserMatchItems}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Refresh Items
+                </button>
+                <button 
+                  onClick={() => {
+                    setApiError(null)
+                    fetchLaserMatchItems()
+                  }}
+                  className="ml-2 inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                >
+                  Retry
+                </button>
+              </div>
             </div>
           )}
             </>
