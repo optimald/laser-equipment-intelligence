@@ -4,6 +4,8 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+import time
+import random
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
@@ -53,6 +55,82 @@ class LaserIntelligenceSpiderMiddleware:
         spider.logger.info("Spider opened: %s" % spider.name)
 
 
+class SourceTrackingMiddleware:
+    """Middleware to track source performance and implement evasion strategies"""
+    
+    def __init__(self):
+        self.start_times = {}
+    
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls()
+    
+    def process_request(self, request, spider):
+        """Process outgoing request with evasion strategy"""
+        # Record start time
+        self.start_times[request.url] = time.time()
+        
+        # Get source name from spider
+        source_name = getattr(spider, 'name', 'unknown')
+        
+        # Simple evasion strategy (can be enhanced with source_tracker)
+        delay = random.uniform(1, 3)  # Random delay between 1-3 seconds
+        time.sleep(delay)
+        
+        return None
+    
+    def process_response(self, request, response, spider):
+        """Process response and track metrics"""
+        source_name = getattr(spider, 'name', 'unknown')
+        start_time = self.start_times.get(request.url, time.time())
+        response_time = time.time() - start_time
+        
+        # Check for blocks/challenges
+        if self._is_blocked(response):
+            spider.logger.warning(f"Block detected for {source_name}: {response.url}")
+        else:
+            # Count items found (this is a simplified count)
+            items_count = len(response.css('div, article, .item, .listing').getall())
+            spider.logger.info(f"Success for {source_name}: {items_count} potential items")
+        
+        # Clean up
+        if request.url in self.start_times:
+            del self.start_times[request.url]
+        
+        return response
+    
+    def process_exception(self, request, exception, spider):
+        """Process exceptions and track failures"""
+        source_name = getattr(spider, 'name', 'unknown')
+        spider.logger.error(f"Failure for {source_name}: {exception}")
+        
+        # Clean up
+        if request.url in self.start_times:
+            del self.start_times[request.url]
+    
+    def _is_blocked(self, response) -> bool:
+        """Check if response indicates blocking"""
+        # Common indicators of blocking
+        block_indicators = [
+            'challenge', 'captcha', 'blocked', 'access denied',
+            'robot', 'bot detection', 'verification required',
+            'splashui', 'challenge page'
+        ]
+        
+        url_lower = response.url.lower()
+        content_lower = response.text.lower() if response.text else ""
+        
+        for indicator in block_indicators:
+            if indicator in url_lower or indicator in content_lower:
+                return True
+        
+        # Check for redirect to challenge pages
+        if response.status in [307, 302] and 'challenge' in url_lower:
+            return True
+        
+        return False
+
+
 class LaserIntelligenceDownloaderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
@@ -98,3 +176,79 @@ class LaserIntelligenceDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
+
+
+class SourceTrackingMiddleware:
+    """Middleware to track source performance and implement evasion strategies"""
+    
+    def __init__(self):
+        self.start_times = {}
+    
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls()
+    
+    def process_request(self, request, spider):
+        """Process outgoing request with evasion strategy"""
+        # Record start time
+        self.start_times[request.url] = time.time()
+        
+        # Get source name from spider
+        source_name = getattr(spider, 'name', 'unknown')
+        
+        # Simple evasion strategy (can be enhanced with source_tracker)
+        delay = random.uniform(1, 3)  # Random delay between 1-3 seconds
+        time.sleep(delay)
+        
+        return None
+    
+    def process_response(self, request, response, spider):
+        """Process response and track metrics"""
+        source_name = getattr(spider, 'name', 'unknown')
+        start_time = self.start_times.get(request.url, time.time())
+        response_time = time.time() - start_time
+        
+        # Check for blocks/challenges
+        if self._is_blocked(response):
+            spider.logger.warning(f"Block detected for {source_name}: {response.url}")
+        else:
+            # Count items found (this is a simplified count)
+            items_count = len(response.css('div, article, .item, .listing').getall())
+            spider.logger.info(f"Success for {source_name}: {items_count} potential items")
+        
+        # Clean up
+        if request.url in self.start_times:
+            del self.start_times[request.url]
+        
+        return response
+    
+    def process_exception(self, request, exception, spider):
+        """Process exceptions and track failures"""
+        source_name = getattr(spider, 'name', 'unknown')
+        spider.logger.error(f"Failure for {source_name}: {exception}")
+        
+        # Clean up
+        if request.url in self.start_times:
+            del self.start_times[request.url]
+    
+    def _is_blocked(self, response) -> bool:
+        """Check if response indicates blocking"""
+        # Common indicators of blocking
+        block_indicators = [
+            'challenge', 'captcha', 'blocked', 'access denied',
+            'robot', 'bot detection', 'verification required',
+            'splashui', 'challenge page'
+        ]
+        
+        url_lower = response.url.lower()
+        content_lower = response.text.lower() if response.text else ""
+        
+        for indicator in block_indicators:
+            if indicator in url_lower or indicator in content_lower:
+                return True
+        
+        # Check for redirect to challenge pages
+        if response.status in [307, 302] and 'challenge' in url_lower:
+            return True
+        
+        return False

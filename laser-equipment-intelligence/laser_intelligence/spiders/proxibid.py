@@ -3,17 +3,17 @@ import re
 from urllib.parse import urlencode, quote_plus
 
 
-class DotmedAuctionsSpider(scrapy.Spider):
-    name = "dotmed_auctions"
-    allowed_domains = ["dotmed.com"]
+class ProxibidSpider(scrapy.Spider):
+    name = "proxibid"
+    allowed_domains = ["proxibid.com"]
     
     def __init__(self, query=None, *args, **kwargs):
-        super(DotmedAuctionsSpider, self).__init__(*args, **kwargs)
+        super(ProxibidSpider, self).__init__(*args, **kwargs)
         self.query = query or "laser equipment"
         
     def start_requests(self):
-        # Search for laser equipment on DOTmed
-        search_url = f"https://www.dotmed.com/search?q={quote_plus(self.query)}"
+        # Search for laser equipment on Proxibid
+        search_url = f"https://www.proxibid.com/search?q={quote_plus(self.query)}"
         yield scrapy.Request(
             url=search_url,
             callback=self.parse_search_results,
@@ -21,16 +21,16 @@ class DotmedAuctionsSpider(scrapy.Spider):
         )
     
     def parse_search_results(self, response):
-        """Parse DOTmed search results page"""
-        items = response.css('div.listing-item, div.product-item, .search-result-item')
+        """Parse Proxibid search results page"""
+        items = response.css('div.lot-item, div.auction-item, .search-result-item')
         
         for item in items:
-            title = item.css('h3 a::text, .title a::text, h2 a::text').get()
+            title = item.css('h3 a::text, .lot-title a::text, h2 a::text').get()
             if not title:
                 continue
                 
-            # Extract price
-            price_text = item.css('.price::text, .cost::text, .amount::text').get()
+            # Extract price (current bid or estimate)
+            price_text = item.css('.current-bid::text, .estimate::text, .price::text').get()
             price = None
             if price_text:
                 price_match = re.search(r'[\$£€]\s*([0-9,]+\.?[0-9]*)', price_text)
@@ -38,30 +38,30 @@ class DotmedAuctionsSpider(scrapy.Spider):
                     price = float(price_match.group(1).replace(',', ''))
             
             # Extract URL
-            url = item.css('h3 a::attr(href), .title a::attr(href), h2 a::attr(href)').get()
+            url = item.css('h3 a::attr(href), .lot-title a::attr(href), h2 a::attr(href)').get()
             if not url:
                 continue
             if not url.startswith('http'):
-                url = f"https://www.dotmed.com{url}"
+                url = f"https://www.proxibid.com{url}"
                 
-            # Extract condition
+            # Extract condition (auction items are typically used)
             condition = item.css('.condition::text, .status::text').get()
             if condition:
                 condition = condition.strip()
             else:
-                condition = "Used - Good"
+                condition = "Used - Auction"
                 
             # Extract location
-            location = item.css('.location::text, .seller-location::text').get()
+            location = item.css('.location::text, .auction-location::text').get()
             if location:
                 location = location.strip()
             else:
-                location = "Unknown"
+                location = "Auction Location"
                 
             # Extract image
             image = item.css('img::attr(src)').get()
             if image and not image.startswith('http'):
-                image = f"https://www.dotmed.com{image}"
+                image = f"https://www.proxibid.com{image}"
                 
             # Extract brand and model from title using real equipment data
             brand = "Unknown"
@@ -102,36 +102,36 @@ class DotmedAuctionsSpider(scrapy.Spider):
                         break
                         
             # Calculate realistic score based on brand and price
-            score_overall = 80  # Base score for DOTmed (reputable medical equipment source)
+            score_overall = 75  # Base score for auction items
             
             # Brand-specific scoring (based on real equipment data)
             premium_brands = ['aerolase', 'candela', 'cynosure', 'lumenis', 'sciton', 'cutera', 'syneron']
             if brand.lower() in premium_brands:
                 score_overall += 15
             
-            # Price-based scoring (DOTmed often has competitive medical equipment prices)
+            # Price-based scoring (auction items often have good deals)
             if price:
-                if price < 15000:  # Excellent DOTmed deal
-                    score_overall += 20
-                elif price < 30000:  # Good DOTmed deal
+                if price < 10000:  # Excellent auction deal
+                    score_overall += 25
+                elif price < 25000:  # Good auction deal
                     score_overall += 15
-                elif price < 50000:  # Fair DOTmed price
+                elif price < 50000:  # Fair auction price
                     score_overall += 10
-                elif price > 100000:  # Expensive for DOTmed
-                    score_overall -= 5
+                elif price > 100000:  # Expensive for auction
+                    score_overall -= 10
             
             yield {
-                'id': f"dotmed_{hash(url)}",
+                'id': f"proxibid_{hash(url)}",
                 'title': title.strip(),
                 'brand': brand,
                 'model': model,
                 'condition': condition,
                 'price': price,
                 'location': location,
-                'description': f"DOTmed listing: {title.strip()}",
+                'description': f"Proxibid auction: {title.strip()}",
                 'url': url,
                 'images': [image] if image else [],
-                'source': 'DOTmed Auctions',
+                'source': 'Proxibid',
                 'discovered_at': self.get_timestamp(),
                 'score_overall': min(100, max(0, score_overall))  # Clamp between 0-100
             }

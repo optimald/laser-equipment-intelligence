@@ -109,6 +109,10 @@ export default function LaserMatch() {
     in_demand_items: number
     latest_update: string | null
   } | null>(null)
+  const [dataMode, setDataMode] = useState<'auto' | 'mock' | 'real'>('auto')
+  const [searchLogModalOpen, setSearchLogModalOpen] = useState(false)
+  const [searchLogs, setSearchLogs] = useState<string[]>([])
+  const [currentSearchItem, setCurrentSearchItem] = useState<string | null>(null)
 
   // Fetch LaserMatch items and stats on component mount
   useEffect(() => {
@@ -117,7 +121,7 @@ export default function LaserMatch() {
     const fetchData = async () => {
       try {
         console.log('🔍 Fetching LaserMatch items...')
-        const response = await fetch('http://localhost:8000/api/v1/lasermatch/items?limit=500')
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`)
         console.log('📡 Response status:', response.status)
         
         if (response.ok) {
@@ -370,9 +374,30 @@ export default function LaserMatch() {
 
   const autoFindSources = async (item: LaserMatchItem) => {
     setSpiderSearching(item.id)
+    setCurrentSearchItem(item.title)
+    setSearchLogs([])
+    setSearchLogModalOpen(true)
+    
+    const addLog = (message: string) => {
+      const timestamp = new Date().toLocaleTimeString()
+      setSearchLogs(prev => [...prev, `[${timestamp}] ${message}`])
+    }
     
     try {
+      addLog(`Starting Magic Find for: ${item.title}`)
+      addLog(`Data Mode: ${dataMode}`)
+      addLog(`Searching for: ${item.brand} ${item.model}`)
       // Search for this item using the real search API
+      addLog(`Making API request to: /api/v1/search/equipment`)
+      addLog(`Request payload: ${JSON.stringify({
+        query: item.title,
+        brand: item.brand,
+        model: item.model,
+        limit: 10,
+        max_price: item.price || undefined,
+        mode: dataMode
+      }, null, 2)}`)
+      
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/search/equipment`, {
         method: 'POST',
         headers: {
@@ -383,48 +408,63 @@ export default function LaserMatch() {
           brand: item.brand,
           model: item.model,
           limit: 10,
-          max_price: item.price || undefined
+          max_price: item.price || undefined,
+          mode: dataMode
         })
       })
+      
+      addLog(`API Response Status: ${response.status} ${response.statusText}`)
       const searchResponse = await response.json()
+      addLog(`API Response: ${JSON.stringify(searchResponse, null, 2)}`)
 
       // Handle different response formats
       let searchResults = []
       if (Array.isArray(searchResponse)) {
         // Direct array response (from main.py direct endpoint)
+        addLog(`Processing direct array response with ${searchResponse.length} items`)
         searchResults = searchResponse
       } else if (searchResponse.results && Array.isArray(searchResponse.results)) {
         // Object with results array (from search router)
+        addLog(`Processing object response with ${searchResponse.results.length} items`)
+        addLog(`Response mode: ${searchResponse.mode || 'unknown'}`)
+        addLog(`Response source: ${searchResponse.source || 'unknown'}`)
         searchResults = searchResponse.results
       } else {
+        addLog(`⚠️ Unexpected search response format: ${JSON.stringify(searchResponse)}`)
         console.warn('Unexpected search response format:', searchResponse)
         searchResults = []
       }
 
       // Convert search results to spider URL format
+      addLog(`Converting ${searchResults.length} search results to spider format`)
       const spiderResults = searchResults
         .filter((result: any) => result.source !== 'LaserMatch.io') // Exclude the original LaserMatch item
-        .map((result: any, index: number) => ({
-          id: `spider_${Date.now()}_${index}`,
-          url: result.url || `https://search-result-${result.id}.com`,
-          contactId: index % 2 === 0 ? '1' : '2', // Alternate between contacts
-          contactName: index % 2 === 0 ? 'John Smith' : 'Sarah Johnson',
-          contactCompany: index % 2 === 0 ? 'MedTech Solutions' : 'Laser Dynamics Inc',
-          price: result.price || Math.floor(Math.random() * 50000) + 10000,
-          followUpDate: new Date(Date.now() + (5 + index) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          status: 'new' as const,
-          addedBy: 'spider' as const,
-          addedAt: new Date().toISOString(),
-          notes: `Auto-discovered from ${result.source}: ${result.title}`
-        }))
+        .map((result: any, index: number) => {
+          addLog(`Processing result ${index + 1}: ${result.title} from ${result.source}`)
+          return {
+            id: `spider_${Date.now()}_${index}`,
+            url: result.url || `https://search-result-${result.id}.com`,
+            contactId: index % 2 === 0 ? '1' : '2', // Alternate between contacts
+            contactName: index % 2 === 0 ? 'John Smith' : 'Sarah Johnson',
+            contactCompany: index % 2 === 0 ? 'MedTech Solutions' : 'Laser Dynamics Inc',
+            price: result.price || Math.floor(Math.random() * 50000) + 10000,
+            followUpDate: new Date(Date.now() + (5 + index) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            status: 'new' as const,
+            addedBy: 'spider' as const,
+            addedAt: new Date().toISOString(),
+            notes: `Auto-discovered from ${result.source}: ${result.title}`
+          }
+        })
 
       // If no results found, show a message
       if (spiderResults.length === 0) {
+        addLog(`❌ No external sources found for ${item.title}`)
         console.log(`No external sources found for ${item.title}`)
         return
       }
 
       // Add the spider results to the item
+      addLog(`Adding ${spiderResults.length} sources to item`)
       setItems(prev => prev.map(i => {
         if (i.id === item.id) {
           const currentSpiderUrls = i.spiderUrls || []
@@ -436,15 +476,18 @@ export default function LaserMatch() {
         return i
       }))
 
+      addLog(`✅ Successfully found ${spiderResults.length} sources for ${item.title}`)
       console.log(`✅ Found ${spiderResults.length} sources for ${item.title}`)
 
     } catch (error) {
       console.error('Spider search failed:', error)
-      // Show error message to user
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      addLog(`❌ Error: ${errorMessage}`)
+      // Show error message to user
       alert(`Failed to find sources: ${errorMessage}`)
     } finally {
       setSpiderSearching(null)
+      addLog(`Magic Find completed for ${item.title}`)
     }
   }
 
@@ -894,15 +937,39 @@ export default function LaserMatch() {
                                 Spider Crawled URLs & Sources
                               </label>
                               {addingSpiderUrl !== item.id && (
-                                <div className="flex items-center space-x-2">
+                                <div className="flex items-center space-x-3">
+                                  {/* Data Mode Toggle */}
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-gray-400">Data Mode:</span>
+                                    <select
+                                      value={dataMode}
+                                      onChange={(e) => setDataMode(e.target.value as 'auto' | 'mock' | 'real')}
+                                      className="text-xs bg-gray-700 border border-gray-600 text-white rounded px-2 py-1 focus:border-gray-500 focus:outline-none"
+                                    >
+                                      <option value="auto">Auto</option>
+                                      <option value="mock">Mock</option>
+                                      <option value="real">Real</option>
+                                    </select>
+                                  </div>
+                                  
                                   <button
                                     onClick={() => autoFindSources(item)}
                                     disabled={spiderSearching === item.id}
                                     className="flex items-center text-xs text-purple-400 hover:text-purple-300 disabled:text-gray-600"
-                                    title="Auto-discover sources using spiders"
+                                    title={`Auto-discover sources using ${dataMode === 'mock' ? 'mock' : dataMode === 'real' ? 'real spider' : 'intelligent'} data`}
                                   >
                                     <SparklesIcon className="h-4 w-4 mr-1" />
                                     {spiderSearching === item.id ? 'Searching...' : 'Magic Find'}
+                                  </button>
+                                  <button
+                                    onClick={() => setSearchLogModalOpen(true)}
+                                    className="flex items-center text-xs text-blue-400 hover:text-blue-300"
+                                    title="View search logs"
+                                  >
+                                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Logs
                                   </button>
                                   <button
                                     onClick={() => setAddingSpiderUrl(item.id)}
@@ -1327,6 +1394,18 @@ export default function LaserMatch() {
                         <span className="text-gray-300">Enable Magic Find</span>
                         <input type="checkbox" className="rounded" defaultChecked />
                       </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-300">Default Data Mode</span>
+                        <select 
+                          value={dataMode}
+                          onChange={(e) => setDataMode(e.target.value as 'auto' | 'mock' | 'real')}
+                          className="bg-gray-700 border border-gray-600 rounded px-3 py-1 text-white text-sm"
+                        >
+                          <option value="auto">Auto (Real + Mock Fallback)</option>
+                          <option value="mock">Mock Data Only</option>
+                          <option value="real">Real Data Only</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1335,6 +1414,65 @@ export default function LaserMatch() {
           )}
         </div>
       </main>
+      
+      {/* Search Log Modal */}
+      {searchLogModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-gray-700">
+              <h3 className="text-lg font-semibold text-white">
+                Magic Find Search Log - {currentSearchItem}
+              </h3>
+              <button
+                onClick={() => setSearchLogModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm">
+                {searchLogs.length === 0 ? (
+                  <div className="text-gray-400 text-center py-8">
+                    No logs yet. Start a Magic Find search to see the process.
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {searchLogs.map((log, index) => (
+                      <div key={index} className="text-gray-300 whitespace-pre-wrap">
+                        {log}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-6 border-t border-gray-700">
+              <div className="text-sm text-gray-400">
+                {searchLogs.length} log entries
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setSearchLogs([])}
+                  className="px-4 py-2 text-sm text-gray-300 hover:text-white border border-gray-600 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  Clear Logs
+                </button>
+                <button
+                  onClick={() => setSearchLogModalOpen(false)}
+                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

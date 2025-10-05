@@ -8,6 +8,8 @@ import tempfile
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import sys
+import re
+import signal
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "laser-equipment-intelligence"))
 
 router = APIRouter()
@@ -55,9 +57,9 @@ async def run_spider_search(search_request: Dict[str, Any]):
         return generate_fallback_results(query, limit, max_price)
 
 async def run_scrapy_spiders_parallel(spider_dir: str, query: str, limit: int, max_price: Optional[float] = None) -> List[Dict[str, Any]]:
-    """Run multiple Scrapy spiders in parallel"""
+    """Run multiple Scrapy spiders in parallel, with fallback to Selenium crawlers"""
     
-    # Define spider configurations
+    # First try Scrapy spiders
     spiders_to_run = [
         {"name": "ebay_laser", "query": query},
         {"name": "dotmed_auctions", "query": query},
@@ -81,6 +83,16 @@ async def run_scrapy_spiders_parallel(spider_dir: str, query: str, limit: int, m
             except Exception as e:
                 print(f"Spider failed: {e}")
                 continue
+    
+    # If no results from Scrapy spiders, try Selenium crawlers
+    if not all_results:
+        print("🔄 No results from Scrapy spiders, trying Selenium crawlers...")
+        try:
+            selenium_results = await run_selenium_crawler(query, limit, max_price)
+            all_results.extend(selenium_results)
+            print(f"✅ Selenium crawlers found {len(selenium_results)} results")
+        except Exception as e:
+            print(f"❌ Selenium crawlers also failed: {e}")
     
     # Filter by max_price if specified
     if max_price:
@@ -413,3 +425,245 @@ async def test_spider():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Spider test failed: {str(e)}")
+
+
+async def run_selenium_crawler(query: str, limit: int, max_price: Optional[float] = None) -> List[Dict[str, Any]]:
+    """Run Selenium-based crawler with timeout protection"""
+    
+    class TimeoutException(Exception):
+        pass
+    
+    def timeout_handler(signum, frame):
+        raise TimeoutException("Selenium operation timed out")
+    
+    try:
+        from selenium import webdriver
+        from selenium.webdriver.common.by import By
+        from selenium.webdriver.chrome.options import Options
+        from selenium.common.exceptions import NoSuchElementException
+        from urllib.parse import quote_plus
+        
+        print(f"🚀 Starting Selenium crawler for: {query}")
+        
+        # Set up timeout protection
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(60)  # 60 second timeout
+        
+        # Setup Chrome with optimized options
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--disable-images')  # Faster loading
+        chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        
+        driver = webdriver.Chrome(options=chrome_options)
+        
+        try:
+            # Search eBay
+            search_url = f"https://www.ebay.com/sch/i.html?_nkw={quote_plus(query)}"
+            print(f"🌐 Searching: {search_url}")
+            
+            driver.get(search_url)
+            time.sleep(3)  # Wait for page load
+            
+            print(f"📄 Page title: {driver.title}")
+            
+            # Check if blocked
+            if 'challenge' in driver.current_url.lower():
+                print("❌ Blocked by challenge page")
+                return []
+            
+            # Use the working approach: find meaningful divs with links and content
+            items = []
+            try:
+                # Find all divs and filter for those with item-like content
+                all_divs = driver.find_elements(By.TAG_NAME, "div")
+                meaningful_items = []
+                
+                for div in all_divs:
+                    try:
+                        # Look for divs that contain links and have reasonable text length
+                        links = div.find_elements(By.TAG_NAME, "a")
+                        text = div.text.strip()
+                        
+                        if (links and 
+                            len(text) > 20 and 
+                            len(text) < 500 and
+                            not text.lower().startswith(('skip', 'sign in', 'daily deals', 'help', 'sell', 'my ebay'))):
+                            
+                            # Check if any link looks like an item link
+                            for link in links:
+                                href = link.get_attribute('href') or ''
+                                if '/itm/' in href:
+                                    meaningful_items.append(div)
+                                    break
+                    except:
+                        continue
+                
+                items = meaningful_items[:20]  # Limit to first 20
+                print(f"📦 Found {len(items)} meaningful product items")
+                
+            except Exception as e:
+                print(f"⚠️ Meaningful div approach failed: {e}")
+            
+            if not items:
+                print("❌ No items found with any approach")
+                return []
+            
+            # Extract data from items
+            results = []
+            print(f"🔍 Extracting data from {len(items)} items...")
+            
+            for i, item in enumerate(items[:limit]):
+                try:
+                    result = extract_selenium_item(item, i)
+                    if result:
+                        # Filter by max_price if specified
+                        if max_price and result.get('price') and result['price'] > max_price:
+                            continue
+                        results.append(result)
+                        print(f"✅ Extracted item {i+1}: {result['title'][:50]}...")
+                except Exception as e:
+                    print(f"⚠️ Error extracting item {i}: {e}")
+                    continue
+            
+            print(f"🎯 Selenium crawler found {len(results)} results")
+            return results
+            
+        finally:
+            driver.quit()
+            signal.alarm(0)  # Cancel timeout
+            
+    except TimeoutException:
+        print("⏰ Selenium crawler timed out after 60 seconds")
+        return []
+    except Exception as e:
+        print(f"❌ Selenium crawler failed: {e}")
+        return []
+
+
+def extract_selenium_item(item_element, index: int) -> Optional[Dict[str, Any]]:
+    """Extract data from a single item element using Selenium"""
+    try:
+        from selenium.webdriver.common.by import By
+        from selenium.common.exceptions import NoSuchElementException
+        
+        # Get all text content
+        all_text = item_element.text.strip()
+        
+        # Split into lines and find the title (longest meaningful line)
+        lines = [line.strip() for line in all_text.split('\n') if line.strip()]
+        title = None
+        
+        for line in sorted(lines, key=len, reverse=True):
+            if (len(line) > 20 and 
+                len(line) < 200 and
+                not line.lower().startswith(('$', 'free', 'shipping', 'skip', 'sign', 'brand new', 'used', 'or best offer')) and
+                not line.lower().endswith(('free shipping', 'buy it now', 'or best offer', 'opens in a new window'))):
+                title = line
+                break
+        
+        if not title:
+            return None
+        
+        # Extract URL from links
+        url = None
+        links = item_element.find_elements(By.TAG_NAME, "a")
+        for link in links:
+            href = link.get_attribute('href')
+            if href and '/itm/' in href:
+                url = href
+                break
+        
+        if not url:
+            return None
+        
+        # Extract price from text content
+        price = None
+        price_match = re.search(r'\$([0-9,]+\.?[0-9]*)', all_text)
+        if price_match:
+            try:
+                price = float(price_match.group(1).replace(',', ''))
+            except ValueError:
+                pass
+        
+        # Extract condition from text content
+        condition = "Used - Unknown"
+        if 'brand new' in all_text.lower():
+            condition = "New"
+        elif 'used' in all_text.lower():
+            condition = "Used"
+        elif 'refurbished' in all_text.lower():
+            condition = "Refurbished"
+        
+        # Extract brand and model from title
+        brand, model = extract_brand_model(title)
+        
+        result = {
+            'id': f"selenium_ebay_{index}",
+            'title': title,
+            'brand': brand,
+            'model': model,
+            'condition': condition,
+            'price': price,
+            'location': "eBay",
+            'description': f"eBay listing: {title}",
+            'url': url,
+            'images': [],
+            'source': 'eBay',
+            'discovered_at': datetime.now().isoformat(),
+            'score_overall': 85 if price and price < 50000 else 75
+        }
+        
+        return result
+        
+    except Exception as e:
+        print(f"⚠️ Error extracting item {index}: {e}")
+        return None
+
+
+def parse_price(price_text: str) -> Optional[float]:
+    """Parse price text to float"""
+    try:
+        # Remove currency symbols and extract numbers
+        price_clean = re.sub(r'[^\d.,]', '', price_text)
+        if price_clean:
+            return float(price_clean.replace(',', ''))
+    except (ValueError, TypeError):
+        pass
+    return None
+
+
+def extract_brand_model(title: str) -> tuple:
+    """Extract brand and model from title using real equipment data"""
+    title_lower = title.lower()
+    
+    # Real laser brands from actual equipment data
+    brands = [
+        'aerolase', 'aesthetic', 'agnes', 'allergan', 'alma', 'apyx', 'btl', 'bluecore', 'buffalo', 
+        'candela', 'canfield', 'cocoon', 'cutera', 'cynosure', 'cytrellis', 'deka', 'dusa', 'edge', 
+        'ellman', 'energist', 'envy', 'fotona', 'hk', 'ilooda', 'inmode', 'iridex', 'jeisys', 
+        'laseroptek', 'lumenis', 'lutronic', 'luvo', 'merz', 'microaire', 'mixto', 'mrp', 'new', 
+        'novoxel', 'ohmeda', 'perigee', 'pronox', 'quanta', 'quantel', 'rohrer', 'sandstone', 
+        'sciton', 'she', 'sinclair', 'solta', 'syl', 'syneron', 'thermi', 'venus', 'wells', 
+        'wontech', 'zimmer'
+    ]
+    
+    for brand in brands:
+        if brand in title_lower:
+            # Try to extract model
+            brand_index = title_lower.find(brand)
+            remaining_text = title[brand_index + len(brand):].strip()
+            
+            # Look for model patterns
+            model_match = re.search(r'([a-zA-Z0-9\s\-]+)', remaining_text)
+            if model_match:
+                model = model_match.group(1).strip().title()
+                return brand.title(), model
+            
+            return brand.title(), "Unknown Model"
+    
+    return "Unknown", "Unknown"

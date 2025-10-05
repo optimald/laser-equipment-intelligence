@@ -63,22 +63,63 @@ class BidspotterSpider(scrapy.Spider):
             if image and not image.startswith('http'):
                 image = f"https://www.bidspotter.com{image}"
                 
-            # Extract brand and model from title
+            # Extract brand and model from title using real equipment data
             brand = "Unknown"
             model = "Unknown"
             if title:
                 title_lower = title.lower()
-                # Common laser brands
-                brands = ['aerolase', 'candela', 'cynosure', 'lumenis', 'syneron', 'alma', 'cutera', 'sciton', 'palomar', 'cooltouch']
+                # Real laser brands from actual equipment data (57 brands)
+                brands = [
+                    'aerolase', 'aesthetic', 'agnes', 'allergan', 'alma', 'apyx', 'btl', 'bluecore', 'buffalo', 
+                    'candela', 'canfield', 'cocoon', 'cutera', 'cynosure', 'cytrellis', 'deka', 'dusa', 'edge', 
+                    'ellman', 'energist', 'envy', 'fotona', 'hk', 'ilooda', 'inmode', 'iridex', 'jeisys', 
+                    'laseroptek', 'lumenis', 'lutronic', 'luvo', 'merz', 'microaire', 'mixto', 'mrp', 'new', 
+                    'novoxel', 'ohmeda', 'perigee', 'pronox', 'quanta', 'quantel', 'rohrer', 'sandstone', 
+                    'sciton', 'she', 'sinclair', 'solta', 'syl', 'syneron', 'thermi', 'venus', 'wells', 
+                    'wontech', 'zimmer'
+                ]
+                
+                # Enhanced brand detection with better matching
                 for brand_name in brands:
                     if brand_name in title_lower:
                         brand = brand_name.title()
-                        # Try to extract model
-                        model_match = re.search(rf'{brand_name}\s+([a-zA-Z0-9\s\-]+)', title_lower)
-                        if model_match:
-                            model = model_match.group(1).strip().title()
+                        # Try to extract model with improved regex patterns
+                        model_patterns = [
+                            rf'{brand_name}\s+([a-zA-Z0-9\s\-\.]+?)(?:\s|$|,|\.)',
+                            rf'{brand_name}:\s*([a-zA-Z0-9\s\-\.]+?)(?:\s|$|,|\.)',
+                            rf'{brand_name}\s+([a-zA-Z0-9\s\-\.]+?)(?:\s+laser|\s+system|\s+device)',
+                        ]
+                        
+                        for pattern in model_patterns:
+                            model_match = re.search(pattern, title_lower)
+                            if model_match:
+                                model = model_match.group(1).strip().title()
+                                break
+                        
+                        # Clean up model name
+                        if model and len(model) > 50:  # Prevent overly long model names
+                            model = model[:50].strip()
                         break
                         
+            # Calculate realistic score based on brand and price
+            score_overall = 75  # Base score for auction items
+            
+            # Brand-specific scoring (based on real equipment data)
+            premium_brands = ['aerolase', 'candela', 'cynosure', 'lumenis', 'sciton', 'cutera', 'syneron']
+            if brand.lower() in premium_brands:
+                score_overall += 15
+            
+            # Price-based scoring (auction items often have good deals)
+            if price:
+                if price < 10000:  # Excellent auction deal
+                    score_overall += 25
+                elif price < 25000:  # Good auction deal
+                    score_overall += 15
+                elif price < 50000:  # Fair auction price
+                    score_overall += 10
+                elif price > 100000:  # Expensive for auction
+                    score_overall -= 10
+            
             yield {
                 'id': f"bidspotter_{hash(url)}",
                 'title': title.strip(),
@@ -92,7 +133,7 @@ class BidspotterSpider(scrapy.Spider):
                 'images': [image] if image else [],
                 'source': 'BidSpotter',
                 'discovered_at': self.get_timestamp(),
-                'score_overall': 85 + (10 if price and price < 30000 else 0)  # Higher score for good deals
+                'score_overall': min(100, max(0, score_overall))  # Clamp between 0-100
             }
     
     def get_timestamp(self):

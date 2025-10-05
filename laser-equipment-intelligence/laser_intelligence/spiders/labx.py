@@ -3,17 +3,17 @@ import re
 from urllib.parse import urlencode, quote_plus
 
 
-class DotmedAuctionsSpider(scrapy.Spider):
-    name = "dotmed_auctions"
-    allowed_domains = ["dotmed.com"]
+class LabxSpider(scrapy.Spider):
+    name = "labx"
+    allowed_domains = ["labx.com"]
     
     def __init__(self, query=None, *args, **kwargs):
-        super(DotmedAuctionsSpider, self).__init__(*args, **kwargs)
+        super(LabxSpider, self).__init__(*args, **kwargs)
         self.query = query or "laser equipment"
         
     def start_requests(self):
-        # Search for laser equipment on DOTmed
-        search_url = f"https://www.dotmed.com/search?q={quote_plus(self.query)}"
+        # Search for laser equipment on LabX
+        search_url = f"https://www.labx.com/search?q={quote_plus(self.query)}"
         yield scrapy.Request(
             url=search_url,
             callback=self.parse_search_results,
@@ -21,7 +21,7 @@ class DotmedAuctionsSpider(scrapy.Spider):
         )
     
     def parse_search_results(self, response):
-        """Parse DOTmed search results page"""
+        """Parse LabX search results page"""
         items = response.css('div.listing-item, div.product-item, .search-result-item')
         
         for item in items:
@@ -42,7 +42,7 @@ class DotmedAuctionsSpider(scrapy.Spider):
             if not url:
                 continue
             if not url.startswith('http'):
-                url = f"https://www.dotmed.com{url}"
+                url = f"https://www.labx.com{url}"
                 
             # Extract condition
             condition = item.css('.condition::text, .status::text').get()
@@ -61,7 +61,7 @@ class DotmedAuctionsSpider(scrapy.Spider):
             # Extract image
             image = item.css('img::attr(src)').get()
             if image and not image.startswith('http'):
-                image = f"https://www.dotmed.com{image}"
+                image = f"https://www.labx.com{image}"
                 
             # Extract brand and model from title using real equipment data
             brand = "Unknown"
@@ -102,36 +102,36 @@ class DotmedAuctionsSpider(scrapy.Spider):
                         break
                         
             # Calculate realistic score based on brand and price
-            score_overall = 80  # Base score for DOTmed (reputable medical equipment source)
+            score_overall = 80  # Base score for LabX (reputable source)
             
             # Brand-specific scoring (based on real equipment data)
             premium_brands = ['aerolase', 'candela', 'cynosure', 'lumenis', 'sciton', 'cutera', 'syneron']
             if brand.lower() in premium_brands:
                 score_overall += 15
             
-            # Price-based scoring (DOTmed often has competitive medical equipment prices)
+            # Price-based scoring (LabX often has competitive prices)
             if price:
-                if price < 15000:  # Excellent DOTmed deal
+                if price < 15000:  # Excellent LabX deal
                     score_overall += 20
-                elif price < 30000:  # Good DOTmed deal
+                elif price < 30000:  # Good LabX deal
                     score_overall += 15
-                elif price < 50000:  # Fair DOTmed price
+                elif price < 50000:  # Fair LabX price
                     score_overall += 10
-                elif price > 100000:  # Expensive for DOTmed
+                elif price > 100000:  # Expensive for LabX
                     score_overall -= 5
             
             yield {
-                'id': f"dotmed_{hash(url)}",
+                'id': f"labx_{hash(url)}",
                 'title': title.strip(),
                 'brand': brand,
                 'model': model,
                 'condition': condition,
                 'price': price,
                 'location': location,
-                'description': f"DOTmed listing: {title.strip()}",
+                'description': f"LabX listing: {title.strip()}",
                 'url': url,
                 'images': [image] if image else [],
-                'source': 'DOTmed Auctions',
+                'source': 'LabX',
                 'discovered_at': self.get_timestamp(),
                 'score_overall': min(100, max(0, score_overall))  # Clamp between 0-100
             }

@@ -3,17 +3,17 @@ import re
 from urllib.parse import urlencode, quote_plus
 
 
-class DotmedAuctionsSpider(scrapy.Spider):
-    name = "dotmed_auctions"
-    allowed_domains = ["dotmed.com"]
+class GovdealsSpider(scrapy.Spider):
+    name = "govdeals"
+    allowed_domains = ["govdeals.com"]
     
     def __init__(self, query=None, *args, **kwargs):
-        super(DotmedAuctionsSpider, self).__init__(*args, **kwargs)
+        super(GovdealsSpider, self).__init__(*args, **kwargs)
         self.query = query or "laser equipment"
         
     def start_requests(self):
-        # Search for laser equipment on DOTmed
-        search_url = f"https://www.dotmed.com/search?q={quote_plus(self.query)}"
+        # Search for laser equipment on GovDeals
+        search_url = f"https://www.govdeals.com/index.cfm?fa=Main.Search&searchtype=1&searchterm={quote_plus(self.query)}"
         yield scrapy.Request(
             url=search_url,
             callback=self.parse_search_results,
@@ -21,16 +21,16 @@ class DotmedAuctionsSpider(scrapy.Spider):
         )
     
     def parse_search_results(self, response):
-        """Parse DOTmed search results page"""
-        items = response.css('div.listing-item, div.product-item, .search-result-item')
+        """Parse GovDeals search results page"""
+        items = response.css('div.search-result-item, div.listing-item, .auction-item')
         
         for item in items:
             title = item.css('h3 a::text, .title a::text, h2 a::text').get()
             if not title:
                 continue
                 
-            # Extract price
-            price_text = item.css('.price::text, .cost::text, .amount::text').get()
+            # Extract price (current bid or starting bid)
+            price_text = item.css('.current-bid::text, .starting-bid::text, .price::text').get()
             price = None
             if price_text:
                 price_match = re.search(r'[\$£€]\s*([0-9,]+\.?[0-9]*)', price_text)
@@ -42,26 +42,26 @@ class DotmedAuctionsSpider(scrapy.Spider):
             if not url:
                 continue
             if not url.startswith('http'):
-                url = f"https://www.dotmed.com{url}"
+                url = f"https://www.govdeals.com{url}"
                 
-            # Extract condition
+            # Extract condition (government equipment is typically used)
             condition = item.css('.condition::text, .status::text').get()
             if condition:
                 condition = condition.strip()
             else:
-                condition = "Used - Good"
+                condition = "Used - Government Surplus"
                 
             # Extract location
-            location = item.css('.location::text, .seller-location::text').get()
+            location = item.css('.location::text, .agency-location::text').get()
             if location:
                 location = location.strip()
             else:
-                location = "Unknown"
+                location = "Government Agency"
                 
             # Extract image
             image = item.css('img::attr(src)').get()
             if image and not image.startswith('http'):
-                image = f"https://www.dotmed.com{image}"
+                image = f"https://www.govdeals.com{image}"
                 
             # Extract brand and model from title using real equipment data
             brand = "Unknown"
@@ -102,36 +102,36 @@ class DotmedAuctionsSpider(scrapy.Spider):
                         break
                         
             # Calculate realistic score based on brand and price
-            score_overall = 80  # Base score for DOTmed (reputable medical equipment source)
+            score_overall = 70  # Base score for government surplus
             
             # Brand-specific scoring (based on real equipment data)
             premium_brands = ['aerolase', 'candela', 'cynosure', 'lumenis', 'sciton', 'cutera', 'syneron']
             if brand.lower() in premium_brands:
                 score_overall += 15
             
-            # Price-based scoring (DOTmed often has competitive medical equipment prices)
+            # Price-based scoring (government surplus often has good deals)
             if price:
-                if price < 15000:  # Excellent DOTmed deal
+                if price < 5000:  # Excellent government deal
+                    score_overall += 30
+                elif price < 15000:  # Good government deal
                     score_overall += 20
-                elif price < 30000:  # Good DOTmed deal
-                    score_overall += 15
-                elif price < 50000:  # Fair DOTmed price
+                elif price < 30000:  # Fair government price
                     score_overall += 10
-                elif price > 100000:  # Expensive for DOTmed
+                elif price > 50000:  # Expensive for government surplus
                     score_overall -= 5
             
             yield {
-                'id': f"dotmed_{hash(url)}",
+                'id': f"govdeals_{hash(url)}",
                 'title': title.strip(),
                 'brand': brand,
                 'model': model,
                 'condition': condition,
                 'price': price,
                 'location': location,
-                'description': f"DOTmed listing: {title.strip()}",
+                'description': f"GovDeals government surplus: {title.strip()}",
                 'url': url,
                 'images': [image] if image else [],
-                'source': 'DOTmed Auctions',
+                'source': 'GovDeals',
                 'discovered_at': self.get_timestamp(),
                 'score_overall': min(100, max(0, score_overall))  # Clamp between 0-100
             }

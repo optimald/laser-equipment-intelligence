@@ -25,70 +25,178 @@ async def search_equipment(search_request: Dict[str, Any]):
     try:
         query = search_request.get('query', '').strip()
         limit = search_request.get('limit', 50)
+        mode = search_request.get('mode', 'auto')  # 'auto', 'mock', 'real'
         
         if not query:
             raise HTTPException(status_code=400, detail="Search query is required")
         
-        # Try database search first
-        conn = await get_db_connection()
-        if conn:
+        # Handle different modes
+        if mode == 'mock':
+            # Force mock data
+            mock_results = generate_mock_search_results(query, limit)
+            return {
+                "query": query,
+                "results": mock_results,
+                "total": len(mock_results),
+                "source": "mock",
+                "mode": "mock",
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        elif mode == 'real':
+            # Try real spiders first, then database, then fail if no results
             try:
-                # Search in LaserMatch items
-                lasermatch_results = await conn.fetch("""
-                    SELECT 
-                        id, title, brand, model, condition, price, location, 
-                        description, url, images, discovered_at, source, status
-                    FROM lasermatch_items 
-                    WHERE 
-                        (LOWER(title) LIKE LOWER($1) OR 
-                         LOWER(brand) LIKE LOWER($1) OR 
-                         LOWER(model) LIKE LOWER($1) OR 
-                         LOWER(description) LIKE LOWER($1))
-                        AND status = 'active'
-                    ORDER BY 
-                        CASE 
-                            WHEN LOWER(brand) LIKE LOWER($1) THEN 1
-                            WHEN LOWER(model) LIKE LOWER($1) THEN 2
-                            WHEN LOWER(title) LIKE LOWER($1) THEN 3
-                            ELSE 4
-                        END,
-                        discovered_at DESC
-                    LIMIT $2
-                """, f"%{query}%", limit)
+                from .spiders import run_scrapy_spiders_parallel
+                import os
                 
-                await conn.close()
+                spider_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "laser-equipment-intelligence")
                 
-                # Convert to list of dicts
-                results = []
-                for row in lasermatch_results:
-                    item = dict(row)
-                    # Convert datetime objects to ISO strings
-                    if item.get('discovered_at'):
-                        item['discovered_at'] = item['discovered_at'].isoformat()
-                    results.append(item)
+                if os.path.exists(spider_dir):
+                    print(f"🚀 Running real spiders for mode='real'")
+                    spider_results = await run_scrapy_spiders_parallel(spider_dir, query, limit)
+                    
+                    if spider_results:
+                        return {
+                            "query": query,
+                            "results": spider_results,
+                            "total": len(spider_results),
+                            "source": "real_spiders",
+                            "mode": "real",
+                            "timestamp": datetime.now().isoformat()
+                        }
                 
+                # Try database search
+                conn = await get_db_connection()
+                if conn:
+                    try:
+                        lasermatch_results = await conn.fetch("""
+                            SELECT 
+                                id, title, brand, model, condition, price, location, 
+                                description, url, images, discovered_at, source, status
+                            FROM lasermatch_items 
+                            WHERE 
+                                (LOWER(title) LIKE LOWER($1) OR 
+                                 LOWER(brand) LIKE LOWER($1) OR 
+                                 LOWER(model) LIKE LOWER($1) OR 
+                                 LOWER(description) LIKE LOWER($1))
+                                AND status = 'active'
+                            ORDER BY 
+                                CASE 
+                                    WHEN LOWER(brand) LIKE LOWER($1) THEN 1
+                                    WHEN LOWER(model) LIKE LOWER($1) THEN 2
+                                    WHEN LOWER(title) LIKE LOWER($1) THEN 3
+                                    ELSE 4
+                                END,
+                                discovered_at DESC
+                            LIMIT $2
+                        """, f"%{query}%", limit)
+                        
+                        await conn.close()
+                        
+                        if lasermatch_results:
+                            results = []
+                            for row in lasermatch_results:
+                                item = dict(row)
+                                if item.get('discovered_at'):
+                                    item['discovered_at'] = item['discovered_at'].isoformat()
+                                results.append(item)
+                            
+                            return {
+                                "query": query,
+                                "results": results,
+                                "total": len(results),
+                                "source": "database",
+                                "mode": "real",
+                                "timestamp": datetime.now().isoformat()
+                            }
+                    except Exception as e:
+                        print(f"Database search failed: {e}")
+                        if conn:
+                            await conn.close()
+                
+                # No real data found
                 return {
                     "query": query,
-                    "results": results,
-                    "total": len(results),
-                    "source": "database",
+                    "results": [],
+                    "total": 0,
+                    "source": "no_real_data",
+                    "mode": "real",
+                    "message": "No real data found. Try mock mode or check spider configuration.",
                     "timestamp": datetime.now().isoformat()
                 }
+                
             except Exception as e:
-                print(f"Database search failed: {e}")
-                if conn:
+                print(f"Real mode failed: {e}")
+                return {
+                    "query": query,
+                    "results": [],
+                    "total": 0,
+                    "source": "error",
+                    "mode": "real",
+                    "error": str(e),
+                    "timestamp": datetime.now().isoformat()
+                }
+        
+        else:  # mode == 'auto' (default)
+            # Try database search first
+            conn = await get_db_connection()
+            if conn:
+                try:
+                    lasermatch_results = await conn.fetch("""
+                        SELECT 
+                            id, title, brand, model, condition, price, location, 
+                            description, url, images, discovered_at, source, status
+                        FROM lasermatch_items 
+                        WHERE 
+                            (LOWER(title) LIKE LOWER($1) OR 
+                             LOWER(brand) LIKE LOWER($1) OR 
+                             LOWER(model) LIKE LOWER($1) OR 
+                             LOWER(description) LIKE LOWER($1))
+                            AND status = 'active'
+                        ORDER BY 
+                            CASE 
+                                WHEN LOWER(brand) LIKE LOWER($1) THEN 1
+                                WHEN LOWER(model) LIKE LOWER($1) THEN 2
+                                WHEN LOWER(title) LIKE LOWER($1) THEN 3
+                                ELSE 4
+                            END,
+                            discovered_at DESC
+                        LIMIT $2
+                    """, f"%{query}%", limit)
+                    
                     await conn.close()
-        
-        # Fallback to mock search results
-        mock_results = generate_mock_search_results(query, limit)
-        
-        return {
-            "query": query,
-            "results": mock_results,
-            "total": len(mock_results),
-            "source": "mock",
-            "timestamp": datetime.now().isoformat()
-        }
+                    
+                    if lasermatch_results:
+                        results = []
+                        for row in lasermatch_results:
+                            item = dict(row)
+                            if item.get('discovered_at'):
+                                item['discovered_at'] = item['discovered_at'].isoformat()
+                            results.append(item)
+                        
+                        return {
+                            "query": query,
+                            "results": results,
+                            "total": len(results),
+                            "source": "database",
+                            "mode": "auto",
+                            "timestamp": datetime.now().isoformat()
+                        }
+                except Exception as e:
+                    print(f"Database search failed: {e}")
+                    if conn:
+                        await conn.close()
+            
+            # Fallback to intelligent mock search results
+            mock_results = generate_mock_search_results(query, limit)
+            return {
+                "query": query,
+                "results": mock_results,
+                "total": len(mock_results),
+                "source": "intelligent_mock",
+                "mode": "auto",
+                "timestamp": datetime.now().isoformat()
+            }
         
     except HTTPException:
         raise
@@ -103,28 +211,42 @@ def generate_mock_search_results(query: str, limit: int) -> List[Dict[str, Any]]
     query_lower = query.lower()
     
     # Determine brand from query
-    if 'aerolase' in query_lower:
+    print(f"DEBUG: Query='{query}', query_lower='{query_lower}'")
+    if 'agnes' in query_lower:
+        brand = 'Agnes'
+        print(f"DEBUG: Detected Agnes brand")
+    elif 'aerolase' in query_lower:
         brand = 'Aerolase'
+        print(f"DEBUG: Detected Aerolase brand")
     elif 'candela' in query_lower:
         brand = 'Candela'
+        print(f"DEBUG: Detected Candela brand")
     elif 'cynosure' in query_lower:
         brand = 'Cynosure'
+        print(f"DEBUG: Detected Cynosure brand")
     elif 'lumenis' in query_lower:
         brand = 'Lumenis'
+        print(f"DEBUG: Detected Lumenis brand")
     elif 'syneron' in query_lower:
         brand = 'Syneron'
+        print(f"DEBUG: Detected Syneron brand")
     elif 'alma' in query_lower:
         brand = 'Alma'
+        print(f"DEBUG: Detected Alma brand")
     elif 'cutera' in query_lower:
         brand = 'Cutera'
+        print(f"DEBUG: Detected Cutera brand")
     elif 'sciton' in query_lower:
         brand = 'Sciton'
+        print(f"DEBUG: Detected Sciton brand")
     else:
-        brand = random.choice(['Aerolase', 'Candela', 'Cynosure', 'Lumenis', 'Syneron', 'Alma', 'Cutera', 'Sciton'])
+        brand = random.choice(['Aerolase', 'Agnes', 'Candela', 'Cynosure', 'Lumenis', 'Syneron', 'Alma', 'Cutera', 'Sciton'])
+        print(f"DEBUG: Random brand selected: {brand}")
     
     # Realistic laser equipment models by brand
     brand_models = {
         'Aerolase': ['LightPod Neo Elite', 'LightPod Neo', 'LightPod Elite', 'LightPod Pro'],
+        'Agnes': ['Agnes RF', 'Agnes RF System', 'Agnes Elite', 'Agnes Pro'],
         'Candela': ['GentleLase Pro', 'GentleMax Pro', 'VBeam Perfecta', 'CoolGlide Excel'],
         'Cynosure': ['Picosure', 'Picoway', 'SmartLipo', 'Monolith'],
         'Lumenis': ['LightSheer Duet', 'M22', 'UltraPulse', 'AcuPulse'],
@@ -151,6 +273,8 @@ def generate_mock_search_results(query: str, limit: int) -> List[Dict[str, Any]]
         # Realistic pricing based on brand and condition
         if brand == 'Aerolase':
             base_price = random.randint(25000, 45000)
+        elif brand == 'Agnes':
+            base_price = random.randint(30000, 55000)
         elif brand in ['Candela', 'Cynosure']:
             base_price = random.randint(35000, 65000)
         elif brand in ['Lumenis', 'Sciton']:
