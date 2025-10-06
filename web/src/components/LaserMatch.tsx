@@ -214,6 +214,7 @@ export default function LaserMatch() {
     console.log('🚀 Component mounted, starting fetch...')
     console.log('📱 User Agent:', navigator.userAgent)
     console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
+    console.log('🔍 All env vars:', process.env)
     
     const fetchData = async () => {
       // Check if we're on localhost
@@ -226,6 +227,7 @@ export default function LaserMatch() {
         const externalApiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
         console.log('🔍 Trying external API:', externalApiUrl)
         
+        console.log('🌐 Making request to:', externalApiUrl)
         const externalResponse = await fetch(externalApiUrl, {
           method: 'GET',
           headers: {
@@ -234,6 +236,8 @@ export default function LaserMatch() {
           },
           credentials: 'include',
         })
+        console.log('📡 Response status:', externalResponse.status)
+        console.log('📡 Response headers:', Object.fromEntries(externalResponse.headers.entries()))
         
         if (externalResponse.ok) {
           const data = await externalResponse.json()
