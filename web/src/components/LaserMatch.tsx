@@ -216,19 +216,10 @@ export default function LaserMatch() {
     console.log('🌐 API URL:', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
     
     const fetchData = async () => {
-      // Check if we're on mobile or if localhost API is not accessible
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      // Check if we're on localhost
       const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       
-      console.log('📱 Mobile detected:', isMobile)
       console.log('🏠 Localhost detected:', isLocalhost)
-      
-      // If mobile and not localhost, use fallback data immediately
-      if (isMobile && !isLocalhost) {
-        console.log('📱 Mobile device detected, using fallback data')
-        tryFallbackData()
-        return
-      }
       
       try {
         // Try external API first (Railway or localhost)
@@ -343,25 +334,17 @@ export default function LaserMatch() {
     setIsLoading(true)
     setApiError(null) // Clear any previous errors
     
-    // Check if we're on mobile or if localhost API is not accessible
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    // Check if we're on localhost
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     
-    console.log('📱 Mobile detected:', isMobile)
     console.log('🏠 Localhost detected:', isLocalhost)
     
-    // If mobile and not localhost, use fallback data immediately
-    if (isMobile && !isLocalhost) {
-      console.log('📱 Mobile device detected, using fallback data')
-      tryFallbackData()
-      return
-    }
-    
     try {
-      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
-      console.log('🔍 Fetching LaserMatch items from:', apiUrl)
+      // Try external API first (Railway or localhost)
+      const externalApiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
+      console.log('🔍 Trying external API:', externalApiUrl)
       
-      const response = await fetch(apiUrl, {
+      const externalResponse = await fetch(externalApiUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -370,54 +353,80 @@ export default function LaserMatch() {
         credentials: 'include',
       })
       
-      console.log('📡 Response status:', response.status, response.statusText)
-      
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('❌ Response not ok:', response.status, response.statusText)
-        console.error('❌ Error response body:', errorText)
-        setApiError(`API Error: ${response.status} ${response.statusText}`)
-        setItems([])
-        return
+      if (externalResponse.ok) {
+        const data = await externalResponse.json()
+        console.log('📊 Received external API data:', data)
+        
+        if (data.items && data.items.length > 0) {
+          const convertedResults: LaserMatchItem[] = data.items.map((item: any) => ({
+            id: item.id.toString(),
+            title: item.title,
+            brand: item.brand,
+            model: item.model,
+            condition: item.condition,
+            price: item.price,
+            location: item.location,
+            description: item.description,
+            url: item.url || '',
+            sources: [],
+            sourcingStatus: 'not_started' as const,
+            assignedRep: undefined,
+            targetPrice: undefined,
+            notes: ''
+          }))
+          console.log('✅ Setting items from external API:', convertedResults.length)
+          setItems(convertedResults)
+          return
+        }
       }
       
-      const data = await response.json()
-      console.log('📊 Received data:', data)
+      // If external API fails, try local API
+      console.log('🔄 External API failed, trying local API...')
+      const localApiUrl = '/api/lasermatch/items?limit=500'
+      const localResponse = await fetch(localApiUrl)
       
-      if (!data.items || data.items.length === 0) {
-        console.log('No LaserMatch items found in database. Click "Refresh Items" to run the scraper.')
-        setItems([])
-        return
+      if (localResponse.ok) {
+        const data = await localResponse.json()
+        console.log('📊 Received local API data:', data)
+        
+        if (data.items && data.items.length > 0) {
+          const convertedResults: LaserMatchItem[] = data.items.map((item: any) => ({
+            id: item.id.toString(),
+            title: item.title,
+            brand: item.brand,
+            model: item.model,
+            condition: item.condition,
+            price: item.price,
+            location: item.location,
+            description: item.description,
+            url: item.url || '',
+            sources: [],
+            sourcingStatus: 'not_started' as const,
+            assignedRep: undefined,
+            targetPrice: undefined,
+            notes: ''
+          }))
+          console.log('✅ Setting items from local API:', convertedResults.length)
+          setItems(convertedResults)
+          setApiError('Using local API - external API unavailable')
+          return
+        }
       }
       
-      // Convert API results to component interface
-      const convertedResults: LaserMatchItem[] = data.items.map((item: any) => ({
-        id: item.id.toString(),
-        title: item.title,
-        brand: item.brand,
-        model: item.model,
-        condition: item.condition,
-        price: item.price,
-        location: item.location,
-        description: item.description,
-        url: item.url || '',
-        sources: [],
-        sourcingStatus: 'not_started' as const,
-        assignedRep: undefined,
-        targetPrice: undefined,
-        notes: ''
-      }))
-      setItems(convertedResults)
+      // If both APIs fail, use fallback data
+      console.log('🔄 Both APIs failed, using fallback data...')
+      tryFallbackData()
+      
     } catch (error) {
-      console.error('❌ Failed to fetch LaserMatch items:', error)
+      console.error('❌ All API attempts failed:', error)
       console.error('❌ Error details:', {
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
       })
-      setApiError(`Network Error: ${error instanceof Error ? error.message : String(error)}`)
+      setApiError(`All APIs failed: ${error instanceof Error ? error.message : String(error)}`)
       
-      // Try fallback data for mobile
-      console.log('🔄 Attempting fallback data for mobile...')
+      // Use fallback data
+      console.log('🔄 Using fallback data...')
       tryFallbackData()
     } finally {
       console.log('🏁 Setting isLoading to false')
