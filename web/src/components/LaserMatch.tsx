@@ -262,10 +262,11 @@ export default function LaserMatch() {
           }
         }
         
-        // If external API fails, try local API
-        console.log('🔄 External API failed, trying local API...')
-        const localApiUrl = '/api/lasermatch/items?limit=500'
-        const localResponse = await fetch(localApiUrl)
+      // If external API fails, try local API
+      console.log('🔄 External API failed, trying local API...')
+      const localApiUrl = '/api/lasermatch/items?limit=500'
+      console.log('🔍 Trying local API:', localApiUrl)
+      const localResponse = await fetch(localApiUrl)
         
         if (localResponse.ok) {
           const data = await localResponse.json()
@@ -383,6 +384,7 @@ export default function LaserMatch() {
       // If external API fails, try local API
       console.log('🔄 External API failed, trying local API...')
       const localApiUrl = '/api/lasermatch/items?limit=500'
+      console.log('🔍 Trying local API:', localApiUrl)
       const localResponse = await fetch(localApiUrl)
       
       if (localResponse.ok) {
