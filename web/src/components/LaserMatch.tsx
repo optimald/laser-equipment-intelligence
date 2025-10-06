@@ -231,25 +231,22 @@ export default function LaserMatch() {
       }
       
       try {
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
-        console.log('🔍 Fetching LaserMatch items from:', apiUrl)
+        // Try external API first
+        const externalApiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
+        console.log('🔍 Trying external API:', externalApiUrl)
         
-        const response = await fetch(apiUrl, {
+        const externalResponse = await fetch(externalApiUrl, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          // Add credentials for CORS if needed
           credentials: 'include',
         })
         
-        console.log('📡 Response status:', response.status, response.statusText)
-        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
-        
-        if (response.ok) {
-          const data = await response.json()
-          console.log('📊 Received data:', data)
+        if (externalResponse.ok) {
+          const data = await externalResponse.json()
+          console.log('📊 Received external API data:', data)
           
           if (data.items && data.items.length > 0) {
             const convertedResults: LaserMatchItem[] = data.items.map((item: any) => ({
@@ -268,30 +265,60 @@ export default function LaserMatch() {
               targetPrice: undefined,
               notes: ''
             }))
-            console.log('✅ Setting items:', convertedResults.length)
+            console.log('✅ Setting items from external API:', convertedResults.length)
             setItems(convertedResults)
-          } else {
-            console.log('⚠️ No items in response')
-            setItems([])
+            return
           }
-        } else {
-          console.error('❌ Response not ok:', response.status, response.statusText)
-          const errorText = await response.text()
-          console.error('❌ Error response body:', errorText)
-          setApiError(`API Error: ${response.status} ${response.statusText}`)
-          setItems([])
         }
+        
+        // If external API fails, try local API
+        console.log('🔄 External API failed, trying local API...')
+        const localApiUrl = '/api/lasermatch/items?limit=500'
+        const localResponse = await fetch(localApiUrl)
+        
+        if (localResponse.ok) {
+          const data = await localResponse.json()
+          console.log('📊 Received local API data:', data)
+          
+          if (data.items && data.items.length > 0) {
+            const convertedResults: LaserMatchItem[] = data.items.map((item: any) => ({
+              id: item.id.toString(),
+              title: item.title,
+              brand: item.brand,
+              model: item.model,
+              condition: item.condition,
+              price: item.price,
+              location: item.location,
+              description: item.description,
+              url: item.url || '',
+              sources: [],
+              sourcingStatus: 'not_started' as const,
+              assignedRep: undefined,
+              targetPrice: undefined,
+              notes: ''
+            }))
+            console.log('✅ Setting items from local API:', convertedResults.length)
+            setItems(convertedResults)
+            setApiError('Using local API - external API unavailable')
+            return
+          }
+        }
+        
+        // If both APIs fail, use fallback data
+        console.log('🔄 Both APIs failed, using fallback data...')
+        tryFallbackData()
+        
       } catch (error) {
-        console.error('❌ Fetch failed:', error)
+        console.error('❌ All API attempts failed:', error)
         console.error('❌ Error details:', {
           message: error instanceof Error ? error.message : String(error),
           stack: error instanceof Error ? error.stack : undefined,
           name: error instanceof Error ? error.name : undefined
         })
-        setApiError(`Network Error: ${error instanceof Error ? error.message : String(error)}`)
+        setApiError(`All APIs failed: ${error instanceof Error ? error.message : String(error)}`)
         
-        // Try fallback data for mobile
-        console.log('🔄 Attempting fallback data for mobile...')
+        // Use fallback data
+        console.log('🔄 Using fallback data...')
         tryFallbackData()
       } finally {
         console.log('🏁 Setting isLoading to false')
