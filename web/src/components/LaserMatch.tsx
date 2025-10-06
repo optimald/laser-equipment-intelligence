@@ -600,7 +600,7 @@ export default function LaserMatch() {
     }
     
     try {
-      addLog(`Starting Magic Find for: ${item.title}`)
+      addLog(`Starting AI Find for: ${item.title}`)
       addLog(`Data Mode: ${dataMode}`)
       addLog(`Searching for: ${item.brand} ${item.model}`)
       // Search for this item using the real search API
@@ -703,7 +703,7 @@ export default function LaserMatch() {
       alert(`Failed to find sources: ${errorMessage}`)
     } finally {
       setSpiderSearching(null)
-      addLog(`Magic Find completed for ${item.title}`)
+      addLog(`AI Find completed for ${item.title}`)
     }
   }
 
@@ -1269,7 +1269,7 @@ export default function LaserMatch() {
                                     title={`Auto-discover sources using ${dataMode === 'mock' ? 'mock' : dataMode === 'real' ? 'real spider' : 'intelligent'} data`}
                                   >
                                     <SparklesIcon className="h-4 w-4 mr-1" />
-                                    {spiderSearching === item.id ? 'Searching...' : 'Magic Find'}
+                                    {spiderSearching === item.id ? 'Searching...' : 'AI Find'}
                                   </button>
                                   <button
                                     onClick={() => setSearchLogModalOpen(true)}
@@ -1798,7 +1798,7 @@ export default function LaserMatch() {
                         </select>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-300">Enable Magic Find</span>
+                        <span className="text-gray-300">Enable AI Find</span>
                         <input type="checkbox" className="rounded" defaultChecked />
                       </div>
                       <div className="flex items-center justify-between">
@@ -1828,7 +1828,7 @@ export default function LaserMatch() {
           <div className="bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] sm:max-h-[80vh] flex flex-col">
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-700">
               <h3 className="text-base sm:text-lg font-semibold text-white truncate">
-                Magic Find Search Log - {currentSearchItem}
+                AI Find Search Log - {currentSearchItem}
               </h3>
               <button
                 onClick={() => setSearchLogModalOpen(false)}
@@ -1844,7 +1844,7 @@ export default function LaserMatch() {
               <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm">
                 {searchLogs.length === 0 ? (
                   <div className="text-gray-400 text-center py-8">
-                    No logs yet. Start a Magic Find search to see the process.
+                    No logs yet. Start an AI Find search to see the process.
                   </div>
                 ) : (
                   <div className="space-y-1">
