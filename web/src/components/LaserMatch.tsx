@@ -231,7 +231,7 @@ export default function LaserMatch() {
       }
       
       try {
-        // Try external API first
+        // Try external API first (Railway or localhost)
         const externalApiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/lasermatch/items?limit=500`
         console.log('🔍 Trying external API:', externalApiUrl)
         
