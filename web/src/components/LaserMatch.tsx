@@ -812,13 +812,13 @@ export default function LaserMatch() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="bg-gray-900 border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center">
-            <nav className="flex flex-wrap space-x-4 md:space-x-8">
+            <nav className="flex flex-wrap space-x-2 sm:space-x-4 md:space-x-8">
               <div className="flex items-center space-x-2">
                 <button 
                   onClick={() => setActiveTab('LaserMatch')}
-                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
+                  className={`flex items-center py-3 sm:py-4 px-2 sm:px-1 border-b-2 font-medium text-sm touch-manipulation ${
                     activeTab === 'LaserMatch' 
                       ? 'border-white text-white' 
                       : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700'
@@ -829,7 +829,7 @@ export default function LaserMatch() {
                 <button
                   onClick={refreshLaserMatchItems}
                   disabled={isRefreshing}
-                  className="p-1 text-gray-400 hover:text-white disabled:text-gray-600 transition-colors"
+                  className="p-2 sm:p-1 text-gray-400 hover:text-white disabled:text-gray-600 transition-colors touch-manipulation"
                   title={isRefreshing ? 'Refreshing...' : 'Refresh Items'}
                 >
                   <ArrowPathIcon className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -870,8 +870,8 @@ export default function LaserMatch() {
         </div>
       </div>
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="space-y-4 sm:space-y-6">
           {activeTab === 'LaserMatch' && (
             <>
               {items.length > 0 ? (
@@ -903,7 +903,7 @@ export default function LaserMatch() {
                     {/* Main Row - Only show if this item is not expanded */}
                     {expandedItem !== item.id && (
                       <div 
-                        className="px-6 py-4 hover:bg-gray-800 transition-colors cursor-pointer"
+                        className="px-4 sm:px-6 py-4 sm:py-4 hover:bg-gray-800 transition-colors cursor-pointer touch-manipulation"
                         onClick={() => setExpandedItem(item.id)}
                       >
                         {/* Desktop Layout */}
@@ -980,59 +980,66 @@ export default function LaserMatch() {
 
                         {/* Mobile Layout */}
                         <div className="md:hidden">
-                          <div className="flex items-start space-x-3">
+                          <div className="flex items-start space-x-4">
                             <div className="flex-shrink-0">
-                              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">
+                              <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                                <span className="text-white font-bold text-xl">
                                   {item.brand?.charAt(0) || 'L'}
                                 </span>
                               </div>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-white font-medium text-base leading-tight">{item.title}</h3>
-                              <p className="text-gray-400 text-sm mt-1">{item.model}</p>
-                              <div className="flex items-center justify-between mt-2">
-                                <div className="flex items-center space-x-3">
-                                  <span className="text-gray-300 text-sm">{item.brand}</span>
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                    {item.condition}
+                              <h3 className="text-white font-semibold text-lg leading-tight mb-1">{item.title}</h3>
+                              <p className="text-gray-400 text-sm mb-3">{item.model}</p>
+                              
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-gray-300 text-sm font-medium">{item.brand}</span>
+                                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                      {item.condition}
+                                    </span>
+                                  </div>
+                                  <span className="text-white font-bold text-base">
+                                    {item.price ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
                                   </span>
                                 </div>
-                                <span className="text-white font-semibold text-sm">
-                                  {item.price ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
-                                </span>
-                              </div>
-                              {item.location && (
-                                <p className="text-gray-400 text-xs mt-1">{item.location}</p>
-                              )}
-                              <div className="flex items-center justify-between mt-3">
-                                <span className="text-gray-400 text-xs">LaserMatch.io</span>
-                                <div className="flex items-center space-x-3">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      window.open(item.url, '_blank')
-                                    }}
-                                    className="text-blue-400 hover:text-blue-300 transition-colors"
-                                    title="View Original Listing"
-                                  >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setExpandedItem(item.id)
-                                    }}
-                                    className="text-green-400 hover:text-green-300 transition-colors"
-                                    title="View Procurement Details"
-                                  >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                    </svg>
-                                  </button>
+                                
+                                {item.location && (
+                                  <p className="text-gray-400 text-xs">{item.location}</p>
+                                )}
+                                
+                                <div className="flex items-center justify-between pt-2">
+                                  <span className="text-gray-400 text-xs">LaserMatch.io</span>
+                                  <div className="flex items-center space-x-4">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        window.open(item.url, '_blank')
+                                      }}
+                                      className="flex items-center space-x-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors touch-manipulation"
+                                      title="View Original Listing"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                      </svg>
+                                      <span>View</span>
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setExpandedItem(item.id)
+                                      }}
+                                      className="flex items-center space-x-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-lg transition-colors touch-manipulation"
+                                      title="View Procurement Details"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      </svg>
+                                      <span>Details</span>
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -1043,7 +1050,22 @@ export default function LaserMatch() {
 
                     {/* Expanded Detailed View */}
                     {expandedItem === item.id && (
-                      <div className="bg-gray-800 border-t border-gray-700 p-6">
+                      <div className="bg-gray-800 border-t border-gray-700 p-4 sm:p-6">
+                        {/* Mobile Header with Back Button */}
+                        <div className="md:hidden flex items-center justify-between mb-4 pb-3 border-b border-gray-700">
+                          <button
+                            onClick={() => setExpandedItem(null)}
+                            className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors touch-manipulation"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                            <span className="text-sm font-medium">Back to List</span>
+                          </button>
+                          <h3 className="text-lg font-semibold text-white truncate max-w-[200px]">{item.title}</h3>
+                          <div className="w-16"></div> {/* Spacer for centering */}
+                        </div>
+                        
                         <div className="space-y-6">
                           {/* Equipment Info */}
                           <div className="flex items-start space-x-4">
@@ -1054,24 +1076,24 @@ export default function LaserMatch() {
                             </div>
                             <div className="flex-1">
                               <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                              <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                <div className="flex items-center justify-between">
                                   <span className="text-gray-400">Brand:</span>
-                                  <span className="text-white ml-2">{item.brand}</span>
+                                  <span className="text-white font-medium">{item.brand}</span>
                                 </div>
-                                <div>
+                                <div className="flex items-center justify-between">
                                   <span className="text-gray-400">Model:</span>
-                                  <span className="text-white ml-2">{item.model}</span>
+                                  <span className="text-white font-medium">{item.model}</span>
                                 </div>
-                                <div>
+                                <div className="flex items-center justify-between">
                                   <span className="text-gray-400">Condition:</span>
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                     {item.condition}
                                   </span>
                                 </div>
-                                <div>
+                                <div className="flex items-center justify-between">
                                   <span className="text-gray-400">Location:</span>
-                                  <span className="text-white ml-2">{item.location || 'Unknown'}</span>
+                                  <span className="text-white font-medium">{item.location || 'Unknown'}</span>
                                 </div>
                               </div>
                             </div>
@@ -1091,7 +1113,7 @@ export default function LaserMatch() {
                                         )
                                       )
                                     }}
-                                    className="w-32 px-2 py-1 text-lg font-bold text-white bg-gray-700 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-32 px-3 py-2 text-lg font-bold text-white bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
                                     placeholder="0"
                                     min="0"
                                     step="0.01"
@@ -1595,7 +1617,7 @@ export default function LaserMatch() {
                           <div className="flex justify-end space-x-4">
                             <button
                               onClick={() => setExpandedItem(null)}
-                              className="px-4 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-700 transition-colors"
+                              className="px-4 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-700 transition-colors touch-manipulation"
                             >
                               Close
                             </button>
