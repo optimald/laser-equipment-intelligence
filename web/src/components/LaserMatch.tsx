@@ -250,8 +250,8 @@ export default function LaserMatch() {
               brand: item.brand,
               model: item.model,
               condition: item.condition,
-              price: item.price,
-              location: item.location,
+              price: item.price && item.price > 0 ? item.price : undefined,
+              location: item.location && item.location !== 'Unknown' ? item.location : undefined,
               description: item.description,
               url: item.url || '',
               sources: [],
@@ -283,8 +283,8 @@ export default function LaserMatch() {
               brand: item.brand,
               model: item.model,
               condition: item.condition,
-              price: item.price,
-              location: item.location,
+              price: item.price && item.price > 0 ? item.price : undefined,
+              location: item.location && item.location !== 'Unknown' ? item.location : undefined,
               description: item.description,
               url: item.url || '',
               sources: [],
@@ -369,8 +369,8 @@ export default function LaserMatch() {
             brand: item.brand,
             model: item.model,
             condition: item.condition,
-            price: item.price,
-            location: item.location,
+            price: item.price && item.price > 0 ? item.price : undefined,
+            location: item.location && item.location !== 'Unknown' ? item.location : undefined,
             description: item.description,
             url: item.url || '',
             sources: [],
@@ -402,8 +402,8 @@ export default function LaserMatch() {
             brand: item.brand,
             model: item.model,
             condition: item.condition,
-            price: item.price,
-            location: item.location,
+            price: item.price && item.price > 0 ? item.price : undefined,
+            location: item.location && item.location !== 'Unknown' ? item.location : undefined,
             description: item.description,
             url: item.url || '',
             sources: [],
@@ -783,8 +783,8 @@ export default function LaserMatch() {
                     brand: item.brand,
                     model: item.model,
                     condition: item.condition,
-                    price: item.price,
-                    location: item.location,
+                    price: item.price && item.price > 0 ? item.price : undefined,
+                    location: item.location && item.location !== 'Unknown' ? item.location : undefined,
                     description: item.description,
                     url: item.url || '',
                     sources: [],
@@ -875,7 +875,7 @@ export default function LaserMatch() {
           {activeTab === 'LaserMatch' && (
             <>
               {items.length > 0 ? (
-            <div className="bg-gray-900 rounded-lg shadow overflow-hidden">
+            <div className="bg-gray-900 rounded-lg shadow overflow-hidden touch-pan-y">
               {isUsingFallback && (
                 <div className="bg-yellow-900 border-b border-yellow-700 px-6 py-2">
                   <p className="text-yellow-200 text-sm text-center">
@@ -936,9 +936,9 @@ export default function LaserMatch() {
                           
                           <div className="col-span-2">
                             <span className="text-white font-semibold">
-                              {item.price ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
+                              {item.price && item.price > 0 ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
                             </span>
-                            {item.location && (
+                            {item.location && item.location !== 'Unknown' && (
                               <p className="text-gray-400 text-xs">{item.location}</p>
                             )}
                           </div>
@@ -1001,11 +1001,11 @@ export default function LaserMatch() {
                                     </span>
                                   </div>
                                   <span className="text-white font-bold text-base">
-                                    {item.price ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
+                                    {item.price && item.price > 0 ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
                                   </span>
                                 </div>
                                 
-                                {item.location && (
+                                {item.location && item.location !== 'Unknown' && (
                                   <p className="text-gray-400 text-xs">{item.location}</p>
                                 )}
                                 
@@ -1093,7 +1093,7 @@ export default function LaserMatch() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                   <span className="text-gray-400">Location:</span>
-                                  <span className="text-white font-medium">{item.location || 'Unknown'}</span>
+                                  <span className="text-white font-medium">{item.location && item.location !== 'Unknown' ? item.location : 'Not specified'}</span>
                                 </div>
                               </div>
                             </div>
@@ -1169,7 +1169,7 @@ export default function LaserMatch() {
                                   value={item.price || ''}
                                   onChange={(e) => updateItem(item.id, { price: e.target.value ? Number(e.target.value) : undefined })}
                                   placeholder="Enter current price"
-                                  className="text-sm font-semibold border border-gray-600 bg-gray-800 text-white rounded px-2 py-1 w-full focus:border-gray-500 focus:outline-none"
+                                  className="text-sm font-semibold border border-gray-600 bg-gray-800 text-white rounded-lg px-3 py-2 w-full focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
                                 />
                               ) : (
                                 <div className="text-sm font-semibold text-white">
@@ -1187,7 +1187,7 @@ export default function LaserMatch() {
                                   value={item.targetPrice || ''}
                                   onChange={(e) => updateItem(item.id, { targetPrice: e.target.value ? Number(e.target.value) : undefined })}
                                   placeholder="Enter target price"
-                                  className="text-sm font-semibold border border-gray-600 bg-gray-800 text-white rounded px-2 py-1 w-full focus:border-gray-500 focus:outline-none"
+                                  className="text-sm font-semibold border border-gray-600 bg-gray-800 text-white rounded-lg px-3 py-2 w-full focus:border-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 touch-manipulation"
                                 />
                               ) : (
                                 <div className="text-sm font-semibold text-white">
@@ -1524,7 +1524,7 @@ export default function LaserMatch() {
                             
                             <div className="space-y-3">
                               {/* Notes Log - Always Visible */}
-                              <div className="border border-gray-700 rounded-lg bg-gray-800 max-h-32 overflow-y-auto">
+                              <div className="border border-gray-700 rounded-lg bg-gray-800 max-h-40 sm:max-h-32 overflow-y-auto">
                                 {(item.notesLog && item.notesLog.length > 0) || item.notes ? (
                                   <div className="p-3 space-y-2">
                                     {/* Show new structured notes in reverse order (newest last, so newest appears at bottom) */}
@@ -1569,7 +1569,7 @@ export default function LaserMatch() {
                                     value={newNoteContent}
                                     onChange={(e) => setNewNoteContent(e.target.value)}
                                     placeholder="Add a new note... (Use @source-1, @source-2, etc. to tag specific sources)"
-                                    className="w-full text-sm bg-gray-700 border border-gray-600 rounded px-3 py-2 h-20 resize-none text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="w-full text-sm bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 h-24 resize-none text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent touch-manipulation"
                                   />
                                   {item.spiderUrls && item.spiderUrls.length > 0 && (
                                     <div className="mt-2 text-xs text-gray-500">
@@ -1824,15 +1824,15 @@ export default function LaserMatch() {
       
       {/* Search Log Modal */}
       {searchLogModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-gray-700">
-              <h3 className="text-lg font-semibold text-white">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] sm:max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-700">
+              <h3 className="text-base sm:text-lg font-semibold text-white truncate">
                 Magic Find Search Log - {currentSearchItem}
               </h3>
               <button
                 onClick={() => setSearchLogModalOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white transition-colors p-2 touch-manipulation"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1840,7 +1840,7 @@ export default function LaserMatch() {
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               <div className="bg-gray-800 rounded-lg p-4 font-mono text-sm">
                 {searchLogs.length === 0 ? (
                   <div className="text-gray-400 text-center py-8">
@@ -1858,20 +1858,20 @@ export default function LaserMatch() {
               </div>
             </div>
             
-            <div className="flex items-center justify-between p-6 border-t border-gray-700">
+            <div className="flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 border-t border-gray-700 space-y-3 sm:space-y-0">
               <div className="text-sm text-gray-400">
                 {searchLogs.length} log entries
               </div>
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
                 <button
                   onClick={() => setSearchLogs([])}
-                  className="px-4 py-2 text-sm text-gray-300 hover:text-white border border-gray-600 rounded-md hover:bg-gray-700 transition-colors"
+                  className="px-4 py-3 text-sm text-gray-300 hover:text-white border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors touch-manipulation w-full sm:w-auto"
                 >
                   Clear Logs
                 </button>
                 <button
                   onClick={() => setSearchLogModalOpen(false)}
-                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="px-4 py-3 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors touch-manipulation w-full sm:w-auto"
                 >
                   Close
                 </button>
