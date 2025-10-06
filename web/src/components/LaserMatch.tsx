@@ -738,7 +738,7 @@ export default function LaserMatch() {
   }
 
   const formatPrice = (price?: number) => {
-    if (!price) return 'N/A'
+    if (!price || price <= 0) return 'Not listed'
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -935,11 +935,12 @@ export default function LaserMatch() {
                           </div>
                           
                           <div className="col-span-2">
-                            <span className="text-white font-semibold">
-                              {item.price && item.price > 0 ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
+                            <div className="text-gray-400 text-xs mb-1">Price</div>
+                            <span className={`text-sm font-medium ${item.price && item.price > 0 ? 'text-white' : 'text-gray-500'}`}>
+                              {item.price && item.price > 0 ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'Not listed'}
                             </span>
                             {item.location && item.location !== 'Unknown' && (
-                              <p className="text-gray-400 text-xs">{item.location}</p>
+                              <p className="text-gray-400 text-xs mt-1">{item.location}</p>
                             )}
                           </div>
                           
@@ -1000,9 +1001,12 @@ export default function LaserMatch() {
                                       {item.condition}
                                     </span>
                                   </div>
-                                  <span className="text-white font-bold text-base">
-                                    {item.price && item.price > 0 ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'N/A'}
-                                  </span>
+                                  <div className="text-right">
+                                    <div className="text-gray-400 text-xs mb-1">Price</div>
+                                    <span className={`text-sm font-medium ${item.price && item.price > 0 ? 'text-white' : 'text-gray-500'}`}>
+                                      {item.price && item.price > 0 ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price) : 'Not listed'}
+                                    </span>
+                                  </div>
                                 </div>
                                 
                                 {item.location && item.location !== 'Unknown' && (
